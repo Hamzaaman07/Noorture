@@ -125,6 +125,8 @@ const SAMPLES = [
   ['/', 1280, 900],
   ['/', 390, 844],
   ['/circles/', 1280, 900],
+  ['/consultations/', 1280, 900],
+  ['/circles/womens-noorture-spring-2026/', 390, 844],
 ];
 
 let worst = { l: 2, px: null, where: null };

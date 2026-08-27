@@ -1,0 +1,384 @@
+---
+import { render } from 'astro:content';
+import { Image } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Section from '../../components/Section.astro';
+import Testimonial from '../../components/Testimonial.astro';
+import {
+  getCohorts,
+  STATUS_META,
+  priceFor,
+  formatDate,
+  formatRange,
+  type Cohort,
+} from '../../lib/cohorts';
+import { CIRCLE_TESTIMONIALS } from '../../data/testimonials';
+import { PRICING, PODIA } from '../../consts';
+
+export async function getStaticPaths() {
+  const cohorts = await getCohorts();
+  return cohorts.map((cohort) => ({
+    params: { slug: cohort.id },
+    props: { cohort },
+  }));
+}
+
+interface Props {
+  cohort: Cohort;
+}
+const { cohort } = Astro.props;
+const { data } = cohort;
+const meta = STATUS_META[data.status];
+const price = priceFor(cohort);
+const { Content } = await render(cohort);
+
+/*
+  §5.1: /circles/[slug] -> [Join this Circle] -> Podia checkout -> Podia grants
+  access automatically. There is deliberately no Stripe checkout on this site;
+  taking payment separately would mean granting product and community access by
+  hand for every buyer.
+
+  A cohort with no podiaUrl is a waitlist cohort with nothing to link at yet,
+  so it falls back to the waitlist form on the contact page.
+*/
+const ctaHref = data.podiaUrl ?? '/contact?waitlist=' + cohort.id;
+const external = Boolean(data.podiaUrl);
+---
+
+<BaseLayout title={data.title} description={data.description}>
+  <Section narrow>
+    <div class="head">
+    <p class="crumb"><a href="/circles" class="tap">&larr; All Circles</a></p>
+
+    <p class:list={['status', `status--${data.status}`]}>{meta.label}</p>
+    <h1>{data.title}</h1>
+    <p class="head__desc">{data.description}</p>
+
+    {
+      data.image && (
+        <Image
+          src={data.image}
+          alt={data.imageAlt ?? ''}
+          widths={[600, 1200]}
+          sizes="(min-width: 48rem) 44rem, 92vw"
+          class="head__image"
+        />
+      )
+    }
+
+    <dl class="facts">
+      <div>
+        <dt>{data.status === 'completed' ? 'Ran' : 'Starts'}</dt>
+        <dd>
+          {
+            data.status === 'completed'
+              ? formatRange(data.startDate, data.endDate)
+              : formatDate(data.startDate)
+          }
+        </dd>
+      </div>
+      <div>
+        <dt>Meets</dt>
+        <dd>{data.schedule}</dd>
+      </div>
+      <div>
+        <dt>Length</dt>
+        <dd>{PRICING.circle.weeks} weeks, on Zoom</dd>
+      </div>
+      {
+        /* Never a price on something that is not for sale (§4.4). */
+        meta.joinable && (
+          <div>
+            <dt>Price</dt>
+            <dd>
+              {price.label}
+              {price.instalments && <span class="facts__sub">{price.instalments}</span>}
+            </dd>
+          </div>
+        )
+      }
+    </dl>
+
+    <div class="cta">
+      <a
+        class:list={['cta__button', meta.joinable ? 'cta__button--go' : 'cta__button--quiet']}
+        href={ctaHref}
+        rel={external ? 'noopener' : undefined}
+        target={external ? '_blank' : undefined}
+      >
+        {meta.cta}
+        {external && <span class="cta__ext" aria-hidden="true">&#8599;</span>}
+      </a>
+
+      <p class="cta__note">
+        {
+          data.status === 'completed' ? (
+            <>
+              This Circle has finished and is not open to join. Members keep
+              access to the recordings and files on Podia — sign in with the
+              account you used when you joined.
+            </>
+          ) : meta.joinable ? (
+            <>Joining opens on Podia, where the Circle and its community live.</>
+          ) : (
+            <>
+              Leave your email and you'll hear first when dates are set. Nothing
+              is charged.
+            </>
+          )
+        }
+      </p>
+    </div>
+    </div>
+  </Section>
+
+  <Section tint narrow>
+    <div class="prose">
+      <Content />
+
+      {
+        data.highlights.length > 0 && (
+          <>
+            <h2>What we cover</h2>
+            <ul class="highlights">
+              {data.highlights.map((item) => <li>{item}</li>)}
+            </ul>
+          </>
+        )
+      }
+    </div>
+  </Section>
+
+  <Testimonial {...CIRCLE_TESTIMONIALS[2]} />
+
+  <Section narrow>
+    <div class="tail">
+    {
+      data.status === 'completed' ? (
+        <p>
+          <a href="/circles" class="tap">See the Circles you can join &rarr;</a>
+        </p>
+      ) : (
+        <p>
+          Not sure whether this is the right Circle?{' '}
+          <a href="/consultations#book">Book a free 15-minute call</a> and ask.
+        </p>
+      )
+    }
+      <p class="tail__login">
+        Already a member? <a href={PODIA.memberLogin} rel="noopener" target="_blank">
+          Circle member login &rarr;</a>
+      </p>
+    </div>
+  </Section>
+</BaseLayout>
+
+<style>
+  .crumb {
+    margin: 0 0 1.5rem;
+  }
+  .crumb a {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--color-noor-aqua-ink);
+    text-decoration: none;
+  }
+
+  .status {
+    display: inline-block;
+    margin: 0 0 1rem;
+    padding: 0.35rem 0.8rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-noor-line);
+    background: #fff;
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-noor-ink-soft);
+  }
+  .status--open,
+  .status--starting-soon {
+    background: var(--color-noor-aqua-ink);
+    border-color: var(--color-noor-aqua-ink);
+    color: #fff;
+  }
+  .status--waitlist {
+    background: var(--color-noor-rose-ink);
+    border-color: var(--color-noor-rose-ink);
+    color: #fff;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: var(--text-4xl);
+  }
+
+  .head__desc {
+    margin: 1.1rem 0 0;
+    font-size: var(--text-lg);
+    color: var(--color-noor-ink-soft);
+  }
+
+  .head__image {
+    margin-top: 2rem;
+    width: 100%;
+    height: auto;
+    border-radius: 1.25rem;
+    border: 1px solid var(--color-noor-line);
+  }
+
+  .facts {
+    margin: 2rem 0 0;
+    display: grid;
+    gap: 0.85rem;
+    padding-block: 1.5rem;
+    border-block: 1px solid var(--color-noor-line);
+  }
+  .facts div {
+    display: grid;
+    grid-template-columns: 5.5rem 1fr;
+    gap: 1rem;
+    align-items: baseline;
+  }
+  .facts dt {
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-noor-ink-soft);
+  }
+  .facts dd {
+    margin: 0;
+    font-size: var(--text-base);
+  }
+  .facts__sub {
+    display: block;
+    font-size: var(--text-xs);
+    color: var(--color-noor-ink-soft);
+  }
+
+  .cta {
+    margin-top: 2rem;
+  }
+
+  .cta__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    min-height: 3.25rem;
+    padding: 0.85rem 1.6rem;
+    border-radius: 999px;
+    border: 2px solid transparent;
+    font-size: var(--text-base);
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    transition: background-color 200ms var(--ease-noor);
+  }
+
+  .cta__button--go {
+    background: var(--color-noor-rose-ink);
+    border-color: var(--color-noor-rose-ink);
+    color: #fff;
+  }
+  .cta__button--go:hover {
+    background: var(--color-noor-rose-ink-hover);
+    border-color: var(--color-noor-rose-ink-hover);
+  }
+
+  /* A finished cohort gets a real, usable link — never a greyed-out
+     purchase button, which reads dead to prospects and unhelpful to the
+     members who actually need the archive (§4.4). */
+  .cta__button--quiet {
+    background: transparent;
+    border-color: var(--color-noor-aqua-deep);
+    color: var(--color-noor-aqua-ink);
+  }
+  .cta__button--quiet:hover {
+    background: color-mix(in srgb, var(--color-noor-aqua) 14%, transparent);
+  }
+
+  .cta__ext {
+    font-size: 0.85em;
+  }
+
+  .cta__note {
+    margin: 0.9rem 0 0;
+    font-size: var(--text-sm);
+    color: var(--color-noor-ink-soft);
+    text-align: center;
+  }
+
+  .prose :global(p) {
+    margin: 0 0 1.1rem;
+  }
+  .prose h2,
+  .prose :global(h2) {
+    margin: 2.5rem 0 1rem;
+    font-size: var(--text-2xl);
+  }
+  .prose :global(p:last-of-type) {
+    margin-bottom: 0;
+  }
+
+  .highlights {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.7rem;
+  }
+  .highlights li {
+    position: relative;
+    padding-left: 1.6rem;
+    font-size: var(--text-sm);
+    line-height: 1.6;
+  }
+  .highlights li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.6em;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 999px;
+    background: var(--color-noor-aqua-deep);
+  }
+
+  .tail {
+    text-align: center;
+  }
+  .tail p {
+    margin: 0 0 0.75rem;
+    font-size: var(--text-sm);
+    color: var(--color-noor-ink-soft);
+  }
+  .tail a {
+    color: var(--color-noor-aqua-ink);
+    font-weight: 600;
+  }
+  .tail__login {
+    margin: 0;
+    font-size: var(--text-xs);
+  }
+
+  @media (min-width: 34rem) {
+    .cta__button {
+      width: auto;
+      min-width: 18rem;
+    }
+    .cta,
+    .cta__note {
+      text-align: center;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cta__button {
+      transition: none;
+    }
+  }
+</style>

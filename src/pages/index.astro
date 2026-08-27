@@ -1,12 +1,162 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
+import Section from '../components/Section.astro';
+import ProductCard from '../components/ProductCard.astro';
+import ProofStrip from '../components/ProofStrip.astro';
+import GiftBand from '../components/GiftBand.astro';
+import Testimonial from '../components/Testimonial.astro';
+import { CIRCLE_TESTIMONIALS } from '../data/testimonials';
+import { PRICING } from '../consts';
+
+// Two short pulls on the home page; the full set lives on /reviews (§4.1).
+const pulls = [CIRCLE_TESTIMONIALS[1], CIRCLE_TESTIMONIALS[2]];
 ---
 
 <BaseLayout ambience="hero">
   <Hero />
-  {/*
-    Stage 1 is the hero only. The positioning block, three product cards,
-    proof strip, and gift band land here in Stage 2 (spec §8).
-  */}
+
+  <Section tint narrow>
+    {/*
+      CLIENT-APPROVED, VERBATIM (§4.1). Do not paraphrase, tighten, or reflow
+      the wording of this paragraph — "noorture" as a verb is deliberate.
+    */}
+    <p class="positioning">
+      Noorture provides services, education, and counseling that fuses the
+      evidence-based sciences of maternal and early childhood health and
+      well-being with the richness of our Islamic tradition to help parents not
+      only nurture their children, but to noorture themselves and their little
+      ones starting from the moment they enter into the world.
+    </p>
+
+    <p class="for-whom">
+      For anyone caring for a baby or young child — parents and parents-to-be,
+      aunts and uncles, grandparents, teachers, students, and care providers.
+    </p>
+  </Section>
+
+  {/* The heart of the page: three cards, equal weight (§4.1). */}
+  <Section labelledby="products-heading">
+    <h2 id="products-heading" class="section-heading">Three ways to work together</h2>
+
+    <div class="products">
+      <ProductCard
+        title="Consultations"
+        href="/consultations"
+        cta="Start with a free 15-minute call"
+        accent="rose"
+      >
+        <p>
+          A private space to talk through what you're actually facing. Bring
+          your situation, and we'll work through it together — the emotional
+          and psychological side of caring for a young child, held with both
+          clinical experience and faith.
+        </p>
+      </ProductCard>
+
+      <ProductCard
+        title="Private Class"
+        href="/private-class"
+        cta={`${PRICING.privateClass.label} per family`}
+      >
+        <p>
+          A private session on one topic, taught with slides, with time for
+          your questions. Birth, breastfeeding, bonding with your baby —
+          practical knowledge, taught the Noorture way.
+        </p>
+      </ProductCard>
+
+      <ProductCard
+        title="Circles"
+        href="/circles"
+        cta={`${PRICING.circle.label} for ${PRICING.circle.weeks} weeks`}
+      >
+        <p>
+          Twelve weeks with a small group of caregivers, meeting on Zoom.
+          Connect, reflect, recharge, and draw on the wisdom of the Quran and
+          each other.
+        </p>
+      </ProductCard>
+    </div>
+  </Section>
+
+  <Section tint labelledby="proof-heading">
+    <h2 id="proof-heading" class="visually-hidden">
+      Credentials and what caregivers say
+    </h2>
+    <ProofStrip />
+
+    <div class="pulls">
+      {pulls.map((t) => <Testimonial {...t} />)}
+    </div>
+
+    <p class="pulls__more">
+      <a href="/reviews" class="tap">Read what caregivers say <span aria-hidden="true">&rarr;</span></a>
+    </p>
+  </Section>
+
+  <Section>
+    <GiftBand />
+  </Section>
 </BaseLayout>
+
+<style>
+  .positioning {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    line-height: 1.42;
+    text-wrap: pretty;
+  }
+
+  .for-whom {
+    margin: 1.75rem 0 0;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-noor-line-alt);
+    font-size: var(--text-sm);
+    color: var(--color-noor-ink-soft);
+  }
+
+  .section-heading {
+    margin: 0 0 clamp(1.75rem, 4vw, 2.5rem);
+    font-size: var(--text-3xl);
+    text-align: center;
+  }
+
+  .products {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .pulls {
+    display: grid;
+    gap: 0;
+  }
+
+  .pulls__more {
+    margin: 0;
+    text-align: center;
+  }
+  .pulls__more a {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--color-noor-aqua-ink);
+    text-decoration: none;
+    border-bottom: 1px solid var(--color-noor-aqua);
+    padding-bottom: 3px;
+  }
+  .pulls__more a:hover {
+    color: var(--color-noor-aqua-ink-hover);
+  }
+
+  @media (min-width: 48rem) {
+    .products {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+    .pulls {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2rem;
+    }
+  }
+</style>

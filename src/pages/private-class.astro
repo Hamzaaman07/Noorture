@@ -1,8 +1,285 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import StageStub from '../components/StageStub.astro';
+import Section from '../components/Section.astro';
+import BookingBlock from '../components/BookingBlock.astro';
+import Button from '../components/Button.astro';
+import { PRICING, CLASS_TOPICS, SOCIAL } from '../consts';
+
+const title = 'Private Class';
+const description =
+  'A private taught session on one topic — birth, breastfeeding, bonding with your baby — with slides and time for your questions. $195 per family.';
 ---
 
-<BaseLayout title="Private Class">
-  <StageStub title="Private Class" stage="Stage 2" note="You pick the topic, and Hoda teaches it. The full topic list and booking arrive in Stage 2." />
+<BaseLayout title={title} description={description}>
+  <Section narrow>
+    <p class="eyebrow">Private Class</p>
+    {/* §4.3: lead with what makes it different from a Consultation. */}
+    <h1>You pick the topic, and Hoda teaches it.</h1>
+    <p class="lede__sub">
+      A private session on one topic, taught with slides, with time for your
+      questions. Practical knowledge, taught the Noorture way — for your
+      family only, on your calendar.
+    </p>
+    <p class="lede__cta">
+      <Button href="#book">Book a class</Button>
+      <span class="lede__price">
+        {PRICING.privateClass.label} {PRICING.privateClass.suffix}
+      </span>
+    </p>
+  </Section>
+
+  {/*
+    §4.3: the topic list is the sales pitch. A visitor should be able to find
+    her exact question in it, so it comes before everything else.
+  */}
+  <Section tint labelledby="topics-heading">
+    <h2 id="topics-heading" class="section-heading">What would you like taught?</h2>
+
+    <div class="topics">
+      {
+        CLASS_TOPICS.map((topic) => (
+          <article class="topic">
+            <h3>{topic.title}</h3>
+            <p>{topic.blurb}</p>
+          </article>
+        ))
+      }
+
+      {/*
+        §9.5 — the list is incomplete and the client supplies the rest. Rather
+        than pad it out with topics nobody has agreed to teach, the gap is an
+        invitation: someone with an unlisted question is exactly who should be
+        getting in touch.
+      */}
+      <article class="topic topic--open">
+        <h3>Something else</h3>
+        <p>
+          If what you need isn't here, ask. Tell me the question you actually
+          have and I'll tell you honestly whether it's mine to teach.
+        </p>
+        <p class="topic__link">
+          <a href="#book" class="tap">Ask about a topic <span aria-hidden="true">&rarr;</span></a>
+        </p>
+      </article>
+    </div>
+  </Section>
+
+  <Section narrow labelledby="how-heading">
+    <h2 id="how-heading">How a class works</h2>
+    <p>
+      You choose the topic. Hoda prepares and teaches it with slides — the same
+      material she'd teach a room, for your family only. It runs on Zoom or
+      FaceTime, and there is time at the end for your questions, which is
+      usually where the useful part happens.
+    </p>
+    <p>
+      One price covers the family. Bring your partner, your mother, your
+      sister — whoever is going to be doing this with you. It is often more
+      useful when the people around you hear it at the same time.
+    </p>
+
+    <h2>How it differs from a Consultation</h2>
+    {/*
+      §2: if the copy doesn't make the difference obvious, the pricing reads
+      as arbitrary. Both are private, one-to-one, on Zoom, and $195.
+    */}
+    <div class="compare">
+      <div class="compare__side">
+        <h3>Private Class</h3>
+        <p><strong>Hoda brings the curriculum.</strong></p>
+        <p>
+          You pick a topic and she teaches it, with slides. Best when you want
+          to understand something properly before you're in the middle of it.
+        </p>
+        <p class="compare__price">
+          {PRICING.privateClass.label} {PRICING.privateClass.suffix}
+        </p>
+      </div>
+      <div class="compare__side">
+        <h3>Consultation</h3>
+        <p><strong>You bring the situation.</strong></p>
+        <p>
+          You talk through what's actually happening and you work it out
+          together. Best when you're already in it and need help now.
+        </p>
+        <p class="compare__price">
+          From {PRICING.consultFollowUp.label} · <a href="/consultations">See consultations</a>
+        </p>
+      </div>
+    </div>
+  </Section>
+
+  <Section tint>
+    <BookingBlock
+      product="private-class"
+      heading="Book a private class"
+      intro={`${PRICING.privateClass.label} ${PRICING.privateClass.suffix}. Tell me the topic you want taught — including one that isn't listed — and when you're usually free.`}
+      options={[
+        ...CLASS_TOPICS.map((t) => ({ value: t.title.toLowerCase(), label: t.title })),
+        { value: 'other', label: 'Another topic — described below' },
+      ]}
+    />
+    <p class="book__aside">
+      Not sure whether you want a class or a consultation?{' '}
+      <a href="/consultations#book">Book the free 15-minute call</a> and we'll
+      work it out, or email <a href={`mailto:${SOCIAL.email}`}>{SOCIAL.email}</a>.
+    </p>
+  </Section>
 </BaseLayout>
+
+<style>
+  .eyebrow {
+    margin: 0 0 0.85rem;
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-noor-rose-ink);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: var(--text-4xl);
+  }
+
+  .lede__sub {
+    margin: 1.25rem 0 0;
+    font-size: var(--text-lg);
+    color: var(--color-noor-ink-soft);
+  }
+
+  .lede__cta {
+    margin: 2rem 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.25rem;
+  }
+
+  .lede__price {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--color-noor-ink-soft);
+  }
+
+  .section-heading {
+    margin: 0 0 clamp(1.75rem, 4vw, 2.5rem);
+    font-size: var(--text-3xl);
+    text-align: center;
+  }
+
+  .topics {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .topic {
+    padding: clamp(1.35rem, 3.5vw, 1.75rem);
+    background: color-mix(in srgb, #fff 66%, transparent);
+    border: 1px solid var(--color-noor-line);
+    border-radius: 1.15rem;
+  }
+
+  .topic--open {
+    background: transparent;
+    border-style: dashed;
+    border-color: var(--color-noor-aqua-deep);
+  }
+
+  .topic h3 {
+    margin: 0 0 0.6rem;
+    font-size: var(--text-xl);
+  }
+
+  .topic p {
+    margin: 0 0 0.8rem;
+    font-size: var(--text-sm);
+    line-height: 1.6;
+    color: var(--color-noor-ink-soft);
+  }
+  .topic p:last-child {
+    margin-bottom: 0;
+  }
+
+  .topic__link a {
+    font-weight: 600;
+    color: var(--color-noor-aqua-ink);
+    text-decoration: none;
+    border-bottom: 1px solid var(--color-noor-aqua);
+    padding-bottom: 2px;
+  }
+
+  h2 {
+    margin: 2.5rem 0 0.85rem;
+    font-size: var(--text-2xl);
+  }
+  h2:first-child {
+    margin-top: 0;
+  }
+
+  p {
+    margin: 0 0 1.1rem;
+  }
+
+  .compare {
+    display: grid;
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+  }
+
+  .compare__side {
+    padding: clamp(1.25rem, 3.5vw, 1.6rem);
+    border: 1px solid var(--color-noor-line);
+    border-radius: 1.15rem;
+    background: color-mix(in srgb, #fff 58%, transparent);
+  }
+
+  .compare__side h3 {
+    margin: 0 0 0.75rem;
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-noor-ink-soft);
+  }
+
+  .compare__side p {
+    margin: 0 0 0.7rem;
+    font-size: var(--text-sm);
+    line-height: 1.6;
+  }
+
+  .compare__price {
+    margin: 1rem 0 0 !important;
+    padding-top: 0.85rem;
+    border-top: 1px solid var(--color-noor-line);
+    font-weight: 600;
+    color: var(--color-noor-ink-soft);
+  }
+  .compare__price a {
+    color: var(--color-noor-aqua-ink);
+  }
+
+  .book__aside {
+    margin: 1.75rem auto 0;
+    max-width: 34rem;
+    text-align: center;
+    font-size: var(--text-sm);
+    color: var(--color-noor-ink-soft);
+  }
+  .book__aside a {
+    color: var(--color-noor-aqua-ink);
+    font-weight: 600;
+  }
+
+  @media (min-width: 48rem) {
+    .topics {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+    .compare {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>

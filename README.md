@@ -11,7 +11,60 @@ refer to that document.
 
 ---
 
-## Status: Stage 1 — Foundation, complete
+## Status: Stage 2 — Conversion path, complete
+
+The site is publishable at this point even with Stage 3 and 4 unbuilt — that is
+the ordering §8 intends. Home, both booking pages, the Circles index and the
+cohort template are all real; the supporting pages are still stubs.
+
+| Stage 2 requirement | State |
+|---|---|
+| Home, complete — positioning block, three product cards, proof strip, gift band | Done |
+| `/consultations` — full copy, three tiers, provisional scope-of-practice language | Done, marked on the page |
+| `/private-class` — full copy, topic list with room for more | Done |
+| `/circles` — index with all four cohort states | Done |
+| `/circles/[slug]` — cohort template, both cohorts seeded | Done |
+| Cohort content collection, with schema | `src/content.config.ts` |
+| Booking component, isolated — request form for now | `src/components/BookingBlock.astro` |
+| Circle testimonials, scroll-revealed, reduced-motion respected | Done — see the note below |
+
+### Stage 2 exit criteria
+
+| Criterion | Result |
+|---|---|
+| Adding a cohort takes one markdown file and no other edits | **Verified by doing it** — added a dummy cohort, it appeared on the index in the right sort position with its own page, no source file touched; then deleted |
+| Every Circle CTA points at the correct Podia URL | Verified against frontmatter in the built HTML |
+| The completed cohort shows an archive link, not a purchase button | Verified — CTA reads "Members: view your archive", zero occurrences of "Join this Circle" or any price on that page, and nothing disabled or greyed |
+| No Stripe code anywhere | Verified — the only occurrence of the word is the comment recording why there is none |
+| Every price matches §2 exactly | Verified — the only prices in the whole build are $250, $195, $150, $50 and "Free" |
+| Swapping the scheduler touches one component and no page templates | Verified — `BookingBlock.astro` is the only file in `src/` containing any form markup; both pages pass props and nothing else |
+
+Also checked across all 13 pages at 360px and 1280px: no horizontal overflow, no
+JS errors, exactly one `h1` each, no skipped heading levels, no image without
+alt, no link without an accessible name, and no tap target under 24px once
+stretched-link and expanded hit areas are accounted for.
+
+### Two things found and fixed while building this
+
+**The scroll reveal had a real bug.** Implemented the obvious way — an
+IntersectionObserver, reveal on `isIntersecting` — a quote that is jumped clean
+past between two frames is never reported as intersecting and stays at opacity
+0 permanently. A hard flick on a phone, an in-page anchor, or a restored scroll
+position all do that, and testing reproduced it on both `/` and `/circles`. The
+result is a quote the reader can never read, which is worse than no animation.
+It is now written as a scroll-position predicate — "reveal anything whose top
+has passed the trigger line" — which is true however the page arrived at that
+position. The listeners detach once every quote has revealed.
+
+**Scoped styles do not reach a child component's root.** Passing
+`class="prose"` into `<Section>` and styling `.prose` from the parent silently
+matched nothing, which left the cohort body copy and its headings unstyled.
+Fixed by owning the wrapper element; there is now a note in `Section.astro` so
+the next person does not spend the same twenty minutes.
+
+---
+
+## Stage 1 — Foundation, complete
 
 The four stages are defined in §8. **Stage 1 is a checkpoint stage** — the
 client reviews the hero and the ambience before anything is built on top of
@@ -48,9 +101,9 @@ them, because this is the cheapest point to change direction.
    this is a licensed clinician, and the hero is where those seconds are. Easy
    to remove if you'd rather hold it for Stage 2.
 
-2. **Every nav route resolves to a marked placeholder** rather than a 404, so
-   the nav is actually walkable on a phone during review. Each says which stage
-   builds it. They are replaced wholesale in Stages 2 and 3.
+2. **Remaining nav routes resolve to marked placeholders** rather than 404s, so
+   the nav is walkable on a phone. Each says which stage builds it. `/about`,
+   `/reviews`, `/gift`, `/contact`, `/terms` and `/privacy` are Stage 3.
 
 ---
 
@@ -62,6 +115,7 @@ npm run dev              # http://localhost:4321
 npm run build            # static output to dist/
 npm run preview          # serve the built site
 npm run check:contrast   # palette gate — see below
+npm run build:logo       # regenerate logo assets from the supplied artwork
 ```
 
 Node 22. Deploys as a fully static site: Vercel and Netlify configs are both
@@ -147,16 +201,53 @@ library. `AmbientNoor.astro` is roughly 200 lines with no dependencies.
 The `intensity` prop is the only knob: `hero` on the homepage, `quiet`
 everywhere else. §6 — spend the boldness in one place.
 
-### Swapping in the real logo
+### Adding a Circle cohort
 
-`NoortureMark.astro` draws a simplified stand-in: the turquoise crescent and
-the rose four-point star. The full logo — the sleeping owl cradled inside the
-crescent — has too much interior detail to redraw faithfully in code.
+One file in `src/content/circles/`, and nothing else. Five lines are required:
 
-Drop the supplied file at `public/noorture-logo.svg` and replace the inline
-`<svg>` in that component with an `<img>`. It is the only place the mark is
-drawn, so nothing else changes. The favicon at `public/favicon.svg` uses the
-same simplified geometry and should be regenerated from the real artwork too.
+```yaml
+---
+title: Infant-Feeding Circle
+status: open          # open | starting-soon | waitlist | completed
+startDate: 2026-03-07
+schedule: First four Saturdays of each month, 9am PT
+podiaUrl: https://…   # where Join goes. Omit for a waitlist cohort.
+description: One or two sentences, shown on the card and the page.
+---
+
+Body copy here.
+```
+
+Everything else has a default. The price is inherited from §2 unless the cohort
+is priced differently, so it cannot drift out of step with the price list.
+`status` decides the sort position, the badge, whether a price is shown at all,
+and what the button says — a `completed` cohort can never render as
+purchasable, because that is a property of the data rather than of each
+template remembering to check.
+
+Set `draft: true` to hide one without deleting the file.
+
+### The logo
+
+The client supplied a 408×324 CMYK JPEG on white — a print asset.
+`npm run build:logo` prepares it: converts through the embedded SWOP profile,
+knocks out the background by flood fill from the border (a plain white
+threshold would punch holes through the owl, whose body is near-white), splits
+the vertical lockup into mark and wordmark, and writes favicons.
+
+It also re-tints the artwork onto the §6 brand tokens. Converted correctly,
+SWOP's narrower gamut puts the turquoise at `#7AB0C6` and the pink at `#DFA4A6`
+— duller and hue-shifted from the `#7FD2D4` / `#E9A3C4` the spec locks. Since
+§6 names the logo as the palette source, the mark is brought to the palette
+rather than the other way round. Set `RECOLOUR = false` in the script to ship
+the file exactly as supplied.
+
+A second wordmark is emitted in the deeper brand tokens, and that is the one
+the header and footer use: the supplied light aqua is lovely large and nearly
+invisible at a header's cap height, where it stops reading as the brand name.
+
+**Worth asking the client for the RGB or vector original** — 408px is thin for
+a logo, and it would make the re-tint unnecessary.
 
 ---
 
@@ -171,8 +262,13 @@ in `src/consts.ts` is one of them.
 | LinkedIn URL | Placeholder in `consts.ts` — points at a search, needs the real profile |
 | Podia host | `consts.ts` assumes today's host; §5.4 moves Podia to a subdomain at launch |
 | Contact address | §9.3 — currently a personal Gmail, not a Noorture-domain address |
-| Scheduler | Not chosen. Stage 2 builds an isolated booking component with a request form |
-| Scope-of-practice copy | Stage 2, as conservative placeholder text, visibly marked |
+| Scheduler | Not chosen (§9.6). `BookingBlock.astro` renders a request form and is the only file to change when one is picked |
+| Form handler | Not wired (§5.3, Stage 3). Until `FORMS.endpoint` is set in `consts.ts`, forms validate normally and then say plainly that they are not connected yet, offering email instead — rather than swallowing a real person's request |
+| Scope-of-practice copy | On `/consultations`, marked on the page as provisional pending the licensing board or an attorney (§9.1) |
+| Testimonial attribution | All quotes unattributed (§9.4). `name` and `location` fields exist and are unused |
+| Private Class topics | Three known (§9.5). The list is a constant in `consts.ts`; the page has a fourth "Something else" card inviting the question rather than padding the list |
+| Insurance / reimbursement | Nothing built (§9.2) |
+| Waitlist storage | Stage 3. No cohort currently uses `waitlist` status |
 | Social preview image, analytics | Stage 4 |
 
 ## Not built, deliberately

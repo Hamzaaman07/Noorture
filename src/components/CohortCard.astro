@@ -1,0 +1,259 @@
+---
+import { Image } from 'astro:assets';
+import mark from '../assets/noorture-mark.png';
+import { STATUS_META, priceFor, formatDate, formatRange, type Cohort } from '../lib/cohorts';
+
+/**
+ * One cohort on the index, in one of the four states from §4.4.
+ *
+ * The state decides everything: a completed cohort shows no price and no
+ * purchase button, only its dates and a link to the archive its members
+ * already paid for.
+ */
+interface Props {
+  cohort: Cohort;
+}
+const { cohort } = Astro.props;
+const { data } = cohort;
+const meta = STATUS_META[data.status];
+const price = priceFor(cohort);
+const href = `/circles/${cohort.id}`;
+---
+
+<article class:list={['cohort', meta.muted && 'cohort--muted']}>
+  <div class="cohort__media">
+    {
+      data.image ? (
+        <Image
+          src={data.image}
+          alt={data.imageAlt ?? ''}
+          widths={[400, 800]}
+          sizes="(min-width: 62rem) 340px, (min-width: 40rem) 45vw, 90vw"
+          class="cohort__image"
+        />
+      ) : (
+        /* No photo supplied for this cohort — a tinted mark rather than a
+           stock image standing in for something that does not exist. */
+        <div class="cohort__fallback">
+          <Image src={mark} alt="" widths={[100, 200]} sizes="72px" />
+        </div>
+      )
+    }
+    <p class:list={['cohort__badge', `cohort__badge--${data.status}`]}>
+      {meta.label}
+    </p>
+  </div>
+
+  <div class="cohort__body">
+    <h3 class="cohort__title">
+      <a href={href}>{data.title}</a>
+    </h3>
+
+    <dl class="cohort__facts">
+      <div>
+        <dt>{data.status === 'completed' ? 'Ran' : 'Starts'}</dt>
+        <dd>
+          {
+            data.status === 'completed'
+              ? formatRange(data.startDate, data.endDate)
+              : formatDate(data.startDate)
+          }
+        </dd>
+      </div>
+      <div>
+        <dt>Meets</dt>
+        <dd>{data.schedule}</dd>
+      </div>
+      {
+        /* Price only where something is actually on sale. A waitlist cohort
+           shows detail with no price emphasis; a completed one shows none. */
+        meta.joinable && (
+          <div>
+            <dt>Price</dt>
+            <dd>
+              {price.label}
+              {price.instalments && (
+                <span class="cohort__instalments">{price.instalments}</span>
+              )}
+            </dd>
+          </div>
+        )
+      }
+    </dl>
+
+    <p class="cohort__desc">{data.description}</p>
+
+    <p class="cohort__cta">
+      <a href={href} class="tap">
+        {meta.joinable ? 'See this Circle' : meta.cta}
+        <span aria-hidden="true">&rarr;</span>
+      </a>
+    </p>
+  </div>
+</article>
+
+<style>
+  .cohort {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: color-mix(in srgb, #fff 66%, transparent);
+    border: 1px solid var(--color-noor-line);
+    border-radius: 1.25rem;
+  }
+
+  /* Completed cohorts are visually recessive — present for the members who
+     need them, not competing with what is joinable. */
+  .cohort--muted {
+    background: color-mix(in srgb, #fff 34%, transparent);
+    border-style: dashed;
+  }
+  .cohort--muted .cohort__title a,
+  .cohort--muted .cohort__desc {
+    color: var(--color-noor-ink-soft);
+  }
+
+  .cohort__media {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--color-noor-bg-alt) 70%, transparent);
+    border-bottom: 1px solid var(--color-noor-line);
+  }
+
+  .cohort__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* No photo supplied: a shallower band than a real image would occupy, so
+     the card is not mostly empty space. */
+  .cohort__media:has(.cohort__fallback) {
+    aspect-ratio: 5 / 2;
+  }
+
+  .cohort__fallback {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    background:
+      radial-gradient(
+        90% 120% at 20% 0%,
+        color-mix(in srgb, var(--color-noor-rose) 22%, transparent),
+        transparent 62%
+      ),
+      radial-gradient(
+        90% 120% at 90% 100%,
+        color-mix(in srgb, var(--color-noor-aqua) 26%, transparent),
+        transparent 62%
+      );
+  }
+  .cohort__fallback :global(img) {
+    width: 4.5rem;
+    height: auto;
+    opacity: 0.9;
+  }
+  .cohort--muted .cohort__fallback :global(img) {
+    opacity: 0.42;
+  }
+
+  .cohort__badge {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    margin: 0;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    background: #fff;
+    border: 1px solid var(--color-noor-line);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--color-noor-ink-soft);
+  }
+  .cohort__badge--open,
+  .cohort__badge--starting-soon {
+    background: var(--color-noor-aqua-ink);
+    border-color: var(--color-noor-aqua-ink);
+    color: #fff;
+  }
+  .cohort__badge--waitlist {
+    background: var(--color-noor-rose-ink);
+    border-color: var(--color-noor-rose-ink);
+    color: #fff;
+  }
+
+  .cohort__body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: clamp(1.25rem, 3.5vw, 1.6rem);
+  }
+
+  .cohort__title {
+    margin: 0;
+    font-size: var(--text-xl);
+  }
+  .cohort__title a {
+    color: var(--color-noor-ink);
+    text-decoration: none;
+  }
+  .cohort__title a:hover {
+    color: var(--color-noor-aqua-ink);
+  }
+
+  .cohort__facts {
+    margin: 1rem 0 0;
+    display: grid;
+    gap: 0.55rem;
+  }
+  .cohort__facts div {
+    display: grid;
+    grid-template-columns: 4.25rem 1fr;
+    gap: 0.75rem;
+    align-items: baseline;
+  }
+  .cohort__facts dt {
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-noor-ink-soft);
+  }
+  .cohort__facts dd {
+    margin: 0;
+    font-size: var(--text-sm);
+  }
+
+  .cohort__instalments {
+    display: block;
+    font-size: var(--text-xs);
+    color: var(--color-noor-ink-soft);
+  }
+
+  .cohort__desc {
+    margin: 1rem 0 0;
+    flex: 1;
+    font-size: var(--text-sm);
+    line-height: 1.6;
+    color: var(--color-noor-ink-soft);
+  }
+
+  .cohort__cta {
+    margin: 1.35rem 0 0;
+  }
+  .cohort__cta a {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--color-noor-aqua-ink);
+    text-decoration: none;
+    border-bottom: 1px solid var(--color-noor-aqua);
+    padding-bottom: 2px;
+  }
+  .cohort__cta a:hover {
+    color: var(--color-noor-aqua-ink-hover);
+  }
+</style>

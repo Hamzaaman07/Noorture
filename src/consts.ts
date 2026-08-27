@@ -47,6 +47,59 @@ export const PODIA = {
   memberLogin: 'https://www.noorture.com/login',
 } as const;
 
+/**
+ * Every price on the site comes from here — spec §2, which is final. Nothing
+ * renders a price literal inline, so there is one place to check that the site
+ * matches the price list, and one place to change it.
+ */
+export const PRICING = {
+  consultIntro: { label: 'Free', amount: 0, minutes: 15 },
+  consultInitial: { label: '$250', amount: 250, minutes: 90 },
+  consultFollowUp: { label: '$195', amount: 195, minutes: 60 },
+  privateClass: { label: '$195', amount: 195, suffix: 'per family' },
+  circle: {
+    label: '$150',
+    amount: 150,
+    weeks: 12,
+    instalments: { count: 3, label: '$50', amount: 50 },
+  },
+} as const;
+
+/**
+ * Private Class topics. §9.5 — the list is incomplete and the client supplies
+ * the rest; §4.3 — the topic list is the sales pitch, so a visitor should be
+ * able to find her exact question in it. Adding one is adding a line here.
+ */
+export const CLASS_TOPICS = [
+  {
+    title: 'Birth',
+    blurb:
+      'What to expect, how to prepare, and how to meet it with steadiness rather than fear.',
+  },
+  {
+    title: 'Breastfeeding',
+    blurb:
+      'Latch, supply, positioning, and what to do when feeding is not going the way you were told it would.',
+  },
+  {
+    title: 'Bonding with your baby',
+    blurb:
+      'Building attachment in the earliest weeks, and what it looks like when it is still finding its footing.',
+  },
+] as const;
+
+/**
+ * Form handling — see the note in BookingBlock.astro.
+ *
+ * Stage 3 wires the handler and the destination inbox (spec §5.3). Until an
+ * endpoint is set here, every form on the site renders normally but explains
+ * on submit that it is not yet connected, and offers email as the route in the
+ * meantime. Setting `endpoint` is the whole switch-on.
+ */
+export const FORMS = {
+  endpoint: null as string | null,
+} as const;
+
 export const CREDENTIALS = [
   '20 years',
   'Pediatric Nurse Practitioner',

@@ -1,0 +1,221 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Section from '../../components/Section.astro';
+import CohortCard from '../../components/CohortCard.astro';
+import Testimonial from '../../components/Testimonial.astro';
+import { getCohorts, STATUS_META } from '../../lib/cohorts';
+import { CIRCLE_TESTIMONIALS } from '../../data/testimonials';
+import { PRICING } from '../../consts';
+
+// Already sorted: joinable first, completed last (§4.4).
+const cohorts = await getCohorts();
+const joinable = cohorts.filter((c) => STATUS_META[c.data.status].joinable);
+const waitlist = cohorts.filter((c) => c.data.status === 'waitlist');
+const completed = cohorts.filter((c) => c.data.status === 'completed');
+const current = [...joinable, ...waitlist];
+
+const title = 'Circles';
+const description = `Twelve weeks with a small group of caregivers, meeting on Zoom. ${PRICING.circle.label} for ${PRICING.circle.weeks} weeks.`;
+---
+
+<BaseLayout title={title} description={description}>
+  <Section narrow>
+    <p class="eyebrow">Circles</p>
+    <h1>Twelve weeks, the same small group, every week.</h1>
+    <p class="lede__sub">
+      Connect, reflect, recharge, and draw on the wisdom of the Quran and each
+      other. Circles meet on Zoom, and the group stays the same for the whole
+      season — which is the part that makes it work.
+    </p>
+  </Section>
+
+  {/*
+    §4.4: quotes scattered down the page at intervals, in generous whitespace,
+    each revealed gently on scroll. Not a carousel and not auto-fading.
+  */}
+  <Testimonial {...CIRCLE_TESTIMONIALS[0]} />
+
+  <Section labelledby="current-heading">
+    <h2 id="current-heading" class="section-heading">Circles you can join</h2>
+    {
+      current.length > 0 ? (
+        <div class="cohorts">
+          {current.map((cohort) => <CohortCard cohort={cohort} />)}
+        </div>
+      ) : (
+        <p class="empty">
+          There is no Circle open at the moment. The next one is usually
+          announced on <a href="/contact">the contact page</a> first.
+        </p>
+      )
+    }
+  </Section>
+
+  <Testimonial {...CIRCLE_TESTIMONIALS[2]} align="left" />
+
+  <Section tint narrow labelledby="what-heading">
+    <h2 id="what-heading">What happens in a Circle</h2>
+    <p>
+      A small group of caregivers meets on Zoom for twelve weeks. Each session
+      starts where everyone actually is that week, and moves into the material
+      from there — reading the Quran as something lived rather than something
+      studied at a distance.
+    </p>
+    <p>
+      It is a support group, not a class you fall behind in. Come as you are,
+      with the week you have had. Nobody is expected to arrive prepared, and
+      nobody is put on the spot.
+    </p>
+
+    <dl class="facts">
+      <div>
+        <dt>Length</dt>
+        <dd>{PRICING.circle.weeks} weeks</dd>
+      </div>
+      <div>
+        <dt>Where</dt>
+        <dd>Zoom, hosted on Podia</dd>
+      </div>
+      <div>
+        <dt>Price</dt>
+        <dd>
+          {PRICING.circle.label}, or {PRICING.circle.instalments.count} monthly
+          payments of {PRICING.circle.instalments.label}
+        </dd>
+      </div>
+    </dl>
+  </Section>
+
+  <Testimonial {...CIRCLE_TESTIMONIALS[3]} align="right" />
+
+  <Section narrow>
+    <Testimonial {...CIRCLE_TESTIMONIALS[4]} />
+  </Section>
+
+  {
+    completed.length > 0 && (
+      <Section labelledby="past-heading">
+        <div class="past__head">
+          <h2 id="past-heading">Past Circles</h2>
+          <p>
+            These have finished and are not open to join. Members keep access
+            to their recordings and files.
+          </p>
+        </div>
+        <div class="cohorts cohorts--past">
+          {completed.map((cohort) => <CohortCard cohort={cohort} />)}
+        </div>
+      </Section>
+    )
+  }
+
+  <Testimonial {...CIRCLE_TESTIMONIALS[1]} />
+</BaseLayout>
+
+<style>
+  .eyebrow {
+    margin: 0 0 0.85rem;
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-noor-rose-ink);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: var(--text-4xl);
+  }
+
+  .lede__sub {
+    margin: 1.25rem 0 0;
+    font-size: var(--text-lg);
+    color: var(--color-noor-ink-soft);
+  }
+
+  .section-heading {
+    margin: 0 0 clamp(1.75rem, 4vw, 2.5rem);
+    font-size: var(--text-3xl);
+    text-align: center;
+  }
+
+  .cohorts {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .past__head {
+    margin-bottom: clamp(1.5rem, 4vw, 2rem);
+    text-align: center;
+  }
+  .past__head h2 {
+    margin: 0;
+    font-size: var(--text-2xl);
+    color: var(--color-noor-ink-soft);
+  }
+  .past__head p {
+    margin: 0.6rem auto 0;
+    max-width: 34rem;
+    font-size: var(--text-sm);
+    color: var(--color-noor-ink-soft);
+  }
+
+  .empty {
+    margin: 0;
+    text-align: center;
+    color: var(--color-noor-ink-soft);
+  }
+  .empty a {
+    color: var(--color-noor-aqua-ink);
+    font-weight: 600;
+  }
+
+  h2 {
+    margin: 2.5rem 0 0.85rem;
+    font-size: var(--text-2xl);
+  }
+  h2:first-child {
+    margin-top: 0;
+  }
+
+  p {
+    margin: 0 0 1.1rem;
+  }
+
+  .facts {
+    margin: 2rem 0 0;
+    display: grid;
+    gap: 0.75rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-noor-line-alt);
+  }
+  .facts div {
+    display: grid;
+    grid-template-columns: 5rem 1fr;
+    gap: 1rem;
+    align-items: baseline;
+  }
+  .facts dt {
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-noor-ink-soft);
+  }
+  .facts dd {
+    margin: 0;
+    font-size: var(--text-sm);
+  }
+
+  @media (min-width: 48rem) {
+    /* Cap the track so a single open cohort does not stretch into one
+       enormous card, and centre whatever number there happens to be. */
+    .cohorts {
+      grid-template-columns: repeat(auto-fit, minmax(18rem, 23rem));
+      justify-content: center;
+    }
+    .cohorts--past {
+      grid-template-columns: repeat(auto-fit, minmax(16rem, 20rem));
+    }
+  }
+</style>
