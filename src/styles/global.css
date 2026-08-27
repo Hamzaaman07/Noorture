@@ -1,0 +1,155 @@
+@import "tailwindcss";
+
+/* Self-hosted so there is no third-party round trip on a bad connection. */
+@import "@fontsource-variable/cormorant-garamond";
+@import "@fontsource-variable/figtree";
+
+/*
+  Noorture design tokens — §6 of the build spec.
+
+  The seven brand values below are taken from the spec verbatim and are the
+  source of truth for anything decorative: fills, borders, the bokeh layer.
+
+  Two of them do not pass WCAG AA as *text*:
+    --noor-aqua-deep  #3F9CA3  →  3.01:1 on --noor-bg   (AA large only)
+    --noor-rose-deep  #C4708F  →  3.23:1 on --noor-bg   (AA large only)
+
+  So each has an AA-safe sibling, darkened along the same hue, used wherever
+  the colour carries a label or small text.
+
+  Those siblings are set against the *ambience*, not against --noor-bg. The
+  bokeh layer sits behind every page, so the real backdrop under a line of
+  text is bg + wash + drifting orbs — measurably darker than bg alone. Every
+  value here clears 4.5:1 against the darkest pixel the ambience produces
+  anywhere on the site.
+
+  `npm run check:contrast` re-measures both: the flat-token table, and the
+  live composited ambience. Re-run it after touching a token or the opacity
+  of the bokeh layer — those two are coupled.
+*/
+@theme {
+  /* --- brand, from the logo (spec §6) --- */
+  --color-noor-rose: #e9a3c4;
+  --color-noor-rose-deep: #c4708f;
+  --color-noor-aqua: #7fd2d4;
+  --color-noor-aqua-deep: #3f9ca3;
+  --color-noor-ink: #2c4a4e;
+  --color-noor-bg: #faf6f5;
+  --color-noor-bg-alt: #eff6f6;
+
+  /* --- AA-safe text/label siblings (derived, see note above) --- */
+  --color-noor-rose-ink: #8d5167;
+  --color-noor-rose-ink-hover: #744254;
+  --color-noor-aqua-ink: #2b6c70;
+  --color-noor-aqua-ink-hover: #23595c;
+
+  /* --- supporting neutrals --- */
+  --color-noor-ink-soft: #496567; /* secondary copy */
+  --color-noor-line: #e2d9d8; /* hairlines on bg */
+  --color-noor-line-alt: #d5e4e4; /* hairlines on bg-alt */
+
+  /* --- type --- */
+  --font-display: "Cormorant Garamond Variable", "Cormorant Garamond",
+    Georgia, "Times New Roman", serif;
+  --font-body: "Figtree Variable", Figtree, ui-sans-serif, system-ui,
+    -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  /*
+    Fluid scale, 360px → 1280px. Body is set deliberately large: the reader
+    is tired, one-handed, and probably in the dark.
+  */
+  --text-xs: clamp(0.8125rem, 0.79rem + 0.1vw, 0.875rem);
+  --text-sm: clamp(0.9375rem, 0.91rem + 0.15vw, 1rem);
+  --text-base: clamp(1.0625rem, 1.02rem + 0.22vw, 1.1875rem);
+  --text-lg: clamp(1.1875rem, 1.12rem + 0.32vw, 1.375rem);
+  --text-xl: clamp(1.375rem, 1.27rem + 0.5vw, 1.625rem);
+  --text-2xl: clamp(1.625rem, 1.45rem + 0.8vw, 2.125rem);
+  --text-3xl: clamp(2rem, 1.6rem + 1.8vw, 3rem);
+  --text-4xl: clamp(2.375rem, 1.75rem + 2.9vw, 4.25rem);
+
+  /* --- motion --- */
+  --ease-noor: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+@layer base {
+  html {
+    background-color: var(--color-noor-bg);
+    color: var(--color-noor-ink);
+    font-family: var(--font-body);
+    font-size: 100%;
+    line-height: 1.65;
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  body {
+    margin: 0;
+    min-height: 100svh;
+    font-size: var(--text-base);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  blockquote {
+    font-family: var(--font-display);
+    font-weight: 500;
+    line-height: 1.12;
+    letter-spacing: -0.005em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /*
+    Focus is visible everywhere and never removed. This is the single
+    accessibility affordance most often lost in a custom theme.
+  */
+  :focus-visible {
+    outline: 3px solid var(--color-noor-aqua-ink);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--color-noor-rose) 55%, transparent);
+    color: var(--color-noor-ink);
+  }
+}
+
+@layer components {
+  /* Skip link — visible only once focused. */
+  .skip-link {
+    position: absolute;
+    left: 0.75rem;
+    top: 0.75rem;
+    z-index: 100;
+    transform: translateY(-150%);
+    background: var(--color-noor-ink);
+    color: var(--color-noor-bg);
+    padding: 0.7rem 1.1rem;
+    border-radius: 999px;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    transition: transform 180ms var(--ease-noor);
+  }
+  .skip-link:focus {
+    transform: translateY(0);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .skip-link {
+      transition: none;
+    }
+  }
+}

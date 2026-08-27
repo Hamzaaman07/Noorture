@@ -1,0 +1,232 @@
+---
+/**
+ * Ambient noor — the site's signature (spec §6).
+ *
+ * Soft, out-of-focus lights drifting slowly behind everything, like light
+ * through a window at an hour when someone is awake with a baby.
+ *
+ * Deliberately a 2D canvas and nothing else. The original brief asked for
+ * immersive WebGL; §6 records why that was dropped — battery and data cost on
+ * older Android, and vestibular sensitivity overlaps meaningfully with
+ * pregnancy and postpartum. Same feeling, a fraction of the cost.
+ *
+ * Layers, back to front:
+ *   1. a static CSS gradient wash  — survives reduced motion
+ *   2. this canvas of drifting orbs — frozen under reduced motion
+ *   3. page content
+ */
+interface Props {
+  /** 'hero' is the loud one — homepage only. Every other page uses 'quiet'. */
+  intensity?: 'hero' | 'quiet';
+}
+const { intensity = 'quiet' } = Astro.props;
+---
+
+<div class="noor-ambience" aria-hidden="true">
+  <div class="noor-wash"></div>
+  <canvas class="noor-canvas" data-noor-canvas data-intensity={intensity}></canvas>
+</div>
+
+<style>
+  .noor-ambience {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  /* Static wash. Present at all times, including reduced motion — the page
+     stays beautiful when the drift stops. */
+  .noor-wash {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(
+        68% 52% at 78% 6%,
+        color-mix(in srgb, var(--color-noor-aqua) 15%, transparent) 0%,
+        transparent 62%
+      ),
+      radial-gradient(
+        62% 48% at 12% 24%,
+        color-mix(in srgb, var(--color-noor-rose) 14%, transparent) 0%,
+        transparent 64%
+      ),
+      radial-gradient(
+        86% 60% at 50% 108%,
+        color-mix(in srgb, var(--color-noor-aqua) 9%, transparent) 0%,
+        transparent 70%
+      ),
+      var(--color-noor-bg);
+  }
+
+  .noor-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+</style>
+
+<script>
+  type Orb = {
+    x: number;
+    y: number;
+    r: number;
+    vx: number;
+    vy: number;
+    hue: 'rose' | 'aqua';
+    alpha: number;
+  };
+
+  const MOTION_QUERY = '(prefers-reduced-motion: reduce)';
+
+  function start(canvas: HTMLCanvasElement) {
+    const ctx = canvas.getContext('2d', { alpha: true });
+    if (!ctx) return;
+
+    const isHero = canvas.dataset.intensity === 'hero';
+    // 15–25 soft circles (spec §6). The hero gets the top of that range; every
+    // other page keeps the same ambience, quieter.
+    const COUNT = isHero ? 22 : 15;
+    const PEAK_ALPHA = isHero ? 0.15 : 0.1;
+
+    // Rose and aqua at low opacity. Read as atmosphere, never as activity.
+    const TINT = { rose: '233, 163, 196', aqua: '127, 210, 212' } as const;
+
+    let orbs: Orb[] = [];
+    let width = 0;
+    let height = 0;
+    let dpr = 1;
+    let frame = 0;
+    let running = false;
+    let last = 0;
+
+    const reduced = window.matchMedia(MOTION_QUERY);
+
+    function measure() {
+      // Cap the backing store. These are blurred gradients — nobody can see
+      // the difference at 2x, and the fill rate on a mid-range Android can.
+      dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      width = canvas.clientWidth;
+      height = canvas.clientHeight;
+      canvas.width = Math.max(1, Math.round(width * dpr));
+      canvas.height = Math.max(1, Math.round(height * dpr));
+      ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function seed() {
+      const base = Math.max(width, height);
+      orbs = Array.from({ length: COUNT }, (_, i) => {
+        // Slow. A full crossing of the viewport takes several minutes.
+        const speed = 0.0016 + Math.random() * 0.0042;
+        const angle = Math.random() * Math.PI * 2;
+        return {
+          x: Math.random() * width,
+          y: Math.random() * height,
+          r: base * (0.05 + Math.random() * 0.16),
+          vx: Math.cos(angle) * speed * base,
+          vy: Math.sin(angle) * speed * base,
+          hue: i % 2 === 0 ? 'rose' : 'aqua',
+          alpha: PEAK_ALPHA * (0.45 + Math.random() * 0.55),
+        };
+      });
+    }
+
+    function paint() {
+      ctx!.clearRect(0, 0, width, height);
+      for (const o of orbs) {
+        const g = ctx!.createRadialGradient(o.x, o.y, 0, o.x, o.y, o.r);
+        const tint = TINT[o.hue];
+        // Soft-edged: opaque centre falling to nothing well before the rim.
+        g.addColorStop(0, `rgba(${tint}, ${o.alpha})`);
+        g.addColorStop(0.45, `rgba(${tint}, ${o.alpha * 0.42})`);
+        g.addColorStop(1, `rgba(${tint}, 0)`);
+        ctx!.fillStyle = g;
+        ctx!.beginPath();
+        ctx!.arc(o.x, o.y, o.r, 0, Math.PI * 2);
+        ctx!.fill();
+      }
+    }
+
+    function step(now: number) {
+      if (!running) return;
+      // Delta-timed so the drift is the same speed at 60Hz and 120Hz, and a
+      // backgrounded tab does not lurch forward on return.
+      const dt = Math.min((now - last) / 1000, 0.05);
+      last = now;
+
+      for (const o of orbs) {
+        o.x += o.vx * dt;
+        o.y += o.vy * dt;
+        // Wrap with a full-radius margin so nothing pops at the edge.
+        if (o.x - o.r > width) o.x = -o.r;
+        if (o.x + o.r < 0) o.x = width + o.r;
+        if (o.y - o.r > height) o.y = -o.r;
+        if (o.y + o.r < 0) o.y = height + o.r;
+      }
+      paint();
+      frame = requestAnimationFrame(step);
+    }
+
+    function play() {
+      if (running || reduced.matches || document.hidden) return;
+      running = true;
+      last = performance.now();
+      frame = requestAnimationFrame(step);
+    }
+
+    function pause() {
+      running = false;
+      cancelAnimationFrame(frame);
+    }
+
+    function apply() {
+      if (reduced.matches) {
+        // Drift stops. The gradient and the static bokeh remain (spec §6).
+        pause();
+        paint();
+      } else {
+        play();
+      }
+    }
+
+    function rebuild() {
+      measure();
+      seed();
+      paint();
+      apply();
+    }
+
+    rebuild();
+
+    // Only react to a real width change: mobile browsers fire resize on every
+    // address-bar collapse, and reseeding on scroll would be visible.
+    let lastWidth = window.innerWidth;
+    let resizeTimer = 0;
+    window.addEventListener(
+      'resize',
+      () => {
+        if (window.innerWidth === lastWidth) return;
+        lastWidth = window.innerWidth;
+        window.clearTimeout(resizeTimer);
+        resizeTimer = window.setTimeout(rebuild, 180);
+      },
+      { passive: true },
+    );
+
+    // Never burn a battery behind a hidden tab.
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) pause();
+      else apply();
+    });
+
+    // Honour the setting being changed live, without a reload.
+    reduced.addEventListener('change', apply);
+  }
+
+  document
+    .querySelectorAll<HTMLCanvasElement>('[data-noor-canvas]')
+    .forEach(start);
+</script>

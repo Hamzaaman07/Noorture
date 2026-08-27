@@ -1,0 +1,79 @@
+---
+/**
+ * The site's two button styles. Both meet AA at their final values:
+ *   primary   — white on --noor-rose-ink (#9F5B74)   4.97:1
+ *   secondary — --noor-aqua-ink on --noor-bg         4.64:1, aqua-deep border
+ */
+interface Props {
+  href: string;
+  variant?: 'primary' | 'secondary';
+  class?: string;
+}
+const { href, variant = 'primary', class: className = '' } = Astro.props;
+---
+
+<a href={href} class:list={['btn', `btn--${variant}`, className]}>
+  <span><slot /></span>
+</a>
+
+<style>
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    /* Comfortably past the 44px touch target — she is holding a baby. */
+    min-height: 3.25rem;
+    padding: 0.85rem 1.6rem;
+    border-radius: 999px;
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    font-weight: 600;
+    line-height: 1.25;
+    text-align: center;
+    text-decoration: none;
+    border: 2px solid transparent;
+    transition:
+      background-color 200ms var(--ease-noor),
+      border-color 200ms var(--ease-noor),
+      color 200ms var(--ease-noor),
+      transform 200ms var(--ease-noor);
+  }
+
+  .btn--primary {
+    background-color: var(--color-noor-rose-ink);
+    border-color: var(--color-noor-rose-ink);
+    color: #fff;
+    box-shadow: 0 1px 2px rgba(44, 74, 78, 0.14);
+  }
+  .btn--primary:hover {
+    background-color: var(--color-noor-rose-ink-hover);
+    border-color: var(--color-noor-rose-ink-hover);
+    transform: translateY(-1px);
+  }
+
+  .btn--secondary {
+    background-color: color-mix(in srgb, #fff 62%, transparent);
+    border-color: var(--color-noor-aqua-deep);
+    color: var(--color-noor-aqua-ink);
+  }
+  .btn--secondary:hover {
+    background-color: #fff;
+    border-color: var(--color-noor-aqua-ink);
+    color: var(--color-noor-aqua-ink-hover);
+    transform: translateY(-1px);
+  }
+
+  .btn:active {
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn {
+      transition: none;
+    }
+    .btn:hover {
+      transform: none;
+    }
+  }
+</style>

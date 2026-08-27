@@ -1,0 +1,285 @@
+---
+import NoortureMark from './NoortureMark.astro';
+import Button from './Button.astro';
+import { NAV, CTA } from '../consts';
+
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const isCurrent = (href: string) => path === href || path.startsWith(href + '/');
+---
+
+<header class="site-header">
+  <div class="shell">
+    <a href="/" class="brand" aria-label="Noorture — home">
+      <NoortureMark />
+    </a>
+
+    <nav class="desktop-nav" aria-label="Primary">
+      <ul>
+        {
+          NAV.map((item) => (
+            <li>
+              <a
+                href={item.href}
+                aria-current={isCurrent(item.href) ? 'page' : undefined}
+              >
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="desktop-cta">
+      <Button href={CTA.primaryHref} class="btn--compact">
+        {CTA.primaryLabel}
+      </Button>
+    </div>
+
+    <button
+      type="button"
+      class="menu-toggle"
+      data-menu-toggle
+      aria-expanded="false"
+      aria-controls="mobile-nav"
+    >
+      <span class="menu-toggle__bars" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </span>
+      <span class="menu-toggle__label" data-menu-label>Menu</span>
+    </button>
+  </div>
+
+  <div class="mobile-nav" id="mobile-nav" data-mobile-nav hidden>
+    <nav aria-label="Primary, mobile">
+      <ul>
+        {
+          NAV.map((item) => (
+            <li>
+              <a
+                href={item.href}
+                aria-current={isCurrent(item.href) ? 'page' : undefined}
+              >
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+    <Button href={CTA.primaryHref} class="mobile-nav__cta">
+      {CTA.primaryLabel}
+    </Button>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: color-mix(in srgb, var(--color-noor-bg) 82%, transparent);
+    border-bottom: 1px solid transparent;
+    backdrop-filter: blur(14px) saturate(1.1);
+    -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  }
+
+  /* Hairline only once the page has moved — keeps the hero seamless at rest. */
+  :global(body.is-scrolled) .site-header {
+    border-bottom-color: var(--color-noor-line);
+  }
+
+  .shell {
+    max-width: 76rem;
+    margin: 0 auto;
+    padding: 0.75rem clamp(1rem, 4vw, 2.5rem);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .brand {
+    text-decoration: none;
+    margin-right: auto;
+    display: inline-flex;
+  }
+
+  .desktop-nav,
+  .desktop-cta {
+    display: none;
+  }
+
+  .desktop-nav ul,
+  .mobile-nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .desktop-nav ul {
+    display: flex;
+    align-items: center;
+    gap: clamp(1rem, 2.4vw, 2rem);
+  }
+
+  .desktop-nav a {
+    color: var(--color-noor-ink);
+    text-decoration: none;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    padding: 0.4rem 0;
+    border-bottom: 2px solid transparent;
+    transition: border-color 180ms var(--ease-noor), color 180ms var(--ease-noor);
+  }
+  .desktop-nav a:hover {
+    color: var(--color-noor-aqua-ink);
+    border-bottom-color: var(--color-noor-aqua);
+  }
+  .desktop-nav a[aria-current='page'] {
+    color: var(--color-noor-aqua-ink);
+    border-bottom-color: var(--color-noor-aqua-deep);
+  }
+
+  .menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    /* Full 44px target at 360px. */
+    min-height: 2.75rem;
+    padding: 0.4rem 0.85rem 0.4rem 0.7rem;
+    background: color-mix(in srgb, #fff 55%, transparent);
+    border: 1px solid var(--color-noor-line);
+    border-radius: 999px;
+    color: var(--color-noor-ink);
+    font: inherit;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .menu-toggle__bars {
+    display: grid;
+    gap: 3px;
+    width: 1.1rem;
+  }
+  .menu-toggle__bars span {
+    display: block;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--color-noor-aqua-ink);
+    transition: transform 200ms var(--ease-noor), opacity 200ms var(--ease-noor);
+  }
+  .menu-toggle[aria-expanded='true'] .menu-toggle__bars span:nth-child(1) {
+    transform: translateY(5px) rotate(45deg);
+  }
+  .menu-toggle[aria-expanded='true'] .menu-toggle__bars span:nth-child(2) {
+    opacity: 0;
+  }
+  .menu-toggle[aria-expanded='true'] .menu-toggle__bars span:nth-child(3) {
+    transform: translateY(-5px) rotate(-45deg);
+  }
+
+  .mobile-nav {
+    border-top: 1px solid var(--color-noor-line);
+    background: color-mix(in srgb, var(--color-noor-bg) 96%, transparent);
+    padding: 0.5rem clamp(1rem, 4vw, 2.5rem) 1.5rem;
+  }
+  .mobile-nav[hidden] {
+    display: none;
+  }
+
+  .mobile-nav a {
+    display: block;
+    padding: 0.95rem 0;
+    color: var(--color-noor-ink);
+    text-decoration: none;
+    font-size: var(--text-lg);
+    font-weight: 500;
+    border-bottom: 1px solid var(--color-noor-line);
+  }
+  .mobile-nav a[aria-current='page'] {
+    color: var(--color-noor-aqua-ink);
+  }
+
+  .mobile-nav :global(.mobile-nav__cta) {
+    display: flex;
+    width: 100%;
+    margin-top: 1.25rem;
+  }
+
+  :global(.btn--compact) {
+    min-height: 2.75rem;
+    padding: 0.55rem 1.15rem;
+    font-size: var(--text-sm);
+  }
+
+  @media (min-width: 62rem) {
+    .desktop-nav,
+    .desktop-cta {
+      display: block;
+    }
+    .menu-toggle,
+    .mobile-nav {
+      display: none;
+    }
+    .brand {
+      margin-right: clamp(1rem, 3vw, 2.5rem);
+    }
+    .desktop-nav {
+      margin-right: auto;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .menu-toggle__bars span,
+    .desktop-nav a {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+  const panel = document.querySelector<HTMLElement>('[data-mobile-nav]');
+  const label = document.querySelector<HTMLElement>('[data-menu-label]');
+
+  if (toggle && panel) {
+    const setOpen = (open: boolean) => {
+      toggle.setAttribute('aria-expanded', String(open));
+      panel.hidden = !open;
+      if (label) label.textContent = open ? 'Close' : 'Menu';
+    };
+
+    toggle.addEventListener('click', () => {
+      setOpen(toggle.getAttribute('aria-expanded') !== 'true');
+    });
+
+    // Escape closes and returns focus to the control that opened it.
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape') return;
+      if (toggle.getAttribute('aria-expanded') !== 'true') return;
+      setOpen(false);
+      toggle.focus();
+    });
+
+    // Crossing into the desktop layout leaves the panel orphaned otherwise.
+    const wide = window.matchMedia('(min-width: 62rem)');
+    wide.addEventListener('change', (event) => {
+      if (event.matches) setOpen(false);
+    });
+  }
+
+  // Drives the header hairline. Passive + rAF-throttled so it never
+  // contends with scrolling on a mid-range phone.
+  let ticking = false;
+  const onScroll = () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      document.body.classList.toggle('is-scrolled', window.scrollY > 8);
+      ticking = false;
+    });
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+</script>

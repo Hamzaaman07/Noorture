@@ -1,0 +1,97 @@
+---
+/**
+ * The Noorture lockup: crescent + four-point star glyph, then the wordmark.
+ *
+ * The glyph is a simplified stand-in drawn from the logo's geometry — the
+ * turquoise crescent and rose four-point star. The full logo (the sleeping
+ * owl cradled inside the crescent) has too much interior detail to redraw
+ * faithfully in code.
+ *
+ * TO SWAP IN THE REAL ARTWORK: drop the supplied file at
+ * `public/noorture-logo.svg` and replace the <svg> below with
+ * <img src="/noorture-logo.svg" alt="" width="40" height="40" />.
+ * Nothing else on the site needs to change — this component is the only
+ * place the mark is drawn.
+ */
+interface Props {
+  /** Wordmark alongside the glyph, or the glyph on its own. */
+  showWordmark?: boolean;
+  class?: string;
+}
+const { showWordmark = true, class: className = '' } = Astro.props;
+---
+
+<span class:list={['mark', className]}>
+  <svg
+    class="mark__glyph"
+    viewBox="0 0 48 48"
+    role="img"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <!-- Crescent: one disc with a second offset disc punched out of it. -->
+    <defs>
+      <mask id="noor-crescent-mask">
+        <rect width="48" height="48" fill="black"></rect>
+        <circle cx="24" cy="24" r="19" fill="white"></circle>
+        <circle cx="31.5" cy="20.5" r="16" fill="black"></circle>
+      </mask>
+    </defs>
+    <g mask="url(#noor-crescent-mask)">
+      <circle cx="24" cy="24" r="19" fill="var(--color-noor-aqua-deep)"></circle>
+    </g>
+    <!-- Four-point star, sitting where it does in the logo. -->
+    <path
+      d="M34 6 C34.9 10.6 36.4 12.1 41 13 C36.4 13.9 34.9 15.4 34 20 C33.1 15.4 31.6 13.9 27 13 C31.6 12.1 33.1 10.6 34 6 Z"
+      fill="var(--color-noor-rose)"></path>
+  </svg>
+
+  {
+    showWordmark && (
+      <span class="mark__word">
+        N<span class="mark__oo">OO</span>RTURE
+      </span>
+    )
+  }
+</span>
+
+<style>
+  .mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    color: var(--color-noor-ink);
+  }
+
+  .mark__glyph {
+    width: 2.1rem;
+    height: 2.1rem;
+    flex: none;
+  }
+
+  /* Flared high-contrast serif, letterspaced — echoes the wordmark. */
+  .mark__word {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.5rem;
+    letter-spacing: 0.1em;
+    line-height: 1;
+    /* The trailing letterspace would otherwise push the word off-centre. */
+    margin-right: -0.1em;
+    white-space: nowrap;
+  }
+
+  .mark__oo {
+    color: var(--color-noor-rose-ink);
+  }
+
+  @media (min-width: 48rem) {
+    .mark__glyph {
+      width: 2.35rem;
+      height: 2.35rem;
+    }
+    .mark__word {
+      font-size: 1.7rem;
+    }
+  }
+</style>
