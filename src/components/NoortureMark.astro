@@ -1,97 +1,109 @@
 ---
+import { Image } from 'astro:assets';
+import mark from '../assets/noorture-mark.png';
+import wordmark from '../assets/noorture-wordmark-deep.png';
+import lockup from '../assets/noorture-lockup.png';
+
 /**
- * The Noorture lockup: crescent + four-point star glyph, then the wordmark.
+ * The Noorture logo.
  *
- * The glyph is a simplified stand-in drawn from the logo's geometry — the
- * turquoise crescent and rose four-point star. The full logo (the sleeping
- * owl cradled inside the crescent) has too much interior detail to redraw
- * faithfully in code.
+ * All three assets are generated from the client's supplied artwork by
+ * `npm run build:logo` — see scripts/build-logo-assets.mjs for what that does
+ * and why. Do not hand-edit the PNGs in src/assets; re-run the script.
  *
- * TO SWAP IN THE REAL ARTWORK: drop the supplied file at
- * `public/noorture-logo.svg` and replace the <svg> below with
- * <img src="/noorture-logo.svg" alt="" width="40" height="40" />.
- * Nothing else on the site needs to change — this component is the only
- * place the mark is drawn.
+ * The source is a 408px print file, so the assets are small. That is fine at
+ * the sizes used here, and every one of them is capped below its native width.
  */
 interface Props {
-  /** Wordmark alongside the glyph, or the glyph on its own. */
-  showWordmark?: boolean;
+  /**
+   * 'horizontal' — mark beside wordmark. Header and footer.
+   * 'stacked'    — the full vertical lockup as supplied. Give it room.
+   * 'glyph'      — the mark alone.
+   */
+  variant?: 'horizontal' | 'stacked' | 'glyph';
+  /** Rendered as decorative when a parent already names the link. */
+  alt?: string;
   class?: string;
 }
-const { showWordmark = true, class: className = '' } = Astro.props;
+const {
+  variant = 'horizontal',
+  alt = '',
+  class: className = '',
+} = Astro.props;
 ---
 
-<span class:list={['mark', className]}>
-  <svg
-    class="mark__glyph"
-    viewBox="0 0 48 48"
-    role="img"
-    aria-hidden="true"
-    focusable="false"
-  >
-    <!-- Crescent: one disc with a second offset disc punched out of it. -->
-    <defs>
-      <mask id="noor-crescent-mask">
-        <rect width="48" height="48" fill="black"></rect>
-        <circle cx="24" cy="24" r="19" fill="white"></circle>
-        <circle cx="31.5" cy="20.5" r="16" fill="black"></circle>
-      </mask>
-    </defs>
-    <g mask="url(#noor-crescent-mask)">
-      <circle cx="24" cy="24" r="19" fill="var(--color-noor-aqua-deep)"></circle>
-    </g>
-    <!-- Four-point star, sitting where it does in the logo. -->
-    <path
-      d="M34 6 C34.9 10.6 36.4 12.1 41 13 C36.4 13.9 34.9 15.4 34 20 C33.1 15.4 31.6 13.9 27 13 C31.6 12.1 33.1 10.6 34 6 Z"
-      fill="var(--color-noor-rose)"></path>
-  </svg>
-
-  {
-    showWordmark && (
-      <span class="mark__word">
-        N<span class="mark__oo">OO</span>RTURE
-      </span>
-    )
-  }
-</span>
+{
+  variant === 'stacked' ? (
+    <Image
+      src={lockup}
+      alt={alt}
+      widths={[196, 392]}
+      sizes="(min-width: 48rem) 260px, 200px"
+      class:list={['logo logo--stacked', className]}
+      loading="eager"
+    />
+  ) : (
+    <span class:list={['logo', `logo--${variant}`, className]}>
+      <Image
+        src={mark}
+        alt={variant === 'glyph' ? alt : ''}
+        widths={[100, 200]}
+        sizes="48px"
+        class="logo__mark"
+        loading="eager"
+      />
+      {variant === 'horizontal' && (
+        <Image
+          src={wordmark}
+          alt={alt}
+          widths={[196, 392]}
+          sizes="180px"
+          class="logo__word"
+          loading="eager"
+        />
+      )}
+    </span>
+  )
+}
 
 <style>
-  .mark {
+  .logo {
     display: inline-flex;
     align-items: center;
-    gap: 0.55rem;
-    color: var(--color-noor-ink);
+    gap: 0.5rem;
   }
 
-  .mark__glyph {
-    width: 2.1rem;
-    height: 2.1rem;
+  .logo__mark {
+    width: 2.6rem;
+    height: auto;
     flex: none;
   }
 
-  /* Flared high-contrast serif, letterspaced — echoes the wordmark. */
-  .mark__word {
-    font-family: var(--font-display);
-    font-weight: 600;
-    font-size: 1.5rem;
-    letter-spacing: 0.1em;
-    line-height: 1;
-    /* The trailing letterspace would otherwise push the word off-centre. */
-    margin-right: -0.1em;
-    white-space: nowrap;
+  /*
+    The deep wordmark variant — the supplied light aqua stops reading as a name
+    at this size. See DEEP_BASES in scripts/build-logo-assets.mjs.
+  */
+  .logo__word {
+    width: auto;
+    height: 1.2rem;
+    flex: none;
   }
 
-  .mark__oo {
-    color: var(--color-noor-rose-ink);
+  .logo--stacked {
+    display: block;
+    width: 12.5rem;
+    height: auto;
   }
 
   @media (min-width: 48rem) {
-    .mark__glyph {
-      width: 2.35rem;
-      height: 2.35rem;
+    .logo__mark {
+      width: 2.9rem;
     }
-    .mark__word {
-      font-size: 1.7rem;
+    .logo__word {
+      height: 1.35rem;
+    }
+    .logo--stacked {
+      width: 16rem;
     }
   }
 </style>
