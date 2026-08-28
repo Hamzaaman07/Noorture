@@ -8,6 +8,7 @@ import GiftBand from '../components/GiftBand.astro';
 import Testimonial from '../components/Testimonial.astro';
 import { CIRCLE_TESTIMONIALS } from '../data/testimonials';
 import { PRICING } from '../consts';
+import { POSITIONING, FOR_WHOM } from '../data/approved-copy';
 
 // Two short pulls on the home page; the full set lives on /reviews (§4.1).
 const pulls = [CIRCLE_TESTIMONIALS[1], CIRCLE_TESTIMONIALS[2]];
@@ -18,21 +19,14 @@ const pulls = [CIRCLE_TESTIMONIALS[1], CIRCLE_TESTIMONIALS[2]];
 
   <Section tint narrow>
     {/*
-      CLIENT-APPROVED, VERBATIM (§4.1). Do not paraphrase, tighten, or reflow
-      the wording of this paragraph — "noorture" as a verb is deliberate.
+      CLIENT-APPROVED, VERBATIM (§4.1). The text lives in
+      src/data/approved-copy.ts so it exists exactly once and the preflight can
+      assert it reached the page unaltered. Do not inline it here.
     */}
-    <p class="positioning">
-      Noorture provides services, education, and counseling that fuses the
-      evidence-based sciences of maternal and early childhood health and
-      well-being with the richness of our Islamic tradition to help parents not
-      only nurture their children, but to noorture themselves and their little
-      ones starting from the moment they enter into the world.
-    </p>
+    <p class="positioning">{POSITIONING}</p>
 
-    <p class="for-whom">
-      For anyone caring for a baby or young child — parents and parents-to-be,
-      aunts and uncles, grandparents, teachers, students, and care providers.
-    </p>
+    <p class="for-whom">{FOR_WHOM}</p>
+
   </Section>
 
   {/* The heart of the page: three cards, equal weight (§4.1). */}

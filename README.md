@@ -11,7 +11,72 @@ refer to that document.
 
 ---
 
-## Status: Stage 2 — Conversion path, complete
+## Status: Stage 3 — Supporting pages, built (two items blocked on the client)
+
+Every page in the §3 sitemap now exists for real; there are no placeholder
+pages left. Two Stage 3 requirements cannot be finished by anyone building this
+site, and are called out below rather than quietly marked done.
+
+| Stage 3 requirement | State |
+|---|---|
+| `/about` — both approved passages verbatim, photo, Instagram and LinkedIn | **Blocked** — neither passage nor the photo is in the spec; see below |
+| `/reviews` — approved opening, all testimonials, optional name/location | Built. Opening verbatim, five Circle quotes. The three general quotes are not in the spec, so that section stays hidden rather than invented |
+| `/gift` — artwork, approved copy, accurate fulfilment description | Built. Approved card line verbatim; artwork is a marked typographic stand-in |
+| `/contact` — form | Built, including the Circle waitlist path |
+| `/terms`, `/privacy` | Built as accurate drafts describing what the site actually does, flagged for legal review |
+| Form handler wired, submissions landing in the inbox | **Blocked** — needs the client's form service and destination inbox |
+| Waitlist submissions stored somewhere retrievable | **Blocked** — same handler. The data is carried (`source`, `cohort`) so it is separable on arrival |
+
+### The two blocked items, precisely
+
+**`/about` has no copy to render.** §4.6 asks for two client-approved passages
+used verbatim. The spec quotes only the opening fragment of the first (*"As
+much as we want to pour love into our little ones…"*) and none of the bio. §8.5
+is explicit that deferred content is built as a marked placeholder rather than
+invented — and writing a plausible-sounding biography for a licensed clinician
+would be worse than an honest gap. Paste the real text into
+`ABOUT_WHAT_IS_NOORTURE` and `ABOUT_HODA` in `src/data/approved-copy.ts`, drop a
+portrait at `src/assets/hoda.jpg`, and the page renders it and drops the notes.
+
+**No form reaches anybody yet.** There is no endpoint and no destination inbox.
+Rather than let a real person's 3am booking request vanish, every form
+validates normally and then says plainly that it is not connected, offering
+email instead. Setting `FORMS.endpoint` in `src/consts.ts` is the entire
+switch-on.
+
+### Stage 3 exit criteria
+
+| Criterion | Result |
+|---|---|
+| Every approved passage matches character-for-character | **Enforced, not eyeballed.** Each passage lives once in `src/data/approved-copy.ts`; `npm run preflight` strips tags, decodes entities, and asserts the exact string survived into the built page. Altering one fails the build gate |
+| Every form submits and arrives | **Cannot pass** — no handler exists. Forms validate, report honestly, and are one constant away from live |
+| No dead links | Passes — the links gate walks every internal href and `#anchor` across all 13 pages |
+
+Also swept all 13 pages at 360px and 1280px: no overflow, no JS errors, one
+`h1` each, no skipped heading levels, no missing alt, no unnamed link, no
+unlabelled form field, no tap target under 24px.
+
+### Three bugs found while building this
+
+**Astro swallows a space before an inline tag.** A line of prose ending in a
+word, followed by `<a>` or `<em>` on the next line, renders as "theearly
+years". This shipped three times before it became a lint —
+`npm run preflight` now scans for the pattern, and caught **eight more**
+instances in the Stage 3 pages immediately.
+
+**Flexbox strips whitespace too.** Giving footer links `display: inline-flex`
+for a bigger tap target made "Instagram @noorturellc" render glued together —
+flex discards the whitespace between an anonymous text run and an element
+child. Fixed with `gap`; the source was innocent, so no source lint could have
+seen it.
+
+**A sharp instance is single-use.** Reusing one for a second pipeline silently
+returns the wrong buffer, which broke the logo's colour classification without
+erroring.
+
+---
+
+## Stage 2 — Conversion path, complete
 
 The site is publishable at this point even with Stage 3 and 4 unbuilt — that is
 the ordering §8 intends. Home, both booking pages, the Circles index and the
@@ -91,6 +156,22 @@ them, because this is the cheapest point to change direction.
   both remain.
 - **Nav works at 360px** — hamburger opens and closes by pointer and keyboard,
   `Escape` closes it and returns focus to the toggle, focus ring visible throughout.
+
+### The hero
+
+At the client's direction the hero now leads with the logo itself rather than
+a text headline. §4.1 had argued the other way — "Noorture" is a coined word,
+and the old site spent three paragraphs decoding it before saying what was for
+sale — so the tagline sits immediately beneath the mark at a size that cannot
+be missed. The brand leads; the sentence that explains it is the very next
+thing the eye lands on.
+
+The lockup is capped at 360px wide. The supplied artwork is 392px, and pushed
+larger it goes visibly soft on the phones this audience uses. Tracing it to
+vector was tried and rejected: the source is a JPEG, so its edges carry
+compression ringing, and the traced curves came out wavier than the raster is
+soft. A logo that reads as badly drawn is worse than one that reads as slightly
+soft. **Vector artwork would remove the cap** — worth asking for.
 
 ### Two things to look at during review
 

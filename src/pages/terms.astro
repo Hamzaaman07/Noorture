@@ -1,8 +1,78 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import StageStub from '../components/StageStub.astro';
+import LegalPage from '../components/LegalPage.astro';
+import { SOCIAL, SITE, PRICING } from '../consts';
 ---
 
-<BaseLayout title="Terms">
-  <StageStub title="Terms" stage="Stage 3" note="Terms of service arrive in Stage 3." />
+<BaseLayout title="Terms" description={`The terms that apply to ${SITE.name} services.`}>
+  <LegalPage title="Terms" updated="August 2026">
+    <h2>Who you are dealing with</h2>
+    <p>
+      These terms apply to {SITE.name} LLC and to the services described on this
+      site: consultations, private classes, and Circles.
+    </p>
+
+    <h2>What these services are — and are not</h2>
+    <p>
+      Consultations and private classes are consultation and education. They do
+      not create a provider–patient relationship, they are not a substitute for
+      care from your own clinician, and nothing said in them is a diagnosis or a
+      prescription.
+    </p>
+    <p>
+      A Circle is a group support and learning space, not therapy and not
+      clinical care. If something is urgent, contact your own clinician or your
+      local emergency number rather than waiting for a session.
+    </p>
+
+    <h2>Booking and payment</h2>
+    <ul>
+      <li>The introductory call is {PRICING.consultIntro.label.toLowerCase()}.</li>
+      <li>An initial consultation is {PRICING.consultInitial.label}; a follow-up is {PRICING.consultFollowUp.label}.</li>
+      <li>A private class is {PRICING.privateClass.label} {PRICING.privateClass.suffix}.</li>
+      <li>
+        A Circle is {PRICING.circle.label} for {PRICING.circle.weeks} weeks, or
+        {PRICING.circle.instalments.count} monthly payments of
+        {PRICING.circle.instalments.label}.
+      </li>
+    </ul>
+    <p>
+      Circles are sold through Podia, and Podia's own terms cover that purchase,
+      the payment, and your access to the Circle. Consultations and classes are
+      arranged directly.
+    </p>
+
+    <h2>Rescheduling and cancellation</h2>
+    <p>
+      Life with a small child does not run to a schedule, and the intention here
+      is to be reasonable. Please give as much notice as you can if you need to
+      move a session, and it will be moved.
+    </p>
+
+    <h2>Gifts</h2>
+    <p>
+      A gifted Circle is redeemable against any open Circle and does not expire.
+      Fulfilment is handled personally — see <a href="/gift">the gift page</a>
+      for how it works.
+    </p>
+
+    <h2>Recordings and materials</h2>
+    <p>
+      Slides, recordings, and other materials are for the person or family who
+      booked, and are not for redistribution. Circle recordings and files stay
+      available to members through Podia after the cohort has finished.
+    </p>
+
+    <h2>Confidentiality in a group</h2>
+    <p>
+      A Circle only works because people speak honestly. What is shared in a
+      Circle stays in that Circle.
+    </p>
+
+    <h2>Contact</h2>
+    <p>
+      Anything unclear here can be raised at{' '}
+      <a href={`mailto:${SOCIAL.email}`}>{SOCIAL.email}</a> before you book.
+    </p>
+  </LegalPage>
 </BaseLayout>

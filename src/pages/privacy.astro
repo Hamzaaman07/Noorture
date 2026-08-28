@@ -1,8 +1,77 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import StageStub from '../components/StageStub.astro';
+import LegalPage from '../components/LegalPage.astro';
+import { SOCIAL, SITE } from '../consts';
 ---
 
-<BaseLayout title="Privacy">
-  <StageStub title="Privacy" stage="Stage 3" note="The privacy policy arrives in Stage 3." />
+<BaseLayout title="Privacy" description={`How ${SITE.name} handles your information.`}>
+  <LegalPage title="Privacy" updated="August 2026">
+    <h2>The short version</h2>
+    <p>
+      This site does not have accounts, does not track you, and does not sell
+      anything about you. The only information it collects is what you type into
+      a form and send on purpose.
+    </p>
+
+    <h2>What this site collects</h2>
+    <p>
+      When you submit the booking, contact, or waitlist form, we receive what you
+      entered — typically your name, email address, an optional phone number, and
+      whatever you chose to write. It is used to reply to you and to arrange what
+      you asked about. Nothing else on the site collects information about you.
+    </p>
+    <p>
+      There is no advertising, no third-party tracking, and no cookie banner
+      because there are no tracking cookies to consent to.
+    </p>
+
+    <h2>What happens elsewhere</h2>
+    <p>
+      Circles are sold and run on Podia, which is a separate service with its own
+      privacy policy. When you join a Circle you leave this site, and Podia
+      handles your account, your payment, and your access to the community and
+      the recordings. Payments are never processed on this site, and card details
+      never reach it.
+    </p>
+
+    <h2>What we keep, and for how long</h2>
+    <p>
+      Messages you send are kept for as long as needed to answer you and to keep
+      a record of the arrangement. Waitlist entries are kept until the Circle you
+      asked about has run, or until you ask to be removed.
+    </p>
+
+    <h2>Health information</h2>
+    <p>
+      Noorture consultations are consultation and education rather than medical
+      care, and these forms are not a medical record system. Please do not send
+      detailed health information through the website. Anything sensitive is
+      better raised in the session itself.
+    </p>
+
+    <h2>Your choices</h2>
+    <p>
+      You can ask what has been kept about you, ask for it to be corrected, or
+      ask for it to be deleted. Email{' '}
+      <a href={`mailto:${SOCIAL.email}`}>{SOCIAL.email}</a> and it will be
+      handled.
+    </p>
+
+    <h2>Children</h2>
+    <p>
+      This site is intended for adults caring for children. It is not directed at
+      children, and it does not knowingly collect information from them.
+    </p>
+
+    <h2>Changes</h2>
+    <p>
+      If this policy changes, the date at the top of the page changes with it.
+    </p>
+
+    <h2>Contact</h2>
+    <p>
+      Questions about any of this go to{' '}
+      <a href={`mailto:${SOCIAL.email}`}>{SOCIAL.email}</a>.
+    </p>
+  </LegalPage>
 </BaseLayout>

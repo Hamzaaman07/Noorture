@@ -105,6 +105,10 @@ const year = new Date().getFullYear();
   .footer__col a {
     display: inline-flex;
     align-items: center;
+    /* Flex strips the whitespace between an anonymous text run and an element
+       child, so "Instagram <span>@noorturellc</span>" renders glued together
+       without this. */
+    gap: 0.35rem;
     min-height: 2.75rem;
     padding: 0.25rem 0;
     color: var(--color-noor-ink);

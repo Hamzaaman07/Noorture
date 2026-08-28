@@ -252,6 +252,88 @@ export async function contentGate(root, dist) {
     lines.push(`${checked} cohort page(s) match their frontmatter state`);
   }
 
+  // --- client-approved copy, verbatim ---
+  // Stage 3 exit criterion: "every approved passage matches the source text
+  // character-for-character". The passages live once in approved-copy.ts; this
+  // asserts each one survived into the built page with nothing paraphrased,
+  // re-punctuated, or silently re-wrapped.
+  const copyPath = join(root, 'src/data/approved-copy.ts');
+  if (existsSync(copyPath)) {
+    const source = readFileSync(copyPath, 'utf8');
+    const entries = [
+      ...source.matchAll(
+        /\{\s*name:\s*'([^']+)',\s*page:\s*'([^']+)',\s*text:\s*(\w+)\s*\}/g,
+      ),
+    ];
+    const constants = Object.fromEntries(
+      [...source.matchAll(/export const (\w+) =\s*\n?\s*'((?:[^'\\]|\\.)*)';/g)]
+        .map((m) => [m[1], m[2].replace(/\\'/g, "'")]),
+    );
+
+    if (entries.length === 0) {
+      lines.push('no approved passages declared — skipping the verbatim check');
+    } else {
+      for (const [, name, page, constName] of entries) {
+        const expected = constants[constName];
+        const file = join(dist, page.replace(/^\//, ''), 'index.html');
+        const target = page === '/' ? join(dist, 'index.html') : file;
+        if (!expected) {
+          bad = true;
+          lines.push(`approved copy: ${constName} could not be read from approved-copy.ts`);
+          continue;
+        }
+        if (!existsSync(target)) {
+          bad = true;
+          lines.push(`approved copy: ${page} not found in the build`);
+          continue;
+        }
+        // Compare rendered text, not markup: strip tags, decode the entities
+        // Astro emits, and collapse the whitespace introduced by pretty HTML.
+        const rendered = readFileSync(target, 'utf8')
+          .replace(/<[^>]+>/g, ' ')
+          .replace(/&#(\d+);/g, (_, d) => String.fromCharCode(Number(d)))
+          .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCharCode(parseInt(h, 16)))
+          .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+          .replace(/&quot;/g, '"').replace(/&apos;|&#39;/g, "'")
+          .replace(/&nbsp;/g, ' ')
+          .replace(/\s+/g, ' ');
+        const wanted = expected.replace(/\s+/g, ' ').trim();
+        if (rendered.includes(wanted)) {
+          lines.push(`approved copy verbatim on ${page}: ${name}`);
+        } else {
+          bad = true;
+          lines.push(`APPROVED COPY ALTERED on ${page}: ${name}`);
+          lines.push(`  expected: ...${wanted.slice(0, 70)}...`);
+        }
+      }
+    }
+  }
+
+  // --- collapsed whitespace before an inline tag ---
+  // Astro trims JSX-style whitespace, so a line of prose ending in a word
+  // followed by an inline tag on the next line renders as "theearly years".
+  // This has shipped three times; it is invisible in source and obvious on the
+  // page, which is exactly what a lint is for. Silence a deliberate case by
+  // ending the text line with {''}.
+  const glued = [];
+  for (const file of walk(join(root, 'src')).filter((f) => f.endsWith('.astro'))) {
+    const src = readFileSync(file, 'utf8').split('\n');
+    for (let i = 0; i < src.length - 1; i++) {
+      const here = src[i].trimEnd();
+      const next = src[i + 1].trim();
+      if (!/[a-zA-Z0-9,;:]$/.test(here)) continue;
+      if (!/^<(a|span|strong|em|b|i|code)[\s>]/.test(next)) continue;
+      glued.push(`${relative(root, file)}:${i + 1} "${here.trim().slice(-46)}" + <${next.slice(1).split(/[\s>]/)[0]}>`);
+    }
+  }
+  if (glued.length) {
+    bad = true;
+    lines.push(`${glued.length} place(s) where Astro will swallow a space before an inline tag:`);
+    lines.push(...glued.map((g) => '  ' + g));
+  } else {
+    lines.push('no collapsed spaces before inline tags');
+  }
+
   return bad ? { name: 'Content', status: 'fail', lines } : pass('Content', ...lines);
 }
 

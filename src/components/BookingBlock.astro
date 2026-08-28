@@ -1,13 +1,14 @@
 ---
-import { FORMS, SOCIAL } from '../consts';
+import FormField from './FormField.astro';
+import { FORMS } from '../consts';
 
 /**
  * THE SCHEDULER SWAP POINT.
  *
  * §5.2: the scheduler is not chosen yet. Both booking pages get a slot that
  * currently renders a request form, delivered to email. When a scheduler is
- * picked — Cal.com, Acuity, SavvyCal are the candidates — that block is
- * swapped for an embed and nothing else on the page changes.
+ * picked — Cal.com, Acuity and SavvyCal are the candidates — this block is
+ * swapped for an embed and nothing else on either page changes.
  *
  * So this component is the only thing that knows a form exists. The pages
  * render <BookingBlock product="..." /> and nothing more. §8.5 asks that
@@ -16,30 +17,17 @@ import { FORMS, SOCIAL } from '../consts';
  *
  * HIPAA compliance is explicitly NOT required for these forms, per client
  * direction (§5.2).
- *
- * On the handler: §5.3 wires it in Stage 3. Until FORMS.endpoint is set, the
- * form renders and validates normally but explains on submit that it is not
- * yet connected, and offers email as the route in the meantime — rather than
- * silently swallowing a real person's request.
  */
 interface Props {
-  /** Which page this is on. Decides the default of the product field. */
   product: 'consultation' | 'private-class';
   id?: string;
-  /** Pre-selects a tier when the visitor arrives from a specific price card. */
   options: { value: string; label: string }[];
   heading?: string;
   intro?: string;
 }
 const {
-  product,
-  id = 'book',
-  options,
-  heading = 'Request a time',
-  intro,
+  product, id = 'book', options, heading = 'Request a time', intro,
 } = Astro.props;
-
-const wired = Boolean(FORMS.endpoint);
 ---
 
 <div class="booking" id={id}>
@@ -52,86 +40,37 @@ const wired = Boolean(FORMS.endpoint);
     class="booking__form"
     method="post"
     action={FORMS.endpoint ?? undefined}
-    data-booking-form
-    data-wired={String(wired)}
+    data-noor-form
     novalidate
   >
     <input type="hidden" name="source" value={product} />
-    <!-- Bots fill this; people never see it. Cheaper than a captcha, and it
-         costs the reader nothing. -->
-    <p class="booking__trap" aria-hidden="true">
-      <label>
-        Leave this field empty
+    <p class="form-trap" aria-hidden="true">
+      <label>Leave this field empty
         <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" />
       </label>
     </p>
 
-    <div class="field">
-      <label for={`${id}-name`}>Your name</label>
-      <input id={`${id}-name`} name="name" type="text" autocomplete="name" required />
-    </div>
+    <FormField id={`${id}-name`} name="name" label="Your name" required autocomplete="name" />
+    <FormField id={`${id}-email`} name="email" label="Email" type="email" required
+      autocomplete="email" inputmode="email" />
+    <FormField id={`${id}-phone`} name="phone" label="Phone" type="tel" optional
+      autocomplete="tel" inputmode="tel" />
+    <FormField id={`${id}-product`} name="product" label="What would you like to book?"
+      type="select" required options={options} />
+    <FormField id={`${id}-times`} name="times" label="Times that usually work for you"
+      required placeholder="Weekday mornings, or after 8pm PT" />
+    <FormField id={`${id}-notes`} name="notes" type="textarea"
+      label="Anything you want me to know beforehand"
+      hint="As much or as little as you like. A sentence is plenty." />
 
-    <div class="field">
-      <label for={`${id}-email`}>Email</label>
-      <input
-        id={`${id}-email`}
-        name="email"
-        type="email"
-        autocomplete="email"
-        inputmode="email"
-        required
-      />
-    </div>
-
-    <div class="field">
-      <label for={`${id}-phone`}>
-        Phone <span class="field__optional">(optional)</span>
-      </label>
-      <input
-        id={`${id}-phone`}
-        name="phone"
-        type="tel"
-        autocomplete="tel"
-        inputmode="tel"
-      />
-    </div>
-
-    <div class="field">
-      <label for={`${id}-product`}>What would you like to book?</label>
-      <select id={`${id}-product`} name="product" required>
-        {options.map((o) => <option value={o.value}>{o.label}</option>)}
-      </select>
-    </div>
-
-    <div class="field">
-      <label for={`${id}-times`}>Times that usually work for you</label>
-      <input
-        id={`${id}-times`}
-        name="times"
-        type="text"
-        placeholder="Weekday mornings, or after 8pm PT"
-        required
-      />
-    </div>
-
-    <div class="field">
-      <label for={`${id}-notes`}>
-        Anything you want me to know beforehand
-      </label>
-      <textarea id={`${id}-notes`} name="notes" rows="4"></textarea>
-      <p class="field__hint">
-        As much or as little as you like. A sentence is plenty.
-      </p>
-    </div>
-
-    <button type="submit" class="booking__submit">Send request</button>
+    <button type="submit" class="form-submit">Send request</button>
 
     <p class="booking__reply">
       You'll hear back within two business days. Nothing is charged when you
       send this.
     </p>
 
-    <div class="booking__status" data-booking-status role="status" hidden></div>
+    <div class="form-status" data-form-status role="status" hidden></div>
   </form>
 </div>
 
@@ -163,203 +102,16 @@ const wired = Boolean(FORMS.endpoint);
     gap: 1.1rem;
   }
 
-  .booking__trap {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
-
-  .field {
-    display: grid;
-    gap: 0.4rem;
-  }
-
-  label {
-    font-size: var(--text-sm);
-    font-weight: 600;
-  }
-
-  .field__optional {
-    font-weight: 400;
-    color: var(--color-noor-ink-soft);
-  }
-
-  input,
-  select,
-  textarea {
-    width: 100%;
-    /* 16px minimum, or iOS zooms the whole page on focus. */
-    font: inherit;
-    font-size: max(1rem, var(--text-sm));
-    color: var(--color-noor-ink);
-    background: #fff;
-    border: 1px solid var(--color-noor-line);
-    border-radius: 0.65rem;
-    padding: 0.8rem 0.9rem;
-    min-height: 3rem;
-  }
-
-  textarea {
-    resize: vertical;
-    min-height: 6.5rem;
-  }
-
-  input:hover,
-  select:hover,
-  textarea:hover {
-    border-color: var(--color-noor-aqua-deep);
-  }
-
-  .field__hint {
-    margin: 0;
-    font-size: var(--text-xs);
-    color: var(--color-noor-ink-soft);
-  }
-
-  input[aria-invalid='true'],
-  textarea[aria-invalid='true'],
-  select[aria-invalid='true'] {
-    border-color: var(--color-noor-rose-ink);
-    /* Never colour alone — the message below the field carries the meaning. */
-    border-width: 2px;
-  }
-
-  .field__error {
-    margin: 0;
-    font-size: var(--text-xs);
-    font-weight: 600;
-    color: var(--color-noor-rose-ink);
-  }
-
-  .booking__submit {
-    margin-top: 0.35rem;
-    min-height: 3.25rem;
-    padding: 0.85rem 1.6rem;
-    border: 2px solid var(--color-noor-rose-ink);
-    border-radius: 999px;
-    background: var(--color-noor-rose-ink);
-    color: #fff;
-    font: inherit;
-    font-size: var(--text-base);
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 200ms var(--ease-noor);
-  }
-  .booking__submit:hover {
-    background: var(--color-noor-rose-ink-hover);
-    border-color: var(--color-noor-rose-ink-hover);
-  }
-
   .booking__reply {
     margin: 0;
     font-size: var(--text-xs);
     color: var(--color-noor-ink-soft);
     text-align: center;
   }
-
-  .booking__status {
-    margin: 0;
-    padding: 0.9rem 1rem;
-    border-radius: 0.75rem;
-    background: color-mix(in srgb, var(--color-noor-bg-alt) 90%, transparent);
-    border: 1px solid var(--color-noor-line-alt);
-    font-size: var(--text-sm);
-  }
-  .booking__status[hidden] {
-    display: none;
-  }
-  /* :global because this anchor is injected at runtime and so carries no
-     scope attribute for Astro's scoped selector to match. */
-  .booking__status :global(a) {
-    color: var(--color-noor-aqua-ink);
-    font-weight: 600;
-    text-decoration: underline;
-    text-underline-offset: 2px;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .booking__submit {
-      transition: none;
-    }
-  }
 </style>
 
-<!-- is:inline because define:vars needs the email at render time. -->
-<script is:inline define:vars={{ email: SOCIAL.email }}>
-  for (const form of document.querySelectorAll('[data-booking-form]')) {
-    const status = form.querySelector('[data-booking-status]');
-    const wired = form.dataset.wired === 'true';
-
-    const clearError = (field) => {
-      field.removeAttribute('aria-invalid');
-      field.removeAttribute('aria-describedby');
-      const existing = field.parentElement.querySelector('.field__error');
-      if (existing) existing.remove();
-    };
-
-    const showError = (field, message) => {
-      clearError(field);
-      const id = `${field.id}-error`;
-      const p = document.createElement('p');
-      p.className = 'field__error';
-      p.id = id;
-      p.textContent = message;
-      field.setAttribute('aria-invalid', 'true');
-      field.setAttribute('aria-describedby', id);
-      field.parentElement.append(p);
-    };
-
-    // Clear a field's error as soon as the person fixes it, rather than making
-    // them submit again to find out.
-    form.addEventListener('input', (event) => {
-      const field = event.target;
-      if (field.getAttribute('aria-invalid') === 'true' && field.checkValidity()) {
-        clearError(field);
-      }
-    });
-
-    form.addEventListener('submit', (event) => {
-      const fields = [...form.elements].filter(
-        (el) => el.willValidate && el.type !== 'submit',
-      );
-
-      let firstBad = null;
-      for (const field of fields) {
-        if (field.checkValidity()) {
-          clearError(field);
-          continue;
-        }
-        const message =
-          field.type === 'email'
-            ? 'Please enter an email address we can reply to.'
-            : 'This one is needed.';
-        showError(field, message);
-        firstBad ??= field;
-      }
-
-      if (firstBad) {
-        event.preventDefault();
-        firstBad.focus();
-        return;
-      }
-
-      if (wired) return; // let it post
-
-      // Stage 3 wires the handler. Until then, say so plainly instead of
-      // pretending the request went somewhere.
-      event.preventDefault();
-      status.hidden = false;
-      status.innerHTML =
-        'This form is not connected yet — it goes live with the rest of the ' +
-        'site. In the meantime, email <a href="mailto:' +
-        email +
-        '">' +
-        email +
-        '</a> and Hoda will get back to you.';
-      status.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-    });
-  }
+<script>
+  import { enhanceForms } from '../scripts/forms';
+  import { FORMS, SOCIAL } from '../consts';
+  enhanceForms({ endpoint: FORMS.endpoint, fallbackEmail: SOCIAL.email });
 </script>

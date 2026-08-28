@@ -1,8 +1,137 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import StageStub from '../components/StageStub.astro';
+import Section from '../components/Section.astro';
+import ContactForm from '../components/ContactForm.astro';
+import { SOCIAL, PODIA } from '../consts';
+
+const title = 'Contact';
+const description =
+  'Get in touch with Noorture — questions about consultations, private classes, Circles, or gifting.';
 ---
 
-<BaseLayout title="Contact">
-  <StageStub title="Contact" stage="Stage 3" note="The contact form arrives in Stage 3." />
+<BaseLayout title={title} description={description}>
+  <Section narrow>
+    <div class="lede">
+      <p class="eyebrow">Contact</p>
+      <h1>Ask me anything.</h1>
+      <p class="lede__sub">
+        Whether you know what you need or you're not sure this is the right
+        place at all — write, and I'll tell you honestly.
+      </p>
+    </div>
+  </Section>
+
+  <Section tint>
+    <ContactForm
+      intro="If it's about booking, the booking pages have a form that asks the right questions — but this reaches me just the same."
+    />
+
+    <div class="other">
+      <h2>Other ways to reach Noorture</h2>
+      <ul>
+        <li>
+          <span class="other__label">Email</span>
+          <a href={`mailto:${SOCIAL.email}`}>{SOCIAL.email}</a>
+        </li>
+        <li>
+          <span class="other__label">Instagram</span>
+          <a href={SOCIAL.instagram} rel="me noopener" target="_blank">@noorturellc</a>
+        </li>
+        <li>
+          <span class="other__label">Circle members</span>
+          <a href={PODIA.memberLogin} rel="noopener" target="_blank">
+            Sign in to your Circle &rarr;
+          </a>
+        </li>
+      </ul>
+      <p class="other__note">
+        Noorture is not an emergency service. If something is urgent, contact
+        your own clinician or your local emergency number.
+      </p>
+    </div>
+  </Section>
 </BaseLayout>
+
+<style>
+  .eyebrow {
+    margin: 0 0 0.85rem;
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-noor-rose-ink);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: var(--text-4xl);
+  }
+
+  .lede__sub {
+    margin: 1.25rem 0 0;
+    font-size: var(--text-lg);
+    color: var(--color-noor-ink-soft);
+  }
+
+  .other {
+    max-width: 34rem;
+    margin: clamp(2.5rem, 6vw, 3.5rem) auto 0;
+  }
+
+  .other h2 {
+    margin: 0 0 1rem;
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--color-noor-ink-soft);
+    text-align: center;
+  }
+
+  .other ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .other li {
+    display: grid;
+    grid-template-columns: 8.5rem 1fr;
+    gap: 1rem;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--color-noor-line-alt);
+    font-size: var(--text-sm);
+  }
+
+  .other__label {
+    font-weight: 600;
+    color: var(--color-noor-ink-soft);
+  }
+
+  .other a {
+    color: var(--color-noor-aqua-ink);
+    font-weight: 600;
+    text-decoration: none;
+    border-bottom: 1px solid var(--color-noor-aqua);
+    padding-bottom: 2px;
+    justify-self: start;
+  }
+
+  .other__note {
+    margin: 1.5rem 0 0;
+    font-size: var(--text-xs);
+    color: var(--color-noor-ink-soft);
+    text-align: center;
+  }
+
+  @media (max-width: 30rem) {
+    .other li {
+      grid-template-columns: 1fr;
+      gap: 0.2rem;
+    }
+  }
+</style>

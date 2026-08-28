@@ -1,8 +1,114 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import StageStub from '../components/StageStub.astro';
+import Section from '../components/Section.astro';
+import Testimonial from '../components/Testimonial.astro';
+import Button from '../components/Button.astro';
+import { CIRCLE_TESTIMONIALS, GENERAL_TESTIMONIALS } from '../data/testimonials';
+import { CTA } from '../consts';
+import { REVIEWS_OPENING } from '../data/approved-copy';
+
+const title = 'Reviews';
+const description =
+  'What caregivers say about the Noorture Circles and consultations.';
+
+// Alternate the alignment so a column of quotes does not read as a list.
+const aligns = ['center', 'left', 'right'] as const;
 ---
 
-<BaseLayout title="Reviews">
-  <StageStub title="Reviews" stage="Stage 3" note="What caregivers say about the Circles and consultations. Arrives in Stage 3." />
+<BaseLayout title={title} description={description}>
+  <Section narrow>
+    <div class="lede">
+      <p class="eyebrow">Reviews</p>
+      {/*
+        CLIENT-APPROVED, VERBATIM (§4.7). Text lives in
+        src/data/approved-copy.ts — see the note there.
+      */}
+      <p class="opening">{REVIEWS_OPENING}</p>
+    </div>
+  </Section>
+
+  <Section labelledby="circle-reviews">
+    <h1 id="circle-reviews" class="section-heading">
+      From the Circles
+    </h1>
+    {
+      CIRCLE_TESTIMONIALS.map((t, i) => (
+        <Testimonial {...t} align={aligns[i % aligns.length]} />
+      ))
+    }
+  </Section>
+
+  {
+    /*
+      §4.7 also lists three general testimonials from the current site. Their
+      text is not in the spec, so the section renders only when the real
+      wording has been added to src/data/testimonials.ts — never invented.
+    */
+    GENERAL_TESTIMONIALS.length > 0 && (
+      <Section tint labelledby="general-reviews">
+        <h2 id="general-reviews" class="section-heading">
+          From consultations and classes
+        </h2>
+        {GENERAL_TESTIMONIALS.map((t, i) => (
+          <Testimonial {...t} align={aligns[i % aligns.length]} />
+        ))}
+      </Section>
+    )
+  }
+
+  <Section narrow>
+    <div class="tail">
+      <h2>Take the first step</h2>
+      <p>
+        The free 15-minute call costs nothing and commits you to nothing. It is
+        the easiest way to find out whether this is right for you.
+      </p>
+      <p class="tail__cta">
+        <Button href={CTA.primaryHref}>{CTA.primaryLabel}</Button>
+      </p>
+    </div>
+  </Section>
 </BaseLayout>
+
+<style>
+  .eyebrow {
+    margin: 0 0 1.25rem;
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-noor-rose-ink);
+    text-align: center;
+  }
+
+  .opening {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    line-height: 1.45;
+    text-wrap: pretty;
+  }
+
+  .section-heading {
+    margin: 0 0 clamp(1rem, 3vw, 1.5rem);
+    font-size: var(--text-3xl);
+    text-align: center;
+  }
+
+  .tail {
+    text-align: center;
+  }
+  .tail h2 {
+    margin: 0;
+    font-size: var(--text-2xl);
+  }
+  .tail p {
+    margin: 0.9rem auto 0;
+    max-width: 32rem;
+    color: var(--color-noor-ink-soft);
+    font-size: var(--text-sm);
+  }
+  .tail__cta {
+    margin-top: 1.75rem;
+  }
+</style>

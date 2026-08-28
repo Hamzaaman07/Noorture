@@ -1,0 +1,137 @@
+---
+import FormField from './FormField.astro';
+import { FORMS } from '../consts';
+
+/**
+ * General contact, and the Circle waitlist.
+ *
+ * §5.3: the waitlist is the only audience-building mechanism on this site —
+ * there is no newsletter — so waitlist submissions have to be stored somewhere
+ * retrievable rather than only emailed. The `source` and `cohort` hidden fields
+ * carry that through to whatever handler is wired, so the two can be told apart
+ * on the receiving end without a second form endpoint.
+ */
+interface Props {
+  /** Pre-selects the reason, e.g. when arriving from a waitlist CTA. */
+  reason?: string;
+  /** Cohort slug when this is a waitlist signup. */
+  cohort?: string;
+  heading?: string;
+  intro?: string;
+}
+const { reason, cohort, heading = 'Send a message', intro } = Astro.props;
+
+const REASONS = [
+  { value: 'general', label: 'A general question' },
+  { value: 'consultation', label: 'Booking a consultation' },
+  { value: 'private-class', label: 'Booking a private class' },
+  { value: 'circle', label: 'Joining a Circle' },
+  { value: 'waitlist', label: 'Joining a Circle waitlist' },
+  { value: 'gift', label: 'Gifting a Circle' },
+];
+---
+
+<div class="contact">
+  <div class="contact__head">
+    <h2>{heading}</h2>
+    {intro && <p class="contact__intro">{intro}</p>}
+  </div>
+
+  <form
+    class="contact__form"
+    method="post"
+    action={FORMS.endpoint ?? undefined}
+    data-noor-form
+    data-contact-form
+    novalidate
+  >
+    <input type="hidden" name="source" value="contact" />
+    <input type="hidden" name="cohort" value={cohort ?? ''} data-cohort-field />
+    <p class="form-trap" aria-hidden="true">
+      <label>Leave this field empty
+        <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" />
+      </label>
+    </p>
+
+    <FormField id="contact-name" name="name" label="Your name" required autocomplete="name" />
+    <FormField id="contact-email" name="email" label="Email" type="email" required
+      autocomplete="email" inputmode="email" />
+    <FormField id="contact-reason" name="reason" label="What's this about?"
+      type="select" required options={REASONS} value={reason} />
+    <FormField id="contact-message" name="message" type="textarea" required
+      label="Your message"
+      hint="However much or little you like." />
+
+    <button type="submit" class="form-submit">Send</button>
+
+    <p class="contact__reply">
+      You'll hear back within two business days.
+    </p>
+
+    <div class="form-status" data-form-status role="status" hidden></div>
+  </form>
+</div>
+
+<style>
+  .contact {
+    max-width: 34rem;
+    margin-inline: auto;
+    padding: clamp(1.5rem, 5vw, 2.5rem);
+    background: color-mix(in srgb, #fff 72%, transparent);
+    border: 1px solid var(--color-noor-line);
+    border-radius: 1.25rem;
+    box-shadow: 0 1px 3px rgba(44, 74, 78, 0.06);
+  }
+
+  .contact__head h2 {
+    margin: 0;
+    font-size: var(--text-2xl);
+  }
+
+  .contact__intro {
+    margin: 0.6rem 0 0;
+    color: var(--color-noor-ink-soft);
+    font-size: var(--text-sm);
+  }
+
+  .contact__form {
+    margin-top: 1.75rem;
+    display: grid;
+    gap: 1.1rem;
+  }
+
+  .contact__reply {
+    margin: 0;
+    font-size: var(--text-xs);
+    color: var(--color-noor-ink-soft);
+    text-align: center;
+  }
+</style>
+
+<script>
+  import { enhanceForms } from '../scripts/forms';
+  import { FORMS, SOCIAL } from '../consts';
+
+  enhanceForms({ endpoint: FORMS.endpoint, fallbackEmail: SOCIAL.email });
+
+  /*
+    A waitlist CTA links here as /contact?waitlist=<cohort-slug>. The page is
+    static and cached, so the cohort cannot be baked in at build time — it is
+    read from the URL on arrival instead, which also keeps a single /contact
+    page rather than one per cohort.
+  */
+  const params = new URLSearchParams(window.location.search);
+  const waitlist = params.get('waitlist');
+  if (waitlist) {
+    const reason = document.querySelector<HTMLSelectElement>('#contact-reason');
+    const cohort = document.querySelector<HTMLInputElement>('[data-cohort-field]');
+    const message = document.querySelector<HTMLTextAreaElement>('#contact-message');
+    if (reason) reason.value = 'waitlist';
+    if (cohort) cohort.value = waitlist;
+    if (message && !message.value) {
+      // Readable title from the slug, so she is not typing it out herself.
+      const title = waitlist.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+      message.value = `Please add me to the waitlist for ${title}.`;
+    }
+  }
+</script>

@@ -18,6 +18,17 @@ export interface Testimonial {
   location?: string;
 }
 
+/**
+ * The three general (non-Circle) testimonials referenced in §4.7.
+ *
+ * Their text is not in the build spec — only the fact that they exist on the
+ * current Podia site. Client-approved copy must not be paraphrased or invented,
+ * so this is deliberately empty and /reviews renders the Circle quotes alone
+ * until the real wording is supplied. Paste them in here and the page picks
+ * them up with no other edit.
+ */
+export const GENERAL_TESTIMONIALS: Testimonial[] = [];
+
 export const CIRCLE_TESTIMONIALS: Testimonial[] = [
   {
     quote:

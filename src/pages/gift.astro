@@ -1,8 +1,257 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import StageStub from '../components/StageStub.astro';
+import Section from '../components/Section.astro';
+import Button from '../components/Button.astro';
+import ProvisionalNote from '../components/ProvisionalNote.astro';
+import { GIFT_CARD_LINE } from '../data/approved-copy';
+import { PRICING, SOCIAL } from '../consts';
+
+const title = 'Gift a Circle';
+const description =
+  'Give someone twelve weeks in a Noorture Circle, with a card written for her by hand.';
 ---
 
-<BaseLayout title="Gift a Circle">
-  <StageStub title="Gift a Circle" stage="Stage 3" note="Know someone who just had a baby? Gifting arrives in Stage 3." />
+<BaseLayout title={title} description={description}>
+  <Section narrow>
+    <div class="lede">
+      <p class="eyebrow">Gift a Circle</p>
+      <h1>Know someone who just had a baby?</h1>
+      <p class="lede__sub">
+        Give her twelve weeks in a Circle of her choosing — a small group, the
+        same faces every week, and somewhere to put the parts of it she hasn't
+        said out loud yet.
+      </p>
+    </div>
+  </Section>
+
+  {/* §4.5 calls this the best copy in the whole brand. Verbatim, from
+      src/data/approved-copy.ts. */}
+  <Section tint>
+    <figure class="card">
+      <div class="card__art" role="img"
+        aria-label="Noorture gift card — a sleeping owl cradled by a crescent moon">
+        <span class="card__mark" aria-hidden="true"></span>
+        <blockquote class="card__line"><p>{GIFT_CARD_LINE}</p></blockquote>
+      </div>
+      <figcaption>
+        Every card carries this line, and the name of whoever sent it.
+        {/* §4.5 asks for the gift card artwork. It has not been supplied, so
+            this is a typographic stand-in built from the brand, rather than a
+            mock-up pretending to be her card. */}
+        <span class="card__flag">
+          Artwork placeholder — awaiting the real gift card design.
+        </span>
+      </figcaption>
+    </figure>
+  </Section>
+
+  <Section narrow>
+    <div class="prose">
+      <h2>What the gift is</h2>
+      <p>
+        A full twelve-week Circle — {PRICING.circle.label} — which she can
+        redeem against whichever Circle suits her, whenever she's ready. She
+        does not have to decide now, and she does not have to start with the
+        next cohort.
+      </p>
+
+      <h2>How it works</h2>
+      {/*
+        §4.5 and §9.3: fulfilment is manual today. The page describes what
+        actually happens rather than implying an automated flow, because a
+        buyer who expects an instant emailed code and gets nothing will assume
+        the purchase failed.
+      */}
+      <ol class="steps">
+        <li>
+          <strong>You buy the Circle.</strong> Checkout runs on Podia, the same
+          place the Circles themselves live.
+        </li>
+        <li>
+          <strong>You email Hoda</strong> at{' '}
+          <a href={`mailto:${SOCIAL.email}`}>{SOCIAL.email}</a> with your name
+          and hers.
+        </li>
+        <li>
+          <strong>She sends back a card</strong> written for the two of you,
+          with a unique code inside.
+        </li>
+        <li>
+          <strong>Your friend redeems the code</strong> whenever she's ready,
+          against any open Circle.
+        </li>
+      </ol>
+      <p class="prose__aside">
+        It is done by hand, so allow a couple of days — and if you need it for a
+        particular day, say so in the email and it will be ready.
+      </p>
+
+      <ProvisionalNote pending="the client's decision on gift fulfilment (§9.3)">
+        <p>
+          This describes the current manual process accurately. It does not
+          scale past a handful of gifts a month, and the address above is a
+          personal Gmail rather than a Noorture-domain one — which reads less
+          established at exactly the moment someone is spending money.
+        </p>
+      </ProvisionalNote>
+
+      <h2>Who it's for</h2>
+      <p>
+        A sister, a friend, a daughter-in-law, a colleague on maternity leave.
+        Anyone who has just had a baby and is about to discover how quiet the
+        weeks after can be.
+      </p>
+
+      <p class="prose__cta">
+        <Button href="/circles">See the Circles</Button>
+        <Button href={`/contact?reason=gift`} variant="secondary">
+          Ask about gifting
+        </Button>
+      </p>
+    </div>
+  </Section>
 </BaseLayout>
+
+<style>
+  .eyebrow {
+    margin: 0 0 0.85rem;
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-noor-rose-ink);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: var(--text-4xl);
+  }
+
+  .lede__sub {
+    margin: 1.25rem 0 0;
+    font-size: var(--text-lg);
+    color: var(--color-noor-ink-soft);
+  }
+
+  .card {
+    margin: 0 auto;
+    max-width: 34rem;
+  }
+
+  .card__art {
+    display: grid;
+    place-items: center;
+    gap: 1.5rem;
+    padding: clamp(2rem, 6vw, 3.25rem) clamp(1.5rem, 5vw, 2.5rem);
+    border-radius: 1.5rem;
+    border: 1px solid var(--color-noor-line);
+    background:
+      radial-gradient(
+        90% 120% at 15% 0%,
+        color-mix(in srgb, var(--color-noor-rose) 26%, transparent),
+        transparent 62%
+      ),
+      radial-gradient(
+        90% 120% at 90% 100%,
+        color-mix(in srgb, var(--color-noor-aqua) 28%, transparent),
+        transparent 62%
+      ),
+      #fff;
+  }
+
+  .card__mark {
+    display: block;
+    width: 3.5rem;
+    height: 3.5rem;
+    background: url('/favicon-180.png') center / contain no-repeat;
+    border-radius: 999px;
+  }
+
+  .card__line {
+    margin: 0;
+  }
+  .card__line p {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    font-style: italic;
+    line-height: 1.35;
+    text-align: center;
+    text-wrap: pretty;
+  }
+
+  figcaption {
+    margin-top: 1.1rem;
+    text-align: center;
+    font-size: var(--text-sm);
+    color: var(--color-noor-ink-soft);
+  }
+
+  .card__flag {
+    display: block;
+    margin-top: 0.6rem;
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-noor-rose-ink);
+  }
+
+  .prose h2 {
+    margin: 2.5rem 0 0.85rem;
+    font-size: var(--text-2xl);
+  }
+  .prose h2:first-child {
+    margin-top: 0;
+  }
+  .prose p {
+    margin: 0 0 1.1rem;
+  }
+
+  .steps {
+    margin: 0 0 1.1rem;
+    padding: 0;
+    list-style: none;
+    counter-reset: step;
+    display: grid;
+    gap: 1rem;
+  }
+  .steps li {
+    counter-increment: step;
+    position: relative;
+    padding-left: 2.6rem;
+    font-size: var(--text-sm);
+    line-height: 1.6;
+  }
+  .steps li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: -0.1rem;
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 999px;
+    background: var(--color-noor-aqua-ink);
+    color: #fff;
+    font-size: var(--text-xs);
+    font-weight: 700;
+  }
+  .steps a {
+    color: var(--color-noor-aqua-ink);
+    font-weight: 600;
+  }
+
+  .prose__aside {
+    font-size: var(--text-sm);
+    color: var(--color-noor-ink-soft);
+  }
+
+  .prose__cta {
+    margin-top: 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+</style>

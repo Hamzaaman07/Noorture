@@ -1,0 +1,81 @@
+---
+import Section from './Section.astro';
+import ProvisionalNote from './ProvisionalNote.astro';
+
+/**
+ * Shared shell for /terms and /privacy.
+ *
+ * These describe what this site actually does — no accounts, no analytics yet,
+ * forms to email, payments and member data on Podia — so they are accurate
+ * rather than generic. They are still a lawyer's document, not a developer's,
+ * so the review flag is on the page.
+ */
+interface Props {
+  title: string;
+  updated: string;
+}
+const { title, updated } = Astro.props;
+---
+
+<Section narrow>
+  <div class="legal">
+    <h1>{title}</h1>
+    <p class="legal__updated">Last updated {updated}</p>
+
+    <ProvisionalNote pending="review by the client's attorney">
+      <p>
+        This is a working draft written to describe accurately how the site and
+        the practice actually operate. It has not been reviewed by a lawyer, and
+        it is not legal advice. It should be checked before launch — particularly
+        the sections touching a licensed clinician's obligations.
+      </p>
+    </ProvisionalNote>
+
+    <div class="legal__body"><slot /></div>
+  </div>
+</Section>
+
+<style>
+  h1 {
+    margin: 0;
+    font-size: var(--text-4xl);
+  }
+
+  .legal__updated {
+    margin: 0.75rem 0 0;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-noor-ink-soft);
+  }
+
+  .legal__body :global(h2) {
+    margin: 2.5rem 0 0.8rem;
+    font-size: var(--text-xl);
+  }
+
+  .legal__body :global(p),
+  .legal__body :global(li) {
+    font-size: var(--text-sm);
+    line-height: 1.7;
+  }
+
+  .legal__body :global(p) {
+    margin: 0 0 1rem;
+  }
+
+  .legal__body :global(ul) {
+    margin: 0 0 1rem;
+    padding-left: 1.15rem;
+  }
+
+  .legal__body :global(li) {
+    margin-bottom: 0.4rem;
+  }
+
+  .legal__body :global(a) {
+    color: var(--color-noor-aqua-ink);
+    font-weight: 600;
+  }
+</style>

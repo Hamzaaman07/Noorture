@@ -160,6 +160,72 @@
     inset: -0.7rem -0.5rem;
   }
 
+  /*
+    Form chrome shared by the booking, contact and waitlist forms. These live
+    here rather than in a component because the error message and the status
+    notice are injected at runtime, and Astro's scoped selectors do not match
+    elements that were not in the template.
+  */
+  .field__error {
+    margin: 0;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--color-noor-rose-ink);
+  }
+
+  .form-submit {
+    margin-top: 0.35rem;
+    min-height: 3.25rem;
+    padding: 0.85rem 1.6rem;
+    border: 2px solid var(--color-noor-rose-ink);
+    border-radius: 999px;
+    background: var(--color-noor-rose-ink);
+    color: #fff;
+    font: inherit;
+    font-size: var(--text-base);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 200ms var(--ease-noor);
+  }
+  .form-submit:hover {
+    background: var(--color-noor-rose-ink-hover);
+    border-color: var(--color-noor-rose-ink-hover);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .form-submit {
+      transition: none;
+    }
+  }
+
+  .form-status {
+    margin: 0;
+    padding: 0.9rem 1rem;
+    border-radius: 0.75rem;
+    background: color-mix(in srgb, var(--color-noor-bg-alt) 90%, transparent);
+    border: 1px solid var(--color-noor-line-alt);
+    font-size: var(--text-sm);
+  }
+  .form-status[hidden] {
+    display: none;
+  }
+  .form-status a {
+    color: var(--color-noor-aqua-ink);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  /* Bots fill this; people never see it. Cheaper than a captcha, and it costs
+     the reader nothing. */
+  .form-trap {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
   /* Skip link — visible only once focused. */
   .skip-link {
     position: absolute;

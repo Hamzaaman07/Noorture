@@ -1,12 +1,65 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import StageStub from '../components/StageStub.astro';
+import Section from '../components/Section.astro';
+import Button from '../components/Button.astro';
+import { NAV } from '../consts';
 ---
 
 <BaseLayout title="Page not found">
-  <StageStub
-    title="We couldn't find that page"
-    stage="404"
-    note="The link may have moved. Head back to the homepage, or use the menu above."
-  />
+  <Section narrow>
+    <div class="nf">
+      <h1>We couldn't find that page</h1>
+      <p>
+        The link may have moved. If you came from an older Noorture page or an
+        email, everything below is still here.
+      </p>
+
+      <ul class="nf__links">
+        {NAV.map((item) => <li><a href={item.href} class="tap">{item.label}</a></li>)}
+      </ul>
+
+      <p class="nf__cta"><Button href="/">Back to home</Button></p>
+    </div>
+  </Section>
 </BaseLayout>
+
+<style>
+  .nf {
+    text-align: center;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: var(--text-3xl);
+  }
+
+  p {
+    margin: 1.1rem auto 0;
+    max-width: 32rem;
+    color: var(--color-noor-ink-soft);
+    font-size: var(--text-sm);
+  }
+
+  .nf__links {
+    list-style: none;
+    margin: 2rem 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem 1.5rem;
+  }
+
+  .nf__links a {
+    color: var(--color-noor-aqua-ink);
+    font-weight: 600;
+    font-size: var(--text-sm);
+    text-decoration: none;
+    border-bottom: 1px solid var(--color-noor-aqua);
+    padding-bottom: 2px;
+  }
+
+  .nf__cta {
+    margin-top: 2.25rem;
+  }
+</style>
