@@ -16,6 +16,9 @@
  *   4. Bring the colours back to the brand palette. See the note on
  *      RECOLOUR below — this one is a judgement call, and reversible.
  *
+ * The wordmark is NOT produced here any more: it comes from the
+ * high-resolution artwork via `npm run build:wordmark`, as vector.
+ *
  * On the knockout: a plain white-threshold would punch holes straight through
  * the owl, whose body is near-white. So the background is found by flood fill
  * from the border instead — only white that is connected to the outside is
@@ -66,17 +69,7 @@ const SOURCE_BASES = { aqua: [0x7a, 0xb0, 0xc6], rose: [0xdf, 0xa4, 0xa6] };
 /** Spec §6: --noor-aqua and --noor-rose. */
 const BRAND_BASES = { aqua: [0x7f, 0xd2, 0xd4], rose: [0xe9, 0xa3, 0xc4] };
 
-/**
- * Spec §6: --noor-aqua-deep and --noor-rose-deep, used for a second wordmark.
- *
- * The supplied wordmark is light aqua, which is beautiful large and nearly
- * invisible at the ~17px cap height of a site header — it stops reading as the
- * brand name and starts reading as decoration. So the same letterforms are
- * emitted a second time in the deeper pair of brand tokens, which is the
- * ordinary dark-on-light logo variant most brands carry. The artwork is not
- * altered; only which brand token it is tinted with.
- */
-const DEEP_BASES = { aqua: [0x3f, 0x9c, 0xa3], rose: [0xc4, 0x70, 0x8f] };
+
 
 /* ------------------------------------------------------------------ */
 /* 1. decode to sRGB                                                    */
@@ -196,12 +189,9 @@ function recolour(source, targets) {
 }
 
 const brand = RECOLOUR ? recolour(rgba, BRAND_BASES) : rgba;
-const deep = RECOLOUR ? recolour(rgba, DEEP_BASES) : rgba;
-if (RECOLOUR) console.log('recoloured to the brand palette, and to a deep variant\n');
+if (RECOLOUR) console.log('recoloured to the brand palette\n');
 
-const raw = { width: W, height: H, channels: 4 };
-const full = sharp(brand, { raw });
-const fullDeep = sharp(deep, { raw });
+const full = sharp(brand, { raw: { width: W, height: H, channels: 4 } });
 
 /* ------------------------------------------------------------------ */
 /* 4. crop the pieces                                                   */
@@ -255,12 +245,16 @@ const allBox = bounds(0, H - 1);
 
 await mkdir(OUT, { recursive: true });
 
+/*
+  The wordmark is no longer emitted here. It comes from the high-resolution
+  artwork instead, traced to SVG by `npm run build:wordmark` — resolution
+  independent, and its fills read CSS custom properties, so the one asset
+  serves both the light brand colours and the deeper pair the header needs.
+  This print file is still the source for the mark, the lockup and the icons.
+*/
 const pieces = [
   ['noorture-mark.png', markBox, full],
-  ['noorture-wordmark.png', wordBox, full],
   ['noorture-lockup.png', allBox, full],
-  // The header and footer use this one — see DEEP_BASES above.
-  ['noorture-wordmark-deep.png', wordBox, fullDeep],
 ];
 for (const [name, box, source] of pieces) {
   await source.clone().extract(box).png({ compressionLevel: 9 }).toFile(resolve(OUT, name));

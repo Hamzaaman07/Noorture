@@ -236,19 +236,47 @@ them, because this is the cheapest point to change direction.
 
 ### The hero
 
-At the client's direction the hero now leads with the logo itself rather than
-a text headline. §4.1 had argued the other way — "Noorture" is a coined word,
-and the old site spent three paragraphs decoding it before saying what was for
-sale — so the tagline sits immediately beneath the mark at a size that cannot
-be missed. The brand leads; the sentence that explains it is the very next
-thing the eye lands on.
+At the client's direction the hero is the wordmark, at full width, with no
+descriptive headline. §4.1 had argued the other way — "Noorture" is a coined
+word, and the old site spent three paragraphs decoding it before saying what
+was for sale — so the subhead beneath it now carries the whole explanatory
+load. Worth watching: a first-time visitor has one sentence to work out what
+this is.
 
-The lockup is capped at 360px wide. The supplied artwork is 392px, and pushed
-larger it goes visibly soft on the phones this audience uses. Tracing it to
-vector was tried and rejected: the source is a JPEG, so its edges carry
-compression ringing, and the traced curves came out wavier than the raster is
-soft. A logo that reads as badly drawn is worse than one that reads as slightly
-soft. **Vector artwork would remove the cap** — worth asking for.
+**The wordmark is vector**, traced from the high-resolution artwork by
+`npm run build:wordmark`. It has to be: the print file is 392px wide, and a
+wordmark filling the hero on a 3x phone needs roughly 2,400px.
+
+An earlier attempt to trace the *print* file failed and was thrown away — it is
+a JPEG, so its high-contrast edges carry compression ringing, and thresholding
+that produced contours that genuinely wobbled. The traced curves came out
+wavier than the raster was soft, which is worse: a logo reading as badly drawn
+beats one reading as slightly soft. The high-resolution source is a PNG with a
+clean alpha channel and 2.5x the pixels, which removes both problems. The
+tracer adds a corner-preserving Bezier fit, so serif terminals stay sharp
+instead of melting.
+
+Because it is inline SVG, its fills read CSS custom properties — so one asset
+serves both the light brand colours in the hero and the deeper pair the header
+needs, with no second file to keep in step.
+
+**Note for the client:** the high-resolution wordmark is a redraw, not the
+original vector. The letterforms are very close but slightly bolder, and the
+N's swash is clipped by two or three pixels at the left edge of the source
+image. If the original vector ever turns up, re-run the tracer against it.
+
+### The ambience
+
+The hero's bokeh is deliberately the boldest thing on the site, then eases back
+as the reader scrolls into the content: opacity and drift speed both fall to
+roughly a third over the first viewport. The boldness is spent where there is
+almost no text and withdrawn where there is.
+
+Under `prefers-reduced-motion` the scroll fade does not merely freeze, it never
+runs — a scroll-linked effect is itself one of the patterns that provokes
+vestibular symptoms. The ambience is painted once at its settled level and
+stays there. The hero gives up its extra boldness for those readers, which is
+the right trade.
 
 ### Two things to look at during review
 
@@ -338,21 +366,33 @@ palette that passes on paper can still fail on the page.
 `npm run check:contrast` measures both:
 
 ```
-Pass 1 — tokens against the flat page background        14 pairs, all PASS
-Pass 2 — text tokens against the darkest pixel the
-         live ambience produces anywhere on the site     4 tokens, all PASS
-         darkest backdrop found: rgb(242, 220, 229)
+Pass 1 — tokens against the flat page background     16 pairs, all PASS
+Pass 2 — every text element against the ambience
+         actually behind it                          386 elements, all PASS
 ```
 
-Pass 2 builds nothing itself — run `npm run build && npm run preview` first, in
-another shell. It screenshots the ambience with the content hidden, at three
-page/width combinations, across six drift frames each, and takes the darkest
-pixel it finds anywhere.
+**Pass 2 measures per element, and that matters.** The first version took the
+darkest pixel anywhere on the page and checked every token against it. That is
+conservative to the point of being wrong: when the hero ambience was turned up
+it failed `aqua-ink` because of a dark patch in the hero, on a page where no
+aqua-ink text is anywhere near it — and would have forced the ambience back
+down for a collision that does not exist.
+
+Now each text element is measured against the darkest ambience pixel that
+actually sits behind *it*, walking the page a screen at a time because the
+ambience is fixed and the backdrop changes as copy scrolls through. Two
+exclusions keep it honest: elements marked `aria-hidden` (a separator glyph is
+not text anyone has to make out) and elements sitting on an opaque background
+of their own (a filled badge's backdrop is the badge, not the ambience — pass 1
+covers those).
+
+It starts its own preview server if one is not already running.
 
 **Token opacity and bokeh opacity are coupled.** Making the ambience bolder
-darkens the backdrop and can push a token below 4.5:1 — that is exactly what
-happened during Stage 1, and why the orb and wash opacities are where they are.
-Re-run the gate after touching either.
+darkens the backdrop and can push a token below 4.5:1 — it happened in Stage 1,
+and again when the hero was turned up. Re-run the gate after touching either.
+The hero's copy uses full `--noor-ink` rather than the softer secondary tone
+precisely because it sits on the boldest backdrop on the site.
 
 ---
 

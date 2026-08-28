@@ -200,23 +200,26 @@
     color: var(--color-noor-rose-ink);
   }
 
+  /* Matches the primary Button: soft brand rose, ink label, deeper border
+     so the control's edge clears 3:1 against the page. */
   .form-submit {
     margin-top: 0.35rem;
     min-height: 3.25rem;
-    padding: 0.85rem 1.6rem;
-    border: 2px solid var(--color-noor-rose-ink);
+    padding: 0.85rem 1.75rem;
+    border: 1.5px solid var(--color-noor-rose-deep);
     border-radius: 999px;
-    background: var(--color-noor-rose-ink);
-    color: #fff;
+    background: var(--color-noor-rose);
+    color: var(--color-noor-ink);
     font: inherit;
     font-size: var(--text-base);
     font-weight: 600;
     cursor: pointer;
-    transition: background-color 200ms var(--ease-noor);
+    transition: background-color 200ms var(--ease-noor),
+      border-color 200ms var(--ease-noor);
   }
   .form-submit:hover {
-    background: var(--color-noor-rose-ink-hover);
-    border-color: var(--color-noor-rose-ink-hover);
+    background: color-mix(in srgb, var(--color-noor-rose) 82%, #fff);
+    border-color: var(--color-noor-rose-ink);
   }
   @media (prefers-reduced-motion: reduce) {
     .form-submit {

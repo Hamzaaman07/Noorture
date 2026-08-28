@@ -1,42 +1,22 @@
 ---
-import { Image } from 'astro:assets';
-import lockup from '../assets/noorture-lockup.png';
+import NoortureMark from './NoortureMark.astro';
 import Button from './Button.astro';
 import { CTA, CREDENTIALS } from '../consts';
 ---
 
 <section class="hero">
   <div class="hero__inner">
-    <!--
-      The logo is the hero.
+    {/*
+      The wordmark IS the hero.
 
-      §4.1 originally led with the descriptive headline, on the reasoning that
-      "Noorture" is a coined word and the old site spent three paragraphs
-      decoding it before saying what was for sale. That reasoning still holds,
-      so the tagline sits immediately under the mark at a size you cannot miss —
-      the brand leads, and the sentence that explains it is the very next thing
-      the eye lands on.
-
-      Sizing note: the supplied artwork is a 408px print file, so the lockup is
-      392px wide. It is capped below ~360px on purpose — pushed larger it goes
-      soft on the phones this audience actually uses. Vector artwork would lift
-      that cap; see README.
-    -->
-    <h1 class="hero__mark">
-      <Image
-        src={lockup}
-        alt="Noorture"
-        widths={[196, 392]}
-        sizes="(min-width: 48rem) 360px, 280px"
-        loading="eager"
-        fetchpriority="high"
-      />
+      It can be this large because it is vector — traced from the
+      high-resolution artwork by `npm run build:wordmark`. The print file it
+      replaced is 392px wide and would have been roughly four times too small
+      for this.
+    */}
+    <h1 class="hero__word">
+      <NoortureMark variant="wordmark" alt="Noorture" />
     </h1>
-
-    <p class="hero__tagline">
-      Islamic-rooted support for the{' '}
-      <span class="hero__accent">early years of parenting.</span>
-    </p>
 
     <p class="hero__subhead">
       Consultations, private classes, and support circles from a pediatric
@@ -44,8 +24,8 @@ import { CTA, CREDENTIALS } from '../consts';
     </p>
 
     <div class="hero__actions">
-      <!-- The free 15-minute call is the lowest-friction entry point in the
-           entire price list, so it sits above the fold. -->
+      {/* The free 15-minute call is the lowest-friction entry point in the
+          entire price list, so it sits above the fold. */}
       <Button href={CTA.primaryHref}>{CTA.primaryLabel}</Button>
       <Button href={CTA.secondaryHref} variant="secondary">
         {CTA.secondaryLabel}
@@ -67,53 +47,37 @@ import { CTA, CREDENTIALS } from '../consts';
 
 <style>
   .hero {
-    padding: clamp(2rem, 6vw, 4rem) clamp(1rem, 4vw, 2.5rem)
-      clamp(3.5rem, 10vw, 6rem);
-    min-height: min(88svh, 50rem);
+    padding: clamp(2.5rem, 8vw, 5rem) clamp(1rem, 4vw, 2.5rem)
+      clamp(3.5rem, 9vw, 6rem);
+    min-height: min(90svh, 52rem);
     display: flex;
     align-items: center;
   }
 
   .hero__inner {
-    max-width: 46rem;
+    width: 100%;
+    max-width: 64rem;
     margin: 0 auto;
     text-align: center;
   }
 
-  .hero__mark {
+  .hero__word {
     margin: 0 auto;
-    /* h1 carries the mark, so it must not inherit the display-serif metrics. */
+    /* An h1 carrying artwork must not inherit display-serif line metrics. */
     line-height: 0;
-  }
-
-  .hero__mark :global(img) {
-    width: 17.5rem;
-    height: auto;
-    margin-inline: auto;
-  }
-
-  .hero__tagline {
-    margin: clamp(1.5rem, 4vw, 2.25rem) auto 0;
-    max-width: 22ch;
-    font-family: var(--font-display);
-    font-size: var(--text-3xl);
-    font-weight: 500;
-    line-height: 1.14;
-    letter-spacing: -0.01em;
-    text-wrap: balance;
-  }
-
-  .hero__accent {
-    color: var(--color-noor-aqua-ink);
-    font-style: italic;
+    /* Fills most of the measure at every width, which is the point. */
+    width: min(100%, 60rem);
   }
 
   .hero__subhead {
-    margin: clamp(0.9rem, 2.5vw, 1.25rem) auto 0;
+    margin: clamp(1.75rem, 4.5vw, 2.75rem) auto 0;
     max-width: 34rem;
-    font-size: var(--text-base);
+    font-size: var(--text-lg);
     line-height: 1.55;
-    color: var(--color-noor-ink-soft);
+    /* Full ink rather than the softer secondary tone: the hero's ambience is
+       deliberately the boldest on the site, and copy sitting on it has to hold
+       its own. Verified per element by npm run check:contrast. */
+    color: var(--color-noor-ink);
   }
 
   .hero__actions {
@@ -134,26 +98,17 @@ import { CTA, CREDENTIALS } from '../consts';
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--color-noor-ink-soft);
+    color: var(--color-noor-ink);
   }
 
   .dot {
-    color: var(--color-noor-rose-deep);
+    color: var(--color-noor-rose-ink);
   }
 
   @media (min-width: 34rem) {
     .hero__actions {
       flex-direction: row;
       justify-content: center;
-    }
-  }
-
-  @media (min-width: 48rem) {
-    .hero__mark :global(img) {
-      width: 22.5rem;
-    }
-    .hero__subhead {
-      font-size: var(--text-lg);
     }
   }
 </style>

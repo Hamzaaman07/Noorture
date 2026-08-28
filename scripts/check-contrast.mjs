@@ -85,18 +85,28 @@ const FLAT = [
 for (const [use, fg, bg, kind] of FLAT) {
   row(use, T[fg], T[bg], ratio(lumOf(T[fg]), lumOf(T[bg])), need(kind));
 }
-const WHITE_ON = [
-  ['primary btn label', 'noor-rose-ink'],
-  ['primary btn hover', 'noor-rose-ink-hover'],
-  ['skip link', 'noor-ink'],
+/*
+  Buttons are a soft brand fill with an ink label, not a dark fill with white
+  type. A fill light enough to stay in the palette cannot hold white text, and
+  a fill dark enough to hold it stops looking like the palette — so the label
+  went dark instead. The trade is that the fill is then too close to the page
+  to define the control's edge, which the border covers.
+*/
+const AQUA_TINT = '#D9F2F2'; // --noor-aqua 30% over white, as the button mixes it
+const ON_FILL = [
+  ['primary btn label', T['noor-ink'], T['noor-rose'], 4.5],
+  ['secondary btn label', T['noor-ink'], AQUA_TINT, 4.5],
+  ['primary btn edge', T['noor-rose-deep'], T['noor-bg'], 3],
+  ['secondary btn edge', T['noor-aqua-deep'], T['noor-bg'], 3],
+  ['skip link', '#FFFFFF', T['noor-ink'], 4.5],
 ];
-for (const [use, fill] of WHITE_ON) {
-  row(use, '#FFFFFF', T[fill], ratio(lumOf('#FFFFFF'), lumOf(T[fill])), 4.5);
+for (const [use, fg, bg, min] of ON_FILL) {
+  row(use, fg, bg, ratio(lumOf(fg), lumOf(bg)), min);
 }
 
 /* ---------- pass 2: live, against the real ambience ---------- */
 
-console.log('\nPass 2 — text tokens against the darkest pixel of the live ambience\n');
+console.log('\nPass 2 — every text element against the ambience actually behind it\n');
 
 let chromium;
 try {
@@ -162,8 +172,20 @@ const browser = await chromium.launch(
   process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {},
 );
 
-// Every page carries the ambience, so sample the loud one (home, 'hero')
-// and a quiet one, at both a phone and a desktop width.
+/*
+  Pass 2, measured per element.
+
+  The first version of this took the darkest pixel anywhere on the page and
+  checked every token against it. That is conservative to the point of being
+  wrong: it failed `aqua-ink` because of a dark patch in the hero, on a page
+  where no aqua-ink text is anywhere near it — and it would have forced the
+  ambience back down for a collision that does not exist.
+
+  So now each text element is measured against the darkest ambience pixel that
+  actually sits behind IT. That is the number a reader experiences, and it lets
+  the hero be as bold as it likes in the large empty area around a wordmark
+  while still catching real collisions under body copy.
+*/
 const SAMPLES = [
   ['/', 1280, 900],
   ['/', 390, 844],
@@ -172,30 +194,131 @@ const SAMPLES = [
   ['/circles/womens-noorture-spring-2026/', 390, 844],
 ];
 
-let worst = { l: 2, px: null, where: null };
+const TEXT_SELECTOR =
+  'p, h1, h2, h3, h4, h5, h6, li, a, button, label, dt, dd, figcaption, blockquote, span';
+
+let worst = null;
+let measured = 0;
 
 for (const [path, width, height] of SAMPLES) {
   const ctx = await browser.newContext({ viewport: { width, height } });
   const page = await ctx.newPage();
   await page.goto(PREVIEW + path, { waitUntil: 'networkidle' });
-  // Hide the content: what is left in the shot is the backdrop alone.
-  await page.addStyleTag({
-    content: 'header,main,footer{visibility:hidden!important}',
+  await page.evaluate(() => {
+    document.documentElement.style.scrollBehavior = 'auto';
   });
-  // Let the orbs drift through several arrangements and keep the darkest.
-  for (let f = 0; f < 6; f++) {
-    await page.waitForTimeout(1100);
-    const { data, info } = await sharp(await page.screenshot())
+
+  // Walk the page a screen at a time: the ambience is fixed, so what sits
+  // behind a paragraph changes as it scrolls through the viewport.
+  const screens = await page.evaluate(
+    () => Math.ceil(document.body.scrollHeight / window.innerHeight),
+  );
+
+  for (let screen = 0; screen < Math.min(screens, 6); screen++) {
+    await page.evaluate((i) => window.scrollTo(0, i * window.innerHeight), screen);
+    await page.waitForTimeout(450);
+
+    // Text elements in view, with their own colour and box.
+    const items = await page.evaluate((sel) => {
+      const out = [];
+      for (const el of document.querySelectorAll(sel)) {
+        // Only elements that render their own text, not wrappers.
+        const own = [...el.childNodes].some(
+          (n) => n.nodeType === 3 && n.textContent.trim(),
+        );
+        if (!own) continue;
+        const r = el.getBoundingClientRect();
+        if (r.width < 4 || r.height < 4) continue;
+        if (r.bottom < 0 || r.top > window.innerHeight) continue;
+        const cs = getComputedStyle(el);
+        if (cs.visibility === 'hidden' || cs.opacity === '0') continue;
+        // Decorative by declaration — a separator glyph is not text a reader
+        // has to make out, and WCAG treats it as incidental.
+        if (el.closest('[aria-hidden="true"]')) continue;
+        // If the element sits on an opaque background of its own — a filled
+        // badge, a card, a button — then the ambience is not its backdrop and
+        // measuring against it is meaningless. Those pairs are pass 1's job.
+        let node = el;
+        let opaque = false;
+        while (node && node !== document.documentElement) {
+          const bg = getComputedStyle(node).backgroundColor;
+          const bm = bg.match(/rgba?\(([^)]+)\)/);
+          if (bm) {
+            const parts = bm[1].split(',').map((v) => parseFloat(v));
+            const alpha = parts.length > 3 ? parts[3] : 1;
+            if (alpha >= 0.95) { opaque = true; break; }
+          }
+          node = node.parentElement;
+        }
+        if (opaque) continue;
+        const m = cs.color.match(/rgba?\(([^)]+)\)/);
+        if (!m) continue;
+        const [r0, g0, b0, a0 = '1'] = m[1].split(',').map((v) => parseFloat(v));
+        if (a0 < 0.9) continue;
+        out.push({
+          color: [r0, g0, b0],
+          label: (el.textContent || '').trim().slice(0, 34),
+          x: Math.max(0, Math.floor(r.left)),
+          y: Math.max(0, Math.floor(r.top)),
+          w: Math.ceil(Math.min(r.width, window.innerWidth - r.left)),
+          h: Math.ceil(Math.min(r.height, window.innerHeight - r.top)),
+        });
+      }
+      return out;
+    }, TEXT_SELECTOR);
+
+    if (items.length === 0) continue;
+
+    // Hide the content: what is left is the backdrop each element sits on.
+    await page.addStyleTag({
+      content: 'header,main,footer{visibility:hidden!important}',
+    });
+    const shot = await page.screenshot();
+    await page.evaluate(() => {
+      const tags = document.querySelectorAll('style');
+      tags[tags.length - 1]?.remove();
+    });
+
+    const { data, info } = await sharp(shot)
       .raw()
       .toBuffer({ resolveWithObject: true });
-    for (let i = 0; i < data.length; i += info.channels * 7) {
-      const l = lum(data[i], data[i + 1], data[i + 2]);
-      if (l < worst.l) {
+
+    for (const item of items) {
+      let darkest = 2;
+      let px = null;
+      for (let y = item.y; y < Math.min(item.y + item.h, info.height); y += 2) {
+        for (let x = item.x; x < Math.min(item.x + item.w, info.width); x += 2) {
+          const i = (y * info.width + x) * info.channels;
+          const l = lum(data[i], data[i + 1], data[i + 2]);
+          if (l < darkest) {
+            darkest = l;
+            px = [data[i], data[i + 1], data[i + 2]];
+          }
+        }
+      }
+      if (!px) continue;
+      measured++;
+      const fg = lum(...item.color);
+      const r = ratio(fg, darkest);
+      if (!worst || r < worst.ratio) {
         worst = {
-          l,
-          px: [data[i], data[i + 1], data[i + 2]],
-          where: `${path} @ ${width}px`,
+          ratio: r,
+          label: item.label,
+          page: `${path} @ ${width}px`,
+          fg: item.color.map(Math.round),
+          bg: px,
         };
+      }
+      if (r < 4.5) {
+        failures++;
+        console.log(
+          '  ' +
+            'FAIL'.padEnd(6) +
+            `"${item.label}"`.padEnd(38) +
+            `rgb(${item.color.map(Math.round).join(',')}) on rgb(${px.join(',')})  ` +
+            r.toFixed(2) +
+            `   ${path} @${width}px`,
+        );
       }
     }
   }
@@ -205,15 +328,13 @@ await browser.close();
 stopPreview();
 
 console.log(
-  `  darkest backdrop found: rgb(${worst.px.join(', ')})  —  ${worst.where}\n`,
+  `  ${measured} text elements measured against the ambience actually behind them.`,
 );
-for (const name of [
-  'noor-ink',
-  'noor-ink-soft',
-  'noor-aqua-ink',
-  'noor-rose-ink',
-]) {
-  row(name.replace('noor-', ''), T[name], 'ambience', ratio(lumOf(T[name]), worst.l), 4.5);
+if (worst) {
+  console.log(
+    `  tightest: "${worst.label}" at ${worst.ratio.toFixed(2)}  ` +
+      `(rgb(${worst.fg.join(',')}) on rgb(${worst.bg.join(',')}), ${worst.page})`,
+  );
 }
 
 console.log(

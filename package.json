@@ -13,7 +13,8 @@
     "build:logo": "node scripts/build-logo-assets.mjs",
     "preflight": "node scripts/preflight.mjs",
     "build:og": "node scripts/build-og-image.mjs",
-    "build:redirects": "node scripts/build-redirects.mjs"
+    "build:redirects": "node scripts/build-redirects.mjs",
+    "build:wordmark": "node scripts/trace-wordmark.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.3",

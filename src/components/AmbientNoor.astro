@@ -22,7 +22,7 @@ interface Props {
 const { intensity = 'quiet' } = Astro.props;
 ---
 
-<div class="noor-ambience" aria-hidden="true">
+<div class="noor-ambience" data-intensity={intensity} aria-hidden="true">
   <div class="noor-wash"></div>
   <canvas class="noor-canvas" data-noor-canvas data-intensity={intensity}></canvas>
 </div>
@@ -38,9 +38,14 @@ const { intensity = 'quiet' } = Astro.props;
 
   /* Static wash. Present at all times, including reduced motion — the page
      stays beautiful when the drift stops. */
+  /*
+    The static wash. The hero page turns it up via [data-intensity=hero] on the
+    canvas beside it; every other page keeps the quieter baseline.
+  */
   .noor-wash {
     position: absolute;
     inset: 0;
+    transition: opacity 400ms var(--ease-noor);
     background:
       radial-gradient(
         68% 52% at 78% 6%,
@@ -67,6 +72,36 @@ const { intensity = 'quiet' } = Astro.props;
     height: 100%;
     display: block;
   }
+
+  /*
+    Hero pages get a bolder wash behind the fold, which then eases back as the
+    reader scrolls into the content — the boldness is spent where there is
+    almost no text (a wordmark and two buttons) and withdrawn where there is.
+    --noor-fade runs 1 -> 0 across the first viewport; the script sets it.
+  */
+  .noor-ambience[data-intensity='hero'] .noor-wash::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: var(--noor-fade, 1);
+    background:
+      radial-gradient(
+        62% 48% at 76% 4%,
+        color-mix(in srgb, var(--color-noor-aqua) 26%, transparent) 0%,
+        transparent 60%
+      ),
+      radial-gradient(
+        58% 44% at 10% 20%,
+        color-mix(in srgb, var(--color-noor-rose) 24%, transparent) 0%,
+        transparent 62%
+      );
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .noor-wash {
+      transition: none;
+    }
+  }
 </style>
 
 <script>
@@ -89,8 +124,18 @@ const { intensity = 'quiet' } = Astro.props;
     const isHero = canvas.dataset.intensity === 'hero';
     // 15–25 soft circles (spec §6). The hero gets the top of that range; every
     // other page keeps the same ambience, quieter.
-    const COUNT = isHero ? 22 : 15;
-    const PEAK_ALPHA = isHero ? 0.15 : 0.1;
+    const COUNT = isHero ? 24 : 15;
+    // The hero is deliberately more present than the rest of the site. What
+    // keeps that from fighting the copy is that it only stays bold while the
+    // reader is looking at a wordmark — see FADE_FLOOR below.
+    const PEAK_ALPHA = isHero ? 0.3 : 0.1;
+    /**
+     * Where the hero's ambience settles once scrolled past, as a fraction of
+     * its full strength. Both the opacity and the drift speed ease to this,
+     * so the background quietens AND slows as content arrives.
+     */
+    const FADE_FLOOR = 0.34;
+    const SPEED_FLOOR = 0.3;
 
     // Rose and aqua at low opacity. Read as atmosphere, never as activity.
     const TINT = { rose: '233, 163, 196', aqua: '127, 210, 212' } as const;
@@ -102,6 +147,8 @@ const { intensity = 'quiet' } = Astro.props;
     let frame = 0;
     let running = false;
     let last = 0;
+    /** 1 at the top of the page, easing to 0 one viewport down. */
+    let fade = 1;
 
     const reduced = window.matchMedia(MOTION_QUERY);
 
@@ -136,12 +183,16 @@ const { intensity = 'quiet' } = Astro.props;
 
     function paint() {
       ctx!.clearRect(0, 0, width, height);
+      // Scale every orb by the scroll fade, so the whole layer recedes
+      // together rather than individual lights blinking out.
+      const scale = isHero ? FADE_FLOOR + (1 - FADE_FLOOR) * fade : 1;
       for (const o of orbs) {
         const g = ctx!.createRadialGradient(o.x, o.y, 0, o.x, o.y, o.r);
         const tint = TINT[o.hue];
+        const a = o.alpha * scale;
         // Soft-edged: opaque centre falling to nothing well before the rim.
-        g.addColorStop(0, `rgba(${tint}, ${o.alpha})`);
-        g.addColorStop(0.45, `rgba(${tint}, ${o.alpha * 0.42})`);
+        g.addColorStop(0, `rgba(${tint}, ${a})`);
+        g.addColorStop(0.45, `rgba(${tint}, ${a * 0.42})`);
         g.addColorStop(1, `rgba(${tint}, 0)`);
         ctx!.fillStyle = g;
         ctx!.beginPath();
@@ -157,9 +208,12 @@ const { intensity = 'quiet' } = Astro.props;
       const dt = Math.min((now - last) / 1000, 0.05);
       last = now;
 
+      // Slow with the fade: past the hero the drift is a third of its speed,
+      // so the ambience reads as settling rather than simply dimming.
+      const speed = isHero ? SPEED_FLOOR + (1 - SPEED_FLOOR) * fade : 1;
       for (const o of orbs) {
-        o.x += o.vx * dt;
-        o.y += o.vy * dt;
+        o.x += o.vx * dt * speed;
+        o.y += o.vy * dt * speed;
         // Wrap with a full-radius margin so nothing pops at the edge.
         if (o.x - o.r > width) o.x = -o.r;
         if (o.x + o.r < 0) o.x = width + o.r;
@@ -201,6 +255,57 @@ const { intensity = 'quiet' } = Astro.props;
 
     rebuild();
 
+    /*
+      Scroll fade. rAF-throttled and passive, and it writes one custom property
+      plus one number — no layout is read beyond scrollY, so it cannot become a
+      scroll jank source on the phones this site is built for.
+    */
+    const ambience = canvas.parentElement as HTMLElement | null;
+    let fadeTicking = false;
+
+    function readFade() {
+      const span = Math.max(1, window.innerHeight * 0.85);
+      const next = Math.max(0, Math.min(1, 1 - window.scrollY / span));
+      if (Math.abs(next - fade) < 0.005) return;
+      fade = next;
+      ambience?.style.setProperty('--noor-fade', fade.toFixed(3));
+      // Repaint immediately when the drift is frozen, or the fade would only
+      // apply on the next resize.
+      if (!running) paint();
+    }
+
+    const onFadeScroll = () => {
+      if (fadeTicking) return;
+      fadeTicking = true;
+      requestAnimationFrame(() => {
+        fadeTicking = false;
+        readFade();
+      });
+    };
+
+    /**
+     * The scroll fade is itself motion — it is scroll-linked, which is one of
+     * the patterns that actually provokes vestibular symptoms. So under
+     * reduced motion it is not merely frozen, it never runs: the ambience is
+     * painted once at its settled level and stays there, whatever the reader
+     * scrolls past. The hero gives up its extra boldness for those readers,
+     * which is the correct trade — they asked for less.
+     */
+    function applyFadeMode() {
+      if (!isHero) return;
+      if (reduced.matches) {
+        window.removeEventListener('scroll', onFadeScroll);
+        fade = 0;
+        ambience?.style.setProperty('--noor-fade', '0');
+        paint();
+      } else {
+        window.addEventListener('scroll', onFadeScroll, { passive: true });
+        readFade();
+      }
+    }
+
+    applyFadeMode();
+
     // Only react to a real width change: mobile browsers fire resize on every
     // address-bar collapse, and reseeding on scroll would be visible.
     let lastWidth = window.innerWidth;
@@ -223,7 +328,10 @@ const { intensity = 'quiet' } = Astro.props;
     });
 
     // Honour the setting being changed live, without a reload.
-    reduced.addEventListener('change', apply);
+    reduced.addEventListener('change', () => {
+      apply();
+      applyFadeMode();
+    });
   }
 
   document

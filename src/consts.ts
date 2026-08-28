@@ -16,7 +16,7 @@ export const CTA = {
   /** The persistent CTA. Spec §3 — wording is fixed, do not paraphrase. */
   primaryLabel: 'Book a free 15-minute call',
   primaryHref: '/consultations#book',
-  secondaryLabel: 'Explore the Circles',
+  secondaryLabel: 'Explore Circles',
   secondaryHref: '/circles',
 } as const;
 

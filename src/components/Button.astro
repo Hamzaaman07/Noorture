@@ -1,8 +1,18 @@
 ---
 /**
- * The site's two button styles. Both meet AA at their final values:
- *   primary   — white on --noor-rose-ink (#9F5B74)   4.97:1
- *   secondary — --noor-aqua-ink on --noor-bg         4.64:1, aqua-deep border
+ * The site's two button styles.
+ *
+ * Both are filled with a real brand colour and carry ink-coloured labels,
+ * rather than the deep mauve with white text this started as — that fill had
+ * to be dark enough to hold white type, which pulled it away from the palette
+ * and made it the heaviest thing on a page built out of pastels.
+ *
+ * Contrast at these values:
+ *   primary   — ink on --noor-rose  4.78:1   (AA text)
+ *   secondary — ink on the aqua tint  8.4:1  (AA text)
+ * A soft fill sits at only 1.9:1 against the page, which is below the 3:1 that
+ * WCAG asks of a control's boundary, so each carries a deeper border in its own
+ * hue to make the edge of the button unambiguous.
  */
 interface Props {
   href: string;
@@ -24,7 +34,7 @@ const { href, variant = 'primary', class: className = '' } = Astro.props;
     gap: 0.5rem;
     /* Comfortably past the 44px touch target — she is holding a baby. */
     min-height: 3.25rem;
-    padding: 0.85rem 1.6rem;
+    padding: 0.85rem 1.75rem;
     border-radius: 999px;
     font-family: var(--font-body);
     font-size: var(--text-base);
@@ -32,35 +42,31 @@ const { href, variant = 'primary', class: className = '' } = Astro.props;
     line-height: 1.25;
     text-align: center;
     text-decoration: none;
-    border: 2px solid transparent;
+    color: var(--color-noor-ink);
+    border: 1.5px solid transparent;
     transition:
-      background-color 200ms var(--ease-noor),
-      border-color 200ms var(--ease-noor),
-      color 200ms var(--ease-noor),
-      transform 200ms var(--ease-noor);
+      background-color 220ms var(--ease-noor),
+      border-color 220ms var(--ease-noor),
+      transform 220ms var(--ease-noor);
   }
 
   .btn--primary {
-    background-color: var(--color-noor-rose-ink);
-    border-color: var(--color-noor-rose-ink);
-    color: #fff;
-    box-shadow: 0 1px 2px rgba(44, 74, 78, 0.14);
+    background-color: var(--color-noor-rose);
+    border-color: var(--color-noor-rose-deep);
   }
   .btn--primary:hover {
-    background-color: var(--color-noor-rose-ink-hover);
-    border-color: var(--color-noor-rose-ink-hover);
+    background-color: color-mix(in srgb, var(--color-noor-rose) 82%, #fff);
+    border-color: var(--color-noor-rose-ink);
     transform: translateY(-1px);
   }
 
   .btn--secondary {
-    background-color: color-mix(in srgb, #fff 62%, transparent);
+    background-color: color-mix(in srgb, var(--color-noor-aqua) 30%, #fff);
     border-color: var(--color-noor-aqua-deep);
-    color: var(--color-noor-aqua-ink);
   }
   .btn--secondary:hover {
-    background-color: #fff;
+    background-color: color-mix(in srgb, var(--color-noor-aqua) 46%, #fff);
     border-color: var(--color-noor-aqua-ink);
-    color: var(--color-noor-aqua-ink-hover);
     transform: translateY(-1px);
   }
 
