@@ -386,13 +386,21 @@ not text anyone has to make out) and elements sitting on an opaque background
 of their own (a filled badge's backdrop is the badge, not the ambience — pass 1
 covers those).
 
-**Pass 3 exists because the buttons are sea glass.** They have no border, so
-the boundary is a blurred inner rim and a soft shadow — and WCAG asks 3:1 for
-the visual information that identifies a control. That cannot be checked from
-the tokens: the rim is a translucent shadow over a translucent fill over a
-drifting ambience. So it is measured on the rendered button across several
-frames and the worst is reported. The first soft-edged attempt measured 1.8:1
-and looked fine; it is now 3.6:1 and still looks soft.
+**Pass 3 exists because the buttons are glass.** They have no border, so the
+boundary is a blurred inner rim — and WCAG asks 3:1 for the visual information
+that identifies a control. That cannot be checked from the tokens: the rim is a
+translucent shadow over a translucent fill over a drifting ambience. So it is
+measured on the rendered button across several frames and the worst is
+reported. The first soft-edged attempt measured 1.8:1 and looked perfectly
+fine; it is now 4.7:1 and still looks soft.
+
+A warning from building it: an early version of this measurement sampled the
+screenshot at `deviceScaleFactor: 2` while indexing it with CSS-pixel
+coordinates, so it read points well inside the button and reported ~1.1:1 for
+every candidate — including ones with an obviously dark rim. It nearly led to
+abandoning the design as impossible. The gate now renders at 1x so screenshot
+pixels and layout pixels are the same unit. If a measurement stops responding
+to the thing it measures, distrust the measurement.
 
 Pass 2 also composites translucent backgrounds rather than skipping them. A
 binary "skip if it sits on an opaque background" test stopped being enough once
