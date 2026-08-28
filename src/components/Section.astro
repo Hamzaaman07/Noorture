@@ -38,17 +38,14 @@ const {
 
 <style>
   .section {
-    padding-block: clamp(4rem, 10vw, 7rem);
+    padding-block: clamp(3rem, 8vw, 5.5rem);
   }
 
-  /*
-    A near-neutral tint, not a mint one. Alternating pink and green washes made
-    the page oscillate between two candy colours; a single warm grey lets the
-    brand colour mean something when it does appear.
-  */
+  /* The tint sits over the ambience, so it is translucent rather than solid —
+     the drift still reads through it. */
   .section--tint {
-    background: color-mix(in srgb, var(--color-noor-bg-alt) 70%, transparent);
-    border-block: 1px solid var(--color-noor-line);
+    background: color-mix(in srgb, var(--color-noor-bg-alt) 72%, transparent);
+    border-block: 1px solid var(--color-noor-line-alt);
   }
 
   .section__inner {

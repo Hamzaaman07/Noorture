@@ -67,52 +67,6 @@ BLOCKER: _redirects has no rules — every Podia URL in circulation must be inve
 
 ---
 
-## The restraint pass
-
-The client's note was that the site looked "childish" and "not professional".
-That is a fair reading of what was there, and the fix was not a better pastel —
-it was to stop letting decoration do the work that hierarchy and typography
-should do.
-
-What was actually wrong, in rough order of damage:
-
-| Symptom | Why it read as childish |
-|---|---|
-| Pastel wash on every surface | Nothing was neutral, so nothing could be emphasis. A page where everything is tinted has no accent |
-| Alternating pink and mint section tints | Reads as a children's worksheet. Sections now alternate against one warm neutral (`--noor-bg-alt`, mint `#EFF6F6` → `#F3F0EF`) |
-| Pale candy wordmark at hero scale | The light brand pair is lovely on a 40px logo and looks like bubblegum at 700px. The hero wordmark is now ink with a single rose `O` |
-| Pastel pills, then glass pills | Two attempts at making the *button* the pretty thing. Both read as toys next to a clinician's credentials |
-| Coloured tabs on cards, lift shadows | Decoration standing in for structure |
-
-What replaced it:
-
-- **Buttons are structural, not decorative.** A solid ink primary with white
-  type, and a quiet outlined secondary. Radii dropped from a 999px pill to
-  `--radius-md` (0.75rem). This also dissolved a constraint the gate had been
-  fighting for two rounds: with a dark fill, label contrast is 9.6:1 and the
-  boundary 8.8:1, where no pastel fill could satisfy both at once.
-- **A radius scale** (`--radius-sm/md/lg/pill`) instead of per-component
-  guesses, so nothing is accidentally rounder than the thing next to it.
-- **Surfaces went flat.** `--noor-surface` (white) and `--noor-tint`, hairline
-  borders, no lift shadows, no coloured top tabs. Cards are told apart by their
-  edge, not by their colour.
-- **Testimonials are upright, not italic**, left-aligned, introduced by a rule
-  rather than oversized quote marks. Italic body copy at length is harder to
-  read and reads as sentiment; these are clinical outcomes.
-- **The ambience was cut by roughly two-thirds** (see above).
-- **`ProofStrip.astro` deleted** — it repeated the hero's credential line
-  verbatim.
-
-Colour did not leave the site; it stopped being the site. Rose and aqua now
-appear as accents — the wordmark's `O`, links, the featured tier — against a
-neutral page, which is what makes them read as choices.
-
-Everything here passed the same gates as before it: three contrast passes green
-(tightest text 5.19:1, tightest control boundary 3.83:1), 13 pages clean on the
-keyboard and reduced-motion sweep at 360px and 1280px, `astro check` clean.
-
----
-
 ## Stage 3 — Supporting pages, complete except the form handler
 
 Every page in the §3 sitemap exists for real. `/about` now carries both
@@ -207,7 +161,7 @@ cohort template are all real; the supporting pages are still stubs.
 
 | Stage 2 requirement | State |
 |---|---|
-| Home, complete — positioning block, three product cards, proof strip, gift band | Done. The proof strip was later folded into the hero — see *The restraint pass* |
+| Home, complete — positioning block, three product cards, proof strip, gift band | Done |
 | `/consultations` — full copy, three tiers, provisional scope-of-practice language | Done, marked on the page |
 | `/private-class` — full copy, topic list with room for more | Done |
 | `/circles` — index with all four cohort states | Done |
@@ -313,15 +267,10 @@ image. If the original vector ever turns up, re-run the tracer against it.
 
 ### The ambience
 
-The hero's bokeh is the boldest ambience on the site, then eases back as the
-reader scrolls into the content: opacity and drift speed both fall to roughly a
-third over the first viewport. The boldness is spent where there is almost no
-text and withdrawn where there is.
-
-It is quieter than it was. The restraint pass below cut peak orb alpha from
-0.30 to 0.11 in the hero and 0.10 to 0.055 elsewhere, and roughly halved the
-static wash. The bokeh still reads as movement in the hero; it no longer reads
-as wallpaper on a page of text.
+The hero's bokeh is deliberately the boldest thing on the site, then eases back
+as the reader scrolls into the content: opacity and drift speed both fall to
+roughly a third over the first viewport. The boldness is spent where there is
+almost no text and withdrawn where there is.
 
 Under `prefers-reduced-motion` the scroll fade does not merely freeze, it never
 runs — a scroll-linked effect is itself one of the patterns that provokes
@@ -335,11 +284,8 @@ the right trade.
    Practitioner · IBCLC Lactation Consultant · UCLA MSN`) is one line beyond the
    literal Stage 1 list — §4.1 places the proof strip further down the home
    page. It is here because §1 says a visitor has to know within seconds that
-   this is a licensed clinician, and the hero is where those seconds are. It is
-   now the *only* place those credentials appear: the separate proof strip
-   further down the home page said the same four things in the same order, and
-   repeating a claim within one scroll weakens it rather than reinforcing it.
-   `ProofStrip.astro` was deleted rather than reworded.
+   this is a licensed clinician, and the hero is where those seconds are. Easy
+   to remove if you'd rather hold it for Stage 2.
 
 2. **Remaining nav routes resolve to marked placeholders** rather than 404s, so
    the nav is walkable on a phone. Each says which stage builds it. `/about`,
@@ -408,17 +354,9 @@ colour carries a label or small text:
 
 | Token | Value | Role |
 |---|---|---|
-| `--noor-aqua-ink` | `#2B6C70` | links, focus ring |
-| `--noor-rose-ink` | `#8D5167` | rose-coloured labels and small print |
+| `--noor-aqua-ink` | `#2B6C70` | links, secondary CTA label, focus ring |
+| `--noor-rose-ink` | `#8D5167` | primary button fill, the wordmark's `OO` |
 | `--noor-ink-soft` | `#496567` | secondary copy |
-| `--noor-edge` | `#6D8083` | the outline of a ghost control — see below |
-
-`--noor-edge` is not a fourth brand colour, it is ink at 60% over the page. It
-exists because a hairline and a control boundary are different jobs:
-`--noor-line` at 1.2:1 is right for a divider between sections and wrong for
-the outline of a button, which WCAG 1.4.11 asks to reach 3:1. Using one token
-for both was how the secondary button shipped for a while with an edge nobody
-could see.
 
 **These are set against the ambience, not against the background.** The bokeh
 layer sits behind every page, so the real backdrop under a line of text is
@@ -448,12 +386,13 @@ not text anyone has to make out) and elements sitting on an opaque background
 of their own (a filled badge's backdrop is the badge, not the ambience — pass 1
 covers those).
 
-**Pass 3 measures control boundaries on the rendered button.** WCAG asks 3:1
-for the visual information that identifies a control, and for a button sitting
-on a drifting ambience that cannot be settled from the tokens alone — so it is
-measured on the real element across several frames and the worst frame is
-reported. It survived the buttons being redesigned twice, and caught the
-invisible ghost-button outline described above.
+**Pass 3 exists because the buttons are glass.** They have no border, so the
+boundary is a blurred inner rim — and WCAG asks 3:1 for the visual information
+that identifies a control. That cannot be checked from the tokens: the rim is a
+translucent shadow over a translucent fill over a drifting ambience. So it is
+measured on the rendered button across several frames and the worst is
+reported. The first soft-edged attempt measured 1.8:1 and looked perfectly
+fine; it is now 4.7:1 and still looks soft.
 
 A warning from building it: an early version of this measurement sampled the
 screenshot at `deviceScaleFactor: 2` while indexing it with CSS-pixel
@@ -464,10 +403,10 @@ pixels and layout pixels are the same unit. If a measurement stops responding
 to the thing it measures, distrust the measurement.
 
 Pass 2 also composites translucent backgrounds rather than skipping them. A
-binary "skip if it sits on an opaque background" test is not enough: an element
-on a partly transparent surface is neither opaque (so not skippable) nor absent
-(so measuring the ambience alone would ignore the surface entirely and report a
-contrast no reader experiences).
+binary "skip if it sits on an opaque background" test stopped being enough once
+the buttons became glass: at 0.9 alpha they are neither opaque (so not
+skippable) nor absent (so measuring the ambience alone would ignore the pink
+entirely and report a contrast no reader experiences).
 
 It starts its own preview server if one is not already running.
 
