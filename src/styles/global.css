@@ -65,6 +65,9 @@
   --color-noor-bg-alt: #eff6f6;
 
   /* --- AA-safe text/label siblings (derived, see note above) --- */
+  /* Brighter, more saturated than --noor-rose, for the sea-glass buttons.
+     Holds 4.71:1 with an ink label. */
+  --color-noor-rose-bright: #f29cc6;
   --color-noor-rose-ink: #8d5167;
   --color-noor-rose-ink-hover: #744254;
   --color-noor-aqua-ink: #2b6c70;
@@ -200,26 +203,49 @@
     color: var(--color-noor-rose-ink);
   }
 
-  /* Matches the primary Button: soft brand rose, ink label, deeper border
-     so the control's edge clears 3:1 against the page. */
+  /* Same sea glass as the primary Button — see Button.astro for why the edge
+     is a rim and a shadow rather than a stroke. */
   .form-submit {
     margin-top: 0.35rem;
     min-height: 3.25rem;
-    padding: 0.85rem 1.75rem;
-    border: 1.5px solid var(--color-noor-rose-deep);
+    padding: 0.9rem 1.9rem;
+    border: 0;
     border-radius: 999px;
-    background: var(--color-noor-rose);
+    background-image: linear-gradient(
+      160deg,
+      rgba(255, 255, 255, 0.42) 0%,
+      rgba(255, 255, 255, 0.1) 46%,
+      rgba(255, 255, 255, 0.16) 100%
+    );
+    background-color: color-mix(
+      in srgb,
+      var(--color-noor-rose-bright) 90%,
+      transparent
+    );
     color: var(--color-noor-ink);
     font: inherit;
     font-size: var(--text-base);
     font-weight: 600;
     cursor: pointer;
+    backdrop-filter: blur(10px) saturate(1.35);
+    -webkit-backdrop-filter: blur(10px) saturate(1.35);
+    box-shadow:
+      inset 0 6px 14px -6px rgba(255, 255, 255, 0.9),
+      inset 0 0 4px 1px rgba(120, 42, 78, 0.86),
+      inset 0 -12px 18px -12px rgba(150, 62, 100, 0.5),
+      0 2px 10px -4px rgba(180, 84, 128, 0.3),
+      0 14px 28px -18px rgba(180, 84, 128, 0.55);
     transition: background-color 200ms var(--ease-noor),
-      border-color 200ms var(--ease-noor);
+      box-shadow 200ms var(--ease-noor);
   }
   .form-submit:hover {
-    background: color-mix(in srgb, var(--color-noor-rose) 82%, #fff);
-    border-color: var(--color-noor-rose-ink);
+    background-color: var(--color-noor-rose-bright);
+    box-shadow:
+      inset 0 6px 14px -6px rgba(255, 255, 255, 1),
+      inset 0 0 4px 1px rgba(120, 42, 78, 0.9),
+      inset 0 -12px 18px -12px rgba(150, 62, 100, 0.55),
+      0 3px 12px -4px rgba(180, 84, 128, 0.36),
+      0 18px 34px -18px rgba(180, 84, 128, 0.6);
   }
   @media (prefers-reduced-motion: reduce) {
     .form-submit {
