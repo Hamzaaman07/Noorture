@@ -3,7 +3,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
 import Section from '../components/Section.astro';
 import ProductCard from '../components/ProductCard.astro';
-import ProofStrip from '../components/ProofStrip.astro';
 import GiftBand from '../components/GiftBand.astro';
 import Testimonial from '../components/Testimonial.astro';
 import { CIRCLE_TESTIMONIALS } from '../data/testimonials';
@@ -75,10 +74,9 @@ const pulls = [CIRCLE_TESTIMONIALS[1], CIRCLE_TESTIMONIALS[2]];
   </Section>
 
   <Section tint labelledby="proof-heading">
-    <h2 id="proof-heading" class="visually-hidden">
-      Credentials and what caregivers say
-    </h2>
-    <ProofStrip />
+    {/* The credential line lives in the hero, where §1 says a visitor has to
+        read it within seconds. Repeating it here verbatim added nothing. */}
+    <h2 id="proof-heading" class="visually-hidden">What caregivers say</h2>
 
     <div class="pulls">
       {pulls.map((t) => <Testimonial {...t} />)}

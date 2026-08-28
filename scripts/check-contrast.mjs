@@ -80,22 +80,26 @@ const FLAT = [
   ['rose label', 'noor-rose-ink', 'noor-bg', 'text'],
   ['rose label on tint', 'noor-rose-ink', 'noor-bg-alt', 'text'],
   ['focus ring', 'noor-aqua-ink', 'noor-bg', 'ui'],
-  ['secondary btn border', 'noor-aqua-deep', 'noor-bg', 'ui'],
+  ['secondary btn border', 'noor-edge', 'noor-bg', 'ui'],
 ];
 for (const [use, fg, bg, kind] of FLAT) {
   row(use, T[fg], T[bg], ratio(lumOf(T[fg]), lumOf(T[bg])), need(kind));
 }
 /*
-  Buttons are a soft brand fill with an ink label, not a dark fill with white
-  type. A fill light enough to stay in the palette cannot hold white text, and
-  a fill dark enough to hold it stops looking like the palette — so the label
-  went dark instead. The trade is that the fill is then too close to the page
-  to define the control's edge, which the border covers.
+  The buttons went through pastel fills and then glass before landing here, and
+  both earlier versions fought this gate: a fill light enough to stay in the
+  brand pastels cannot hold white text, and a fill dark enough to hold it stops
+  reading as a pastel. Ink-filled primary, outlined secondary — the constraint
+  disappears rather than being negotiated with.
+
+  The secondary carries no fill at all, so its label is measured against the
+  page and its edge is --noor-edge, which exists because a hairline good enough
+  for a divider (1.2:1) is not good enough for the boundary of a control (3:1,
+  WCAG 1.4.11).
 */
-const AQUA_TINT = '#D9F2F2'; // --noor-aqua 30% over white, as the button mixes it
 const ON_FILL = [
-  ['primary btn label', T['noor-ink'], T['noor-rose'], 4.5],
-  ['secondary btn label', T['noor-ink'], AQUA_TINT, 4.5],
+  ['primary btn label', '#FFFFFF', T['noor-ink'], 4.5],
+  ['secondary btn label', T['noor-ink'], T['noor-bg'], 4.5],
   ['skip link', '#FFFFFF', T['noor-ink'], 4.5],
 ];
 for (const [use, fg, bg, min] of ON_FILL) {

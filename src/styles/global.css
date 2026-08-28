@@ -62,12 +62,9 @@
   --color-noor-aqua-deep: #3f9ca3;
   --color-noor-ink: #2c4a4e;
   --color-noor-bg: #faf6f5;
-  --color-noor-bg-alt: #eff6f6;
+  --color-noor-bg-alt: #f3f0ef;
 
   /* --- AA-safe text/label siblings (derived, see note above) --- */
-  /* Brighter, more saturated than --noor-rose. The buttons are translucent
-     glass, so this is a tint the page shows through rather than a fill. */
-  --color-noor-rose-bright: #ee80b4;
   --color-noor-rose-ink: #8d5167;
   --color-noor-rose-ink-hover: #744254;
   --color-noor-aqua-ink: #2b6c70;
@@ -75,8 +72,19 @@
 
   /* --- supporting neutrals --- */
   --color-noor-ink-soft: #496567; /* secondary copy */
-  --color-noor-line: #e2d9d8; /* hairlines on bg */
-  --color-noor-line-alt: #d5e4e4; /* hairlines on bg-alt */
+  --color-noor-line: #e5dedd; /* hairlines on bg */
+  --color-noor-line-alt: #dde5e5; /* hairlines on bg-alt */
+  /* Surfaces are near-neutral. Brand colour is punctuation, not wallpaper —
+     which is what separates a clinical practice from a nursery. */
+  --color-noor-surface: #ffffff;
+  --color-noor-tint: #f4f1f0;
+  /*
+    Hairlines separate; a CONTROL's edge has to be seen. --noor-line at 1.2:1
+    is right for a divider and wrong for the outline of a ghost button, which
+    WCAG asks to reach 3:1. This is ink at 60% over the page — quiet, but
+    actually visible.
+  */
+  --color-noor-edge: #6d8083;
 
   /* --- type --- */
   --font-display: "Amiri Salawat", "Cormorant Garamond Variable",
@@ -96,6 +104,14 @@
   --text-2xl: clamp(1.625rem, 1.45rem + 0.8vw, 2.125rem);
   --text-3xl: clamp(2rem, 1.6rem + 1.8vw, 3rem);
   --text-4xl: clamp(2.375rem, 1.75rem + 2.9vw, 4.25rem);
+
+  /* --- geometry ---
+     Pills everywhere read casual. A tight, consistent radius scale reads
+     considered; the pill is kept for small chips and badges only. */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-pill: 999px;
 
   /* --- motion --- */
   --ease-noor: cubic-bezier(0.22, 0.61, 0.36, 1);
@@ -203,54 +219,24 @@
     color: var(--color-noor-rose-ink);
   }
 
-  /* Same glass as the primary Button — see Button.astro for why the edge is a
-     blurred rim rather than a stroke. */
+  /* Matches the primary Button. */
   .form-submit {
     margin-top: 0.35rem;
-    min-height: 3.25rem;
-    padding: 0.9rem 1.9rem;
-    border: 0;
-    border-radius: 999px;
-    background-image: linear-gradient(
-      152deg,
-      rgba(255, 255, 255, 0.55) 0%,
-      rgba(255, 255, 255, 0.04) 52%,
-      rgba(255, 255, 255, 0.16) 100%
-    );
-    background-color: color-mix(
-      in srgb,
-      var(--color-noor-rose-bright) 48%,
-      transparent
-    );
-    color: var(--color-noor-ink);
+    min-height: 3.125rem;
+    padding: 0.85rem 1.6rem;
+    border: 1px solid var(--color-noor-ink);
+    border-radius: var(--radius-md);
+    background: var(--color-noor-ink);
+    color: #fff;
     font: inherit;
-    font-size: var(--text-base);
+    font-size: var(--text-sm);
     font-weight: 600;
     cursor: pointer;
-    backdrop-filter: blur(20px) saturate(1.85);
-    -webkit-backdrop-filter: blur(20px) saturate(1.85);
-    box-shadow:
-      inset 0 1.5px 0 rgba(255, 255, 255, 0.95),
-      inset 0 0 5px 1.5px rgba(104, 32, 70, 0.9),
-      inset 0 -18px 26px -20px rgba(140, 52, 92, 0.35),
-      0 1.5px 2px rgba(44, 74, 78, 0.32),
-      0 12px 26px -12px rgba(44, 74, 78, 0.22);
-    transition:
-      background-color 200ms var(--ease-noor),
-      box-shadow 200ms var(--ease-noor);
+    transition: background-color 200ms var(--ease-noor);
   }
   .form-submit:hover {
-    background-color: color-mix(
-      in srgb,
-      var(--color-noor-rose-bright) 62%,
-      transparent
-    );
-    box-shadow:
-      inset 0 1.5px 0 rgba(255, 255, 255, 1),
-      inset 0 0 5px 1.5px rgba(104, 32, 70, 0.95),
-      inset 0 -18px 26px -20px rgba(140, 52, 92, 0.4),
-      0 2px 3px rgba(44, 74, 78, 0.34),
-      0 16px 32px -12px rgba(44, 74, 78, 0.26);
+    background: #1d3639;
+    border-color: #1d3639;
   }
   @media (prefers-reduced-motion: reduce) {
     .form-submit {
@@ -261,7 +247,7 @@
   .form-status {
     margin: 0;
     padding: 0.9rem 1rem;
-    border-radius: 0.75rem;
+    border-radius: var(--radius-sm);
     background: color-mix(in srgb, var(--color-noor-bg-alt) 90%, transparent);
     border: 1px solid var(--color-noor-line-alt);
     font-size: var(--text-sm);

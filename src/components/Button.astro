@@ -1,27 +1,15 @@
 ---
 /**
- * Glass buttons.
+ * Two buttons: a solid ink primary and a quiet outlined secondary.
  *
- * Genuinely translucent: the tint is roughly half opacity and the ambience
- * drifts visibly through it, blurred by the backdrop filter. An earlier pass
- * sat at 0.9 alpha, which is not glass — it is a coloured pill with a
- * highlight painted on, and it read as candy.
+ * Earlier versions were pastel pills — first candy-coloured, then glass. Both
+ * read as toys next to the rest of a clinician's site. The fix was not a better
+ * pastel: it was to stop making the button the decorative element. A deep ink
+ * fill anchors the page, gives the eye somewhere definite to land, and lets the
+ * rose and aqua go back to being accents.
  *
- * Three things do the work:
- *   - a low-alpha tint over `backdrop-filter`, so the background is seen
- *     THROUGH the button rather than covered by it
- *   - a bright catch along the top edge, where light meets the surface
- *   - a soft inner rim, which is where glass looks thickest — and which is
- *     also what makes the control's boundary perceivable
- *
- * That last point is not decorative. Translucent glass on a near-white page
- * has almost no luminance difference from the page, so without the rim the
- * button's edge measures about 1.7:1 where WCAG asks 3:1 for the visual
- * information identifying a control. Blurred over 5px it reads as shading
- * rather than a stroke, and measures 4.5:1. Pass 3 of
- * scripts/check-contrast.mjs measures it on the rendered button, because none
- * of this is predictable from the tokens: it is a translucent shadow over a
- * translucent fill over a drifting ambience.
+ * Contrast is no longer a constraint fought against — white on ink is 9.6:1 and
+ * the boundary is the fill itself at 8.9:1 against the page.
  */
 interface Props {
   href: string;
@@ -42,98 +30,48 @@ const { href, variant = 'primary', class: className = '' } = Astro.props;
     justify-content: center;
     gap: 0.5rem;
     /* Comfortably past the 44px touch target — she is holding a baby. */
-    min-height: 3.25rem;
-    padding: 0.9rem 1.9rem;
-    border: 0;
-    border-radius: 999px;
+    min-height: 3.125rem;
+    padding: 0.85rem 1.6rem;
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
     font-family: var(--font-body);
-    font-size: var(--text-base);
+    font-size: var(--text-sm);
     font-weight: 600;
+    letter-spacing: 0.005em;
     line-height: 1.25;
     text-align: center;
     text-decoration: none;
-    color: var(--color-noor-ink);
-    /* The light falling across the face of the glass. */
-    background-image: linear-gradient(
-      152deg,
-      rgba(255, 255, 255, 0.55) 0%,
-      rgba(255, 255, 255, 0.04) 52%,
-      rgba(255, 255, 255, 0.16) 100%
-    );
-    backdrop-filter: blur(20px) saturate(1.85);
-    -webkit-backdrop-filter: blur(20px) saturate(1.85);
     transition:
-      background-color 240ms var(--ease-noor),
-      box-shadow 240ms var(--ease-noor),
-      transform 240ms var(--ease-noor);
+      background-color 200ms var(--ease-noor),
+      border-color 200ms var(--ease-noor),
+      color 200ms var(--ease-noor);
   }
 
   .btn--primary {
-    background-color: color-mix(
-      in srgb,
-      var(--color-noor-rose-bright) 48%,
-      transparent
-    );
-    box-shadow:
-      inset 0 1.5px 0 rgba(255, 255, 255, 0.95),
-      inset 0 0 5px 1.5px rgba(104, 32, 70, 0.9),
-      inset 0 -18px 26px -20px rgba(140, 52, 92, 0.35),
-      0 1.5px 2px rgba(44, 74, 78, 0.32),
-      0 12px 26px -12px rgba(44, 74, 78, 0.22);
+    background-color: var(--color-noor-ink);
+    border-color: var(--color-noor-ink);
+    color: #fff;
   }
   .btn--primary:hover {
-    background-color: color-mix(
-      in srgb,
-      var(--color-noor-rose-bright) 62%,
-      transparent
-    );
-    transform: translateY(-1px);
-    box-shadow:
-      inset 0 1.5px 0 rgba(255, 255, 255, 1),
-      inset 0 0 5px 1.5px rgba(104, 32, 70, 0.95),
-      inset 0 -18px 26px -20px rgba(140, 52, 92, 0.4),
-      0 2px 3px rgba(44, 74, 78, 0.34),
-      0 16px 32px -12px rgba(44, 74, 78, 0.26);
+    background-color: #1d3639;
+    border-color: #1d3639;
   }
 
+  /* --noor-edge, not --noor-line: a divider hairline is far too faint to be a
+     control's boundary. See the note on the token. */
   .btn--secondary {
-    background-color: color-mix(
-      in srgb,
-      var(--color-noor-aqua) 46%,
-      transparent
-    );
-    box-shadow:
-      inset 0 1.5px 0 rgba(255, 255, 255, 0.95),
-      inset 0 0 5px 1.5px rgba(10, 62, 66, 0.85),
-      inset 0 -18px 26px -20px rgba(20, 80, 84, 0.32),
-      0 1.5px 2px rgba(44, 74, 78, 0.32),
-      0 12px 26px -12px rgba(44, 74, 78, 0.22);
+    background-color: transparent;
+    border-color: var(--color-noor-edge);
+    color: var(--color-noor-ink);
   }
   .btn--secondary:hover {
-    background-color: color-mix(
-      in srgb,
-      var(--color-noor-aqua) 60%,
-      transparent
-    );
-    transform: translateY(-1px);
-    box-shadow:
-      inset 0 1.5px 0 rgba(255, 255, 255, 1),
-      inset 0 0 5px 1.5px rgba(10, 62, 66, 0.9),
-      inset 0 -18px 26px -20px rgba(20, 80, 84, 0.38),
-      0 2px 3px rgba(44, 74, 78, 0.34),
-      0 16px 32px -12px rgba(44, 74, 78, 0.26);
-  }
-
-  .btn:active {
-    transform: translateY(0);
+    border-color: var(--color-noor-ink);
+    background-color: color-mix(in srgb, var(--color-noor-ink) 4%, transparent);
   }
 
   @media (prefers-reduced-motion: reduce) {
     .btn {
       transition: none;
-    }
-    .btn:hover {
-      transform: none;
     }
   }
 </style>
