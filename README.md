@@ -11,15 +11,16 @@ refer to that document.
 
 ---
 
-## Status: Stage 3 — Supporting pages, built (two items blocked on the client)
+## Status: Stage 3 — Supporting pages, complete except the form handler
 
-Every page in the §3 sitemap now exists for real; there are no placeholder
-pages left. Two Stage 3 requirements cannot be finished by anyone building this
-site, and are called out below rather than quietly marked done.
+Every page in the §3 sitemap exists for real. `/about` now carries both
+client-approved passages and Hoda's portrait. One Stage 3 requirement remains
+genuinely blocked — the form handler — and is called out rather than quietly
+marked done.
 
 | Stage 3 requirement | State |
 |---|---|
-| `/about` — both approved passages verbatim, photo, Instagram and LinkedIn | **Blocked** — neither passage nor the photo is in the spec; see below |
+| `/about` — both approved passages verbatim, photo, Instagram and LinkedIn | Done. Both passages supplied and rendered verbatim; portrait in place |
 | `/reviews` — approved opening, all testimonials, optional name/location | Built. Opening verbatim, five Circle quotes. The three general quotes are not in the spec, so that section stays hidden rather than invented |
 | `/gift` — artwork, approved copy, accurate fulfilment description | Built. Approved card line verbatim; artwork is a marked typographic stand-in |
 | `/contact` — form | Built, including the Circle waitlist path |
@@ -27,16 +28,28 @@ site, and are called out below rather than quietly marked done.
 | Form handler wired, submissions landing in the inbox | **Blocked** — needs the client's form service and destination inbox |
 | Waitlist submissions stored somewhere retrievable | **Blocked** — same handler. The data is carried (`source`, `cohort`) so it is separable on arrival |
 
-### The two blocked items, precisely
+### How approved copy is protected
 
-**`/about` has no copy to render.** §4.6 asks for two client-approved passages
-used verbatim. The spec quotes only the opening fragment of the first (*"As
-much as we want to pour love into our little ones…"*) and none of the bio. §8.5
-is explicit that deferred content is built as a marked placeholder rather than
-invented — and writing a plausible-sounding biography for a licensed clinician
-would be worse than an honest gap. Paste the real text into
-`ABOUT_WHAT_IS_NOORTURE` and `ABOUT_HODA` in `src/data/approved-copy.ts`, drop a
-portrait at `src/assets/hoda.jpg`, and the page renders it and drops the notes.
+All six approved passages live once, in `src/data/approved-copy.json` — JSON
+rather than TypeScript so the preflight parses them exactly instead of regexing
+source. Two checks run on every preflight:
+
+1. **The text must still hash to its recorded `sha256`.** This is what makes
+   editing approved copy a deliberate, visible act: you have to change the hash
+   too, and it shows in the diff. Without it, editing the JSON would change both
+   the source and the page together and no comparison could see it.
+2. **Every paragraph must appear in the built page, unaltered.** On failure the
+   gate prints where the text stopped matching.
+
+Both were verified by deliberately breaking them: straightening one curly quote
+in the source trips the hash check; truncating the bio in the template trips the
+page check and points at the exact divergence. Recompute hashes *only* when the
+client has approved new wording — `node scripts/rehash-approved-copy.mjs`.
+
+**One thing to check with the client:** the bio reads "…at the UMass Chan School
+of Medicine Early and the Pritzker Foundation, respectively." The word "Early"
+looks misplaced. It is rendered exactly as supplied and has **not** been
+corrected — approved copy is the client's to change, not ours.
 
 **No form reaches anybody yet.** There is no endpoint and no destination inbox.
 Rather than let a real person's 3am booking request vanish, every form
@@ -48,7 +61,7 @@ switch-on.
 
 | Criterion | Result |
 |---|---|
-| Every approved passage matches character-for-character | **Enforced, not eyeballed.** Each passage lives once in `src/data/approved-copy.ts`; `npm run preflight` strips tags, decodes entities, and asserts the exact string survived into the built page. Altering one fails the build gate |
+| Every approved passage matches character-for-character | **Enforced, not eyeballed** — hash on the source, exact match against the built page. 7 paragraphs across 6 passages |
 | Every form submits and arrives | **Cannot pass** — no handler exists. Forms validate, report honestly, and are one constant away from live |
 | No dead links | Passes — the links gate walks every internal href and `#anchor` across all 13 pages |
 
@@ -73,6 +86,14 @@ seen it.
 **A sharp instance is single-use.** Reusing one for a second pipeline silently
 returns the wrong buffer, which broke the logo's colour classification without
 erroring.
+
+**The salawat (ﷺ) rendered as a smudge.** Neither the body nor display face
+carries U+FDFA, and the system fallbacks squash the ligature into a single em —
+not an acceptable way to set a religious honorific, least of all on the page
+where this audience decides whether they are understood here. One glyph of Amiri
+is now self-hosted, subsetted from 108 KB to 1.6 KB and confined by
+`unicode-range` to that single codepoint, with `size-adjust: 150%` so it sits
+at a comparable weight to the Latin around it.
 
 ---
 

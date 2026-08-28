@@ -12,6 +12,7 @@
 import { readFileSync, existsSync, statSync, readdirSync } from 'node:fs';
 import { join, relative, extname, dirname, resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 
 const pass = (name, ...lines) => ({ name, status: 'pass', lines });
 const fail = (name, ...lines) => ({ name, status: 'fail', lines });
@@ -254,59 +255,74 @@ export async function contentGate(root, dist) {
 
   // --- client-approved copy, verbatim ---
   // Stage 3 exit criterion: "every approved passage matches the source text
-  // character-for-character". The passages live once in approved-copy.ts; this
-  // asserts each one survived into the built page with nothing paraphrased,
+  // character-for-character". The words live once, in approved-copy.json —
+  // JSON so this reads them exactly instead of regexing TypeScript. Each
+  // paragraph must survive into the built page with nothing paraphrased,
   // re-punctuated, or silently re-wrapped.
-  const copyPath = join(root, 'src/data/approved-copy.ts');
+  const copyPath = join(root, 'src/data/approved-copy.json');
   if (existsSync(copyPath)) {
-    const source = readFileSync(copyPath, 'utf8');
-    const entries = [
-      ...source.matchAll(
-        /\{\s*name:\s*'([^']+)',\s*page:\s*'([^']+)',\s*text:\s*(\w+)\s*\}/g,
-      ),
-    ];
-    const constants = Object.fromEntries(
-      [...source.matchAll(/export const (\w+) =\s*\n?\s*'((?:[^'\\]|\\.)*)';/g)]
-        .map((m) => [m[1], m[2].replace(/\\'/g, "'")]),
-    );
+    const copy = JSON.parse(readFileSync(copyPath, 'utf8'));
+    const entries = Object.entries(copy).filter(([key]) => !key.startsWith('_'));
 
-    if (entries.length === 0) {
-      lines.push('no approved passages declared — skipping the verbatim check');
-    } else {
-      for (const [, name, page, constName] of entries) {
-        const expected = constants[constName];
-        const file = join(dist, page.replace(/^\//, ''), 'index.html');
-        const target = page === '/' ? join(dist, 'index.html') : file;
-        if (!expected) {
-          bad = true;
-          lines.push(`approved copy: ${constName} could not be read from approved-copy.ts`);
-          continue;
-        }
-        if (!existsSync(target)) {
-          bad = true;
-          lines.push(`approved copy: ${page} not found in the build`);
-          continue;
-        }
-        // Compare rendered text, not markup: strip tags, decode the entities
-        // Astro emits, and collapse the whitespace introduced by pretty HTML.
-        const rendered = readFileSync(target, 'utf8')
-          .replace(/<[^>]+>/g, ' ')
-          .replace(/&#(\d+);/g, (_, d) => String.fromCharCode(Number(d)))
-          .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCharCode(parseInt(h, 16)))
-          .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
-          .replace(/&quot;/g, '"').replace(/&apos;|&#39;/g, "'")
-          .replace(/&nbsp;/g, ' ')
-          .replace(/\s+/g, ' ');
-        const wanted = expected.replace(/\s+/g, ' ').trim();
+    // Rendered text, not markup: strip tags, decode the entities Astro emits,
+    // and collapse the whitespace that pretty-printed HTML introduces.
+    const renderedText = (file) =>
+      readFileSync(file, 'utf8')
+        .replace(/<(script|style)[^>]*>[\s\S]*?<\/\1>/gi, ' ')
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/&#(\d+);/g, (_, d) => String.fromCharCode(Number(d)))
+        .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCharCode(parseInt(h, 16)))
+        .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"').replace(/&apos;|&#39;/g, "'")
+        .replace(/&nbsp;/g, ' ')
+        .replace(/\s+/g, ' ');
+
+    let checked = 0;
+    for (const [, passage] of entries) {
+      // 1. Has the source of truth itself been edited? Comparing the JSON
+      //    against the page cannot see this — editing the JSON changes both
+      //    sides at once. The recorded hash is what makes an edit to approved
+      //    copy a deliberate, reviewable act instead of a silent one.
+      const actual = createHash('sha256')
+        .update(passage.paragraphs.join('\n\n'), 'utf8')
+        .digest('hex');
+      if (passage.sha256 && passage.sha256 !== actual) {
+        bad = true;
+        lines.push(`APPROVED COPY EDITED AT SOURCE — ${passage.name}`);
+        lines.push(`  recorded ${passage.sha256.slice(0, 16)}…, now ${actual.slice(0, 16)}…`);
+        lines.push('  If the client approved this wording, run: node scripts/rehash-approved-copy.mjs');
+      } else if (!passage.sha256) {
+        lines.push(`${passage.name}: no recorded hash — run scripts/rehash-approved-copy.mjs`);
+      }
+
+      const target =
+        passage.page === '/'
+          ? join(dist, 'index.html')
+          : join(dist, passage.page.replace(/^\//, ''), 'index.html');
+      if (!existsSync(target)) {
+        bad = true;
+        lines.push(`approved copy: ${passage.page} not found in the build`);
+        continue;
+      }
+      const rendered = renderedText(target);
+      for (const [i, paragraph] of passage.paragraphs.entries()) {
+        const wanted = paragraph.replace(/\s+/g, ' ').trim();
         if (rendered.includes(wanted)) {
-          lines.push(`approved copy verbatim on ${page}: ${name}`);
-        } else {
-          bad = true;
-          lines.push(`APPROVED COPY ALTERED on ${page}: ${name}`);
-          lines.push(`  expected: ...${wanted.slice(0, 70)}...`);
+          checked++;
+          continue;
         }
+        bad = true;
+        lines.push(
+          `APPROVED COPY ALTERED — ${passage.name}, paragraph ${i + 1}, on ${passage.page}`,
+        );
+        // Point at the first divergence so the fix is obvious.
+        let cut = 0;
+        while (cut < wanted.length && rendered.includes(wanted.slice(0, cut + 1))) cut++;
+        lines.push(`  matched up to: ...${wanted.slice(Math.max(0, cut - 45), cut)}`);
+        lines.push(`  expected next: ${wanted.slice(cut, cut + 45)}...`);
       }
     }
+    lines.push(`${checked} approved paragraph(s) verbatim across ${entries.length} passages`);
   }
 
   // --- collapsed whitespace before an inline tag ---

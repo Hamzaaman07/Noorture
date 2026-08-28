@@ -5,6 +5,33 @@
 @import "@fontsource-variable/figtree";
 
 /*
+  The salawat, ﷺ (U+FDFA), appears in the approved "What is Noorture" passage.
+
+  Neither body nor display face carries it, and the system fallbacks squeeze
+  the ligature into a single em where it renders as an illegible smudge — which
+  is not an acceptable way to set a religious honorific, least of all on the
+  page where this audience is deciding whether they are understood here.
+
+  So one glyph of Amiri is self-hosted. `unicode-range` means the browser only
+  fetches it on a page that actually contains the character — in practice just
+  /about — and subsetting takes it from 108 KB to 1.6 KB.
+
+  Regenerate with:
+    python3 -m fontTools.subset       node_modules/@fontsource/amiri/files/amiri-arabic-400-normal.woff2       --unicodes=U+FDFA --layout-features='*' --flavor=woff2       --output-file=src/assets/fonts/amiri-salawat.woff2
+*/
+@font-face {
+  font-family: "Amiri Salawat";
+  src: url("../assets/fonts/amiri-salawat.woff2") format("woff2");
+  unicode-range: U+FDFA;
+  font-display: swap;
+  font-weight: 400;
+  /* Amiri sets this ligature small against Latin text at the same size;
+     150% brings it to a comparable weight without crowding the full stop
+     that follows it. */
+  size-adjust: 150%;
+}
+
+/*
   Noorture design tokens — §6 of the build spec.
 
   The seven brand values below are taken from the spec verbatim and are the
@@ -49,10 +76,10 @@
   --color-noor-line-alt: #d5e4e4; /* hairlines on bg-alt */
 
   /* --- type --- */
-  --font-display: "Cormorant Garamond Variable", "Cormorant Garamond",
-    Georgia, "Times New Roman", serif;
-  --font-body: "Figtree Variable", Figtree, ui-sans-serif, system-ui,
-    -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Amiri Salawat", "Cormorant Garamond Variable",
+    "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --font-body: "Amiri Salawat", "Figtree Variable", Figtree, ui-sans-serif,
+    system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 
   /*
     Fluid scale, 360px → 1280px. Body is set deliberately large: the reader

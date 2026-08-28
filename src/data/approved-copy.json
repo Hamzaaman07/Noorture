@@ -1,0 +1,70 @@
+{
+  "_README": [
+    "CLIENT-APPROVED COPY. VERBATIM. DO NOT EDIT THE WORDING.",
+    "",
+    "Stage 3 exit criterion: every approved passage must match the source",
+    "character-for-character. `npm run preflight` enforces this two ways:",
+    "",
+    "  1. Each passage's text must still hash to its recorded `sha256`.",
+    "     That makes editing approved copy a deliberate, visible act — you",
+    "     have to change the hash too, and it shows up in the diff — rather",
+    "     than something that slips through in a tidy-up.",
+    "  2. Each paragraph must appear in the built page, unaltered.",
+    "",
+    "Recompute a hash only when the client has actually approved new wording:",
+    "  node scripts/rehash-approved-copy.mjs",
+    "",
+    "It is JSON rather than TypeScript so the gate parses it exactly, instead",
+    "of regexing source and hoping. Pages import it through approved-copy.ts.",
+    "If a passage reads oddly, that is a question for the client, not an edit."
+  ],
+  "positioning": {
+    "name": "positioning block (§4.1)",
+    "page": "/",
+    "paragraphs": [
+      "Noorture provides services, education, and counseling that fuses the evidence-based sciences of maternal and early childhood health and well-being with the richness of our Islamic tradition to help parents not only nurture their children, but to noorture themselves and their little ones starting from the moment they enter into the world."
+    ],
+    "sha256": "ce7abec1feb802d47ffc7ccaa93cdce14e9f7a26d4d3e3f3b7d68d0d8f6a9697"
+  },
+  "forWhom": {
+    "name": "who it is for (§4.1)",
+    "page": "/",
+    "paragraphs": [
+      "For anyone caring for a baby or young child — parents and parents-to-be, aunts and uncles, grandparents, teachers, students, and care providers."
+    ],
+    "sha256": "c92db108ca1d045317eea8a09ad763bf7d9969e05d690ccb919f768efde33aed"
+  },
+  "reviewsOpening": {
+    "name": "reviews opening (§4.7)",
+    "page": "/reviews/",
+    "paragraphs": [
+      "Parenthood changed everything, including your relationship with God. For many parents, the overwhelm of busy routines, daily stresses, and the disappointment of unmet expectations can leave them feeling disconnected — from themselves, their children, and even God. It was never meant to be this way. In fact, some of the most profound stories for us to learn from in the Quran come from sacred parent-child relationships. Today our communities are hungry for a sense of connection in their relationships and for a spiritual revival. It begins in the home, with every parent, and with every child. It starts with you taking the first step."
+    ],
+    "sha256": "6be98b4b44225e18baa433594b9ef694ed1c3b2393a8083c11a24d6e62dd294c"
+  },
+  "giftCardLine": {
+    "name": "gift card line (§4.5)",
+    "page": "/gift/",
+    "paragraphs": [
+      "May Allah make this a means of replenishing your heart and soul while you give of yourself."
+    ],
+    "sha256": "5b2b895f30f980a0131b570fd8d3c52151c834c71e6499d1585547b2b3b4c131"
+  },
+  "aboutWhatIsNoorture": {
+    "name": "What is Noorture (§4.6)",
+    "page": "/about/",
+    "paragraphs": [
+      "As much as we want to pour love into our little ones, we know that God is the Ultimate Source of Love and Light (Noor), for both us and our children. We can only give unconditionally when we ourselves are tapped into His Infinite Source of Noor that guides us and keep us whole.",
+      "Noorture is based on a belief that raising a child is not about merely providing nutrition, shelter, and comfort. It describes the sacred transmission of a spiritual connection that comes through the Guiding Noor of God and His Messenger ﷺ. Young children receive it, not from the lessons they hear, but from experiencing the gentleness, love, and acceptance they feel through everyday interactions with the adults who care for them. What they experience in their relationships build the foundation for their own future relationship with God. This essential component of children’s spiritual development can only be passed on when the adults caring for them are spiritually connected within themselves and with Their Creator. By understanding and practicing this, we can fill our homes with His Noor and raise our children in that Divine Light by “Noorturing” ourselves and our children."
+    ],
+    "sha256": "635561ebbde616365fa4fd462551bbbd69c19b1ab7af6be56c3509a446a87965"
+  },
+  "aboutHoda": {
+    "name": "About Hoda (§4.6)",
+    "page": "/about/",
+    "paragraphs": [
+      "Hoda Shawky is a maternal child health consultant with 20 years of experience working as a pediatric nurse practitioner with expertise in lactation, healthy nutrition, and maternal and pediatric mental health. She received both her undergraduate degree and Masters’ of Science in Nursing from UCLA and completed fellowships in Early Relational Health and Early Childhood advocacy at the UMass Chan School of Medicine Early and the Pritzker Foundation, respectively. She studies Quran under Dr. Zainab Alwani through Glass Lamp Institute and Ustadha Samia Mubarak through Quranic Ocean. She is a student in the Al Madina Institute Suhba Seminary. Hoda is the founder of Noorture, where she provides evidence based, spiritually-centered support to new parents and their young children which integrate Quranic and Prophetic wisdom into the foundation of care for babies and young children in order to noorture future generations through Divine Noor (God's Love and Light)."
+    ],
+    "sha256": "a08e511fb41370b7522b4fdc2dd45c60eb107176f8c13134ef63ecc688874b99"
+  }
+}

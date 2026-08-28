@@ -3,7 +3,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Section from '../components/Section.astro';
 import NoortureMark from '../components/NoortureMark.astro';
 import Button from '../components/Button.astro';
-import ProvisionalNote from '../components/ProvisionalNote.astro';
+import { Image } from 'astro:assets';
+import portrait from '../assets/hoda.png';
 import { ABOUT_WHAT_IS_NOORTURE, ABOUT_HODA } from '../data/approved-copy';
 import { SOCIAL, CREDENTIALS, CTA } from '../consts';
 
@@ -31,26 +32,12 @@ const description =
   <Section tint narrow labelledby="what-is">
     <div class="prose">
       <h1 id="what-is">What is Noorture</h1>
-      {
-        ABOUT_WHAT_IS_NOORTURE ? (
-          <div class="prose__approved" set:html={ABOUT_WHAT_IS_NOORTURE} />
-        ) : (
-          <ProvisionalNote pending="the client supplying the full approved passage">
-            <p>
-              §4.6 calls for the existing passage beginning{' '}
-              <em>“As much as we want to pour love into our little ones…”</em>,
-              used verbatim. The build spec quotes only that opening fragment,
-              and client-approved copy must not be paraphrased or reconstructed
-              — so the passage is not shown rather than shown wrongly.
-            </p>
-            <p>
-              Paste it into <code>ABOUT_WHAT_IS_NOORTURE</code> in{' '}
-              <code>src/data/approved-copy.ts</code> and this section renders it
-              and drops this note.
-            </p>
-          </ProvisionalNote>
-        )
-      }
+      {/*
+        CLIENT-APPROVED, VERBATIM (§4.6). The words live in
+        src/data/approved-copy.json and the preflight asserts every paragraph
+        reached the page unaltered. Do not edit the wording here.
+      */}
+      {ABOUT_WHAT_IS_NOORTURE.map((paragraph) => <p class="approved">{paragraph}</p>)}
     </div>
   </Section>
 
@@ -60,12 +47,18 @@ const description =
 
       <div class="bio">
         <div class="bio__portrait">
-          {/* §4.6 asks for a photo. None has been supplied; a stock portrait
-              standing in for a real clinician would be worse than an honest
-              gap. */}
-          <div class="bio__placeholder">
-            <span>Photograph<br />to come</span>
-          </div>
+          {/*
+            The supplied headshot sits on a warm near-white that measures
+            [250, 246, 247] — within a point or two of --noor-bg — so it blends
+            into the page without any background knockout.
+          */}
+          <Image
+            src={portrait}
+            alt="Hoda Shawky"
+            widths={[243, 486]}
+            sizes="(min-width: 40rem) 15rem, 12rem"
+            class="bio__photo"
+          />
         </div>
 
         <div class="bio__body">
@@ -81,25 +74,8 @@ const description =
         </div>
       </div>
 
-      {
-        ABOUT_HODA ? (
-          <div class="prose__approved" set:html={ABOUT_HODA} />
-        ) : (
-          <ProvisionalNote pending="the client supplying the full approved bio and a photo">
-            <p>
-              §4.6 calls for the full existing bio, used verbatim, with a photo.
-              Neither is in the build spec. Inventing a biography for a licensed
-              clinician would be worse than leaving the gap visible, so the
-              credentials above are shown and the bio is not.
-            </p>
-            <p>
-              Paste it into <code>ABOUT_HODA</code> in{' '}
-              <code>src/data/approved-copy.ts</code>, and drop the portrait at{' '}
-              <code>src/assets/hoda.jpg</code>.
-            </p>
-          </ProvisionalNote>
-        )
-      }
+      {/* CLIENT-APPROVED, VERBATIM (§4.6). See approved-copy.json. */}
+      {ABOUT_HODA.map((paragraph) => <p class="approved">{paragraph}</p>)}
     </div>
   </Section>
 
@@ -139,37 +115,34 @@ const description =
     font-size: var(--text-3xl);
   }
 
-  .prose__approved :global(p) {
-    margin: 0 0 1.1rem;
+  /* Long-form, and the one page a visitor has already decided to spend time
+     on (§4.6) — so it is set larger and looser than body copy elsewhere. */
+  .approved {
+    margin: 0 0 1.25rem;
     font-size: var(--text-lg);
-    line-height: 1.7;
+    line-height: 1.72;
+    text-wrap: pretty;
+  }
+  .approved:last-child {
+    margin-bottom: 0;
   }
 
   .bio {
     display: grid;
     gap: 1.75rem;
-    margin-bottom: 2rem;
+    margin-bottom: 2.25rem;
+    justify-items: center;
+    text-align: center;
   }
 
-  .bio__placeholder {
-    display: grid;
-    place-items: center;
-    aspect-ratio: 4 / 5;
-    border-radius: 1.25rem;
-    border: 1px dashed var(--color-noor-aqua-deep);
-    background:
-      radial-gradient(
-        90% 120% at 20% 0%,
-        color-mix(in srgb, var(--color-noor-rose) 16%, transparent),
-        transparent 62%
-      ),
-      color-mix(in srgb, var(--color-noor-bg-alt) 60%, transparent);
-    color: var(--color-noor-ink-soft);
-    font-size: var(--text-xs);
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    text-align: center;
+  .bio__portrait :global(.bio__photo) {
+    display: block;
+    width: 12rem;
+    height: auto;
+    border-radius: 999px;
+    /* A hairline ring so the portrait reads as placed rather than floating,
+       given its background is nearly the page colour. */
+    box-shadow: 0 0 0 1px var(--color-noor-line);
   }
 
   .bio__name {
@@ -213,6 +186,12 @@ const description =
     margin: 0;
     display: flex;
     gap: 1.25rem;
+    justify-content: center;
+  }
+  @media (min-width: 40rem) {
+    .bio__links {
+      justify-content: flex-start;
+    }
   }
   .bio__links a {
     display: inline-flex;
@@ -252,8 +231,13 @@ const description =
   @media (min-width: 40rem) {
     .bio {
       grid-template-columns: 15rem 1fr;
-      align-items: start;
+      align-items: center;
       gap: 2.5rem;
+      justify-items: start;
+      text-align: left;
+    }
+    .bio__portrait :global(.bio__photo) {
+      width: 15rem;
     }
   }
 </style>
