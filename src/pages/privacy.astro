@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import LegalPage from '../components/LegalPage.astro';
-import { SOCIAL, SITE } from '../consts';
+import { SOCIAL, SITE, ANALYTICS } from '../consts';
 ---
 
 <BaseLayout title="Privacy" description={`How ${SITE.name} handles your information.`}>
@@ -20,10 +20,22 @@ import { SOCIAL, SITE } from '../consts';
       whatever you chose to write. It is used to reply to you and to arrange what
       you asked about. Nothing else on the site collects information about you.
     </p>
-    <p>
-      There is no advertising, no third-party tracking, and no cookie banner
-      because there are no tracking cookies to consent to.
-    </p>
+    {/* Reads the real setting, so this paragraph cannot drift from what the
+        site actually does. */}
+    {
+      ANALYTICS.cloudflareToken ? (
+        <p>
+          There is no advertising and no cross-site tracking. We use Cloudflare
+          Web Analytics to count page views, which sets no cookies and builds no
+          profile of you — which is why there is no cookie banner to click.
+        </p>
+      ) : (
+        <p>
+          There is no advertising, no analytics, no third-party tracking, and no
+          cookie banner because there are no tracking cookies to consent to.
+        </p>
+      )
+    }
 
     <h2>What happens elsewhere</h2>
     <p>

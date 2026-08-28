@@ -398,6 +398,38 @@ export async function cloudflareGate(root, dist) {
     }
   }
 
+  // The redirect map is the whole Stage 4 exit criterion — no URL that worked
+  // before launch may break after it. A rule pointing at a page that does not
+  // exist would turn a working bookmark into a 404, which is the exact failure
+  // the map exists to prevent. So internal targets are checked against the
+  // build, and the JSON source is checked against the generated file.
+  const redirectSrc = join(root, 'src/data/redirects.json');
+  if (existsSync(redirectSrc)) {
+    const { rules = [] } = JSON.parse(readFileSync(redirectSrc, 'utf8'));
+    let dangling = 0;
+    for (const rule of rules) {
+      if (!rule.from || !rule.to) {
+        bad = true;
+        lines.push(`redirect rule missing from/to: ${JSON.stringify(rule)}`);
+        continue;
+      }
+      if (/^https?:\/\//i.test(rule.to)) continue; // off-site, cannot verify
+      const clean = rule.to.split(/[?#]/)[0].replace(/^\//, '');
+      const hit =
+        existsSync(join(dist, clean)) ||
+        existsSync(join(dist, clean, 'index.html')) ||
+        clean === '';
+      if (!hit) {
+        bad = true;
+        dangling++;
+        lines.push(`redirect target does not exist in the build: ${rule.from} -> ${rule.to}`);
+      }
+    }
+    if (rules.length && dangling === 0) {
+      lines.push(`${rules.length} redirect rule(s), every internal target resolves`);
+    }
+  }
+
   // Malformed lines are ignored silently at request time, so parse them here.
   const redirects = join(dist, '_redirects');
   if (existsSync(redirects)) {

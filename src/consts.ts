@@ -100,6 +100,24 @@ export const FORMS = {
   endpoint: null as string | null,
 } as const;
 
+/**
+ * Analytics (spec §8, Stage 4).
+ *
+ * Cloudflare Web Analytics is the fit here: it is free, it is already where
+ * the site is hosted, and — the part that matters — it is cookieless and does
+ * not fingerprint, so the privacy page can keep saying there is no cookie
+ * banner because there is nothing to consent to.
+ *
+ * Off until a token is set. Get one from the Cloudflare dashboard under
+ * Analytics & Logs → Web Analytics, after the site is deployed.
+ *
+ * The privacy page reads this value and changes its wording accordingly, so
+ * the policy cannot quietly drift from what the site actually does.
+ */
+export const ANALYTICS = {
+  cloudflareToken: null as string | null,
+} as const;
+
 export const CREDENTIALS = [
   '20 years',
   'Pediatric Nurse Practitioner',

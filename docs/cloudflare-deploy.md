@@ -167,7 +167,13 @@ Plus screenshots.
 
 ---
 
-## 4. Not this stage
+## 4. The launch cutover
+
+`docs/launch.md` is the runbook for pointing the apex here — the URL inventory,
+the redirect map, the order the DNS changes have to happen in, and the check
+that past members can still reach their archives.
+
+## 5. Not this stage
 
 The apex cutover is Stage 4 and has its own exit criterion: no URL that worked
 before launch may break after it. Before that happens, every Podia URL in
