@@ -1,0 +1,10 @@
+# Cloudflare Pages project config.
+#
+# Deploy from a local build:   npx wrangler pages deploy dist
+# Or connect the repo in the Cloudflare dashboard with:
+#   build command:      npm run build
+#   output directory:   dist
+#   NODE_VERSION:       22   (or leave it to .node-version)
+name = "noorture"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-08-28"

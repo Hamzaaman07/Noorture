@@ -116,7 +116,37 @@ npm run build            # static output to dist/
 npm run preview          # serve the built site
 npm run check:contrast   # palette gate — see below
 npm run build:logo       # regenerate logo assets from the supplied artwork
+npm run preflight        # full deploy gate — see below
 ```
+
+### Deploying
+
+Cloudflare Pages, static. `docs/cloudflare-deploy.md` has the exact settings, a
+paste-ready handoff prompt for the dashboard, and the launch caveats.
+
+```bash
+npm run preflight              # before a preview deploy
+npm run preflight -- --launch  # before pointing the apex here
+```
+
+The preflight builds, type-checks, walks every internal link and anchor, checks
+the prices against `consts.ts` and the cohort states against their frontmatter,
+validates the Cloudflare config, runs the contrast gate, and then **boots the
+real Cloudflare runtime** (`wrangler pages dev`, i.e. workerd) to assert against
+what will actually be served — headers, 404s, trailing slashes, every page.
+
+That last part is the one that pays. `npm run build` proves the bundler was
+happy and nothing more. The first `_headers` file put `Cache-Control` under
+`/*`; Cloudflare *appends* the headers of every matching rule rather than
+letting a specific rule win, so hashed assets came back with
+`max-age=31536000, immutable, ..., max-age=0, must-revalidate` — ambiguous, and
+read the wrong way it revalidates every cached asset on every request, on
+exactly the slow connections this audience has. Every build was green. Only the
+runtime showed it.
+
+`--launch` additionally blocks on published provisional copy, forms with no
+handler, and an empty redirect map. It fails on all three today, which is
+correct — those are Stage 3 and Stage 4.
 
 Node 22. Deploys as a fully static site: Vercel and Netlify configs are both
 committed, either works, neither needs a paid tier at this traffic level.

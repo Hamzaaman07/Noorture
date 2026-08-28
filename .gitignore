@@ -7,3 +7,6 @@ dist/
 .env.production
 .DS_Store
 npm-debug.log*
+
+# wrangler local runtime state (miniflare cache, dev bundles)
+.wrangler/

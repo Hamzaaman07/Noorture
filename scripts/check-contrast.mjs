@@ -11,8 +11,9 @@
  *              which is measurably darker than bg alone. Skipping this pass is
  *              how a palette passes on paper and fails on a phone.
  *
- * Pass 2 needs a built site: `npm run build` first. It is skipped, with a
- * notice and a non-zero exit, if Playwright or a preview server is missing.
+ * Pass 2 needs a built site: `npm run build` first. If nothing is answering on
+ * the preview URL it starts its own `astro preview` and shuts it down after,
+ * so the check is self-contained and safe to run from `npm run preflight`.
  *
  *   npm run check:contrast
  */
@@ -115,6 +116,48 @@ try {
   process.exit(1);
 }
 
+// Bring up a preview server unless one is already answering. Assuming an
+// external server is running makes this fail for reasons that have nothing to
+// do with contrast, which is exactly the kind of noise that gets a check
+// ignored.
+const reachable = async () => {
+  try {
+    await fetch(PREVIEW + '/', { signal: AbortSignal.timeout(1500) });
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+let previewProc = null;
+if (!(await reachable())) {
+  const { spawn } = await import('node:child_process');
+  const port = new URL(PREVIEW).port || '4321';
+  previewProc = spawn('npx', ['astro', 'preview', '--port', port], {
+    cwd: root,
+    stdio: 'ignore',
+    detached: true,
+  });
+  let up = false;
+  for (let i = 0; i < 20 && !up; i++) {
+    await new Promise((r) => setTimeout(r, 750));
+    up = await reachable();
+  }
+  if (!up) {
+    console.log('  Could not start a preview server — run `npm run build` first.\n');
+    try { process.kill(-previewProc.pid, 'SIGKILL'); } catch {}
+    process.exit(1);
+  }
+}
+
+const stopPreview = () => {
+  if (previewProc) {
+    try { process.kill(-previewProc.pid, 'SIGKILL'); } catch {}
+    previewProc = null;
+  }
+};
+process.on('exit', stopPreview);
+
 const browser = await chromium.launch(
   process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {},
 );
@@ -159,6 +202,7 @@ for (const [path, width, height] of SAMPLES) {
   await ctx.close();
 }
 await browser.close();
+stopPreview();
 
 console.log(
   `  darkest backdrop found: rgb(${worst.px.join(', ')})  —  ${worst.where}\n`,
