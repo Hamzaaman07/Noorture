@@ -163,19 +163,25 @@ const { intensity = 'quiet' } = Astro.props;
     /**
      * Drift, as a fraction of the viewport's long edge per second.
      *
-     * These were roughly a third of their current value, which measured 0.8px
-     * per second at the alpha centroid — a viewport crossing took four and a
-     * half minutes. That is animated in the sense that the numbers change, and
-     * a still image to anyone actually looking at it. A light now crosses a
-     * 1280px window in about 75 seconds in the hero, and about two minutes on
-     * the quieter pages, where the ambience sits behind body copy.
+     * This has been raised twice. It started at roughly a sixth of the current
+     * value, which measured 0.8px per second at the alpha centroid — a
+     * viewport crossing took four and a half minutes, which is animated in the
+     * sense that the numbers change and a still image to anyone looking at it.
+     * A light now crosses a 1280px window in about 37 seconds in the hero, and
+     * a little over a minute on the quieter pages, where the ambience sits
+     * behind body copy rather than a wordmark.
      */
-    const SPEED_MIN = isHero ? 0.008 : 0.005;
-    const SPEED_MAX = isHero ? 0.019 : 0.012;
+    const SPEED_MIN = isHero ? 0.016 : 0.009;
+    const SPEED_MAX = isHero ? 0.038 : 0.021;
 
-    /** Seconds for a full turn of the arc each orb travels. */
-    const TURN_PERIOD_MIN = 70;
-    const TURN_PERIOD_SPAN = 90;
+    /**
+     * Seconds for a full turn of the arc each orb travels. Halved alongside
+     * the speed above: the radius of the arc is speed/turn, so leaving the
+     * period alone would have doubled every curve into something close to a
+     * straight line — the lights would travel faster and stop wandering.
+     */
+    const TURN_PERIOD_MIN = 35;
+    const TURN_PERIOD_SPAN = 45;
 
     // Rose and aqua at low opacity. Read as atmosphere, never as activity.
     const TINT = { rose: '233, 163, 196', aqua: '127, 210, 212' } as const;
