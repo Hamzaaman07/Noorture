@@ -80,7 +80,10 @@ const FLAT = [
   ['rose label', 'noor-rose-ink', 'noor-bg', 'text'],
   ['rose label on tint', 'noor-rose-ink', 'noor-bg-alt', 'text'],
   ['focus ring', 'noor-aqua-ink', 'noor-bg', 'ui'],
-  ['secondary btn border', 'noor-aqua-deep', 'noor-bg', 'ui'],
+  /* The button borders. Not the -deep pair: see the note in Button.astro —
+     those top out at ~2.9:1 composited, at full opacity. */
+  ['primary btn border', 'noor-rose-ink', 'noor-bg', 'ui'],
+  ['secondary btn border', 'noor-aqua-ink', 'noor-bg', 'ui'],
 ];
 for (const [use, fg, bg, kind] of FLAT) {
   row(use, T[fg], T[bg], ratio(lumOf(T[fg]), lumOf(T[bg])), need(kind));

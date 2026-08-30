@@ -1,27 +1,25 @@
 ---
 /**
- * Glass buttons.
+ * Buttons, per the client's spec.
  *
- * Genuinely translucent: the tint is roughly half opacity and the ambience
- * drifts visibly through it, blurred by the backdrop filter. An earlier pass
- * sat at 0.9 alpha, which is not glass — it is a coloured pill with a
- * highlight painted on, and it read as candy.
+ * Light glass rather than the heavier treatment this replaced: a low-alpha
+ * tint over `backdrop-filter`, a real 1px border, no drop shadow, no inner
+ * rim, and a 4px radius instead of a pill.
  *
- * Three things do the work:
- *   - a low-alpha tint over `backdrop-filter`, so the background is seen
- *     THROUGH the button rather than covered by it
- *   - a bright catch along the top edge, where light meets the surface
- *   - a soft inner rim, which is where glass looks thickest — and which is
- *     also what makes the control's boundary perceivable
+ * The border is doing a job the old inner rim used to. Translucent tint on a
+ * near-white page has almost no luminance difference from the page, so
+ * something has to make the control's boundary perceivable — WCAG 1.4.11 asks
+ * 3:1 for the visual information that identifies a control. Pass 3 of
+ * scripts/check-contrast.mjs measures that on the rendered button rather than
+ * from the tokens, because it is a translucent stroke over a translucent fill
+ * over a drifting ambience.
  *
- * That last point is not decorative. Translucent glass on a near-white page
- * has almost no luminance difference from the page, so without the rim the
- * button's edge measures about 1.7:1 where WCAG asks 3:1 for the visual
- * information identifying a control. Blurred over 5px it reads as shading
- * rather than a stroke, and measures 4.5:1. Pass 3 of
- * scripts/check-contrast.mjs measures it on the rendered button, because none
- * of this is predictable from the tokens: it is a translucent shadow over a
- * translucent fill over a drifting ambience.
+ * That is why the border uses the AA-safe siblings rather than --noor-rose-deep
+ * and --noor-aqua-deep. Those two sit at roughly 3.0:1 flat, and once they are
+ * composited over the button's own tint and the ambience behind it they top out
+ * at 2.91 and 2.94 — at full opacity. Turning the alpha up does not rescue
+ * them; the hue itself cannot carry a boundary on this page. Measured, not
+ * assumed: the sweep is in the commit that introduced these values.
  */
 interface Props {
   href: string;
@@ -41,99 +39,49 @@ const { href, variant = 'primary', class: className = '' } = Astro.props;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    /* Comfortably past the 44px touch target — she is holding a baby. */
-    min-height: 3.25rem;
-    padding: 0.9rem 1.9rem;
-    border: 0;
-    border-radius: 999px;
+    /* Floor only — the padding below already clears it. She is holding a
+       baby, so the target must not fall under 44px if the type scale moves. */
+    min-height: 2.75rem;
+    padding: 14px 28px;
+    border: 1px solid;
+    border-radius: 4px;
     font-family: var(--font-body);
     font-size: var(--text-base);
-    font-weight: 600;
+    font-weight: 500;
+    letter-spacing: 0.01em;
     line-height: 1.25;
     text-align: center;
     text-decoration: none;
     color: var(--color-noor-ink);
-    /* The light falling across the face of the glass. */
-    background-image: linear-gradient(
-      152deg,
-      rgba(255, 255, 255, 0.55) 0%,
-      rgba(255, 255, 255, 0.04) 52%,
-      rgba(255, 255, 255, 0.16) 100%
-    );
-    backdrop-filter: blur(20px) saturate(1.85);
-    -webkit-backdrop-filter: blur(20px) saturate(1.85);
+    backdrop-filter: blur(12px) saturate(1.4);
+    -webkit-backdrop-filter: blur(12px) saturate(1.4);
+    box-shadow: none;
     transition:
-      background-color 240ms var(--ease-noor),
-      box-shadow 240ms var(--ease-noor),
-      transform 240ms var(--ease-noor);
+      background 180ms ease,
+      border-color 180ms ease;
   }
 
   .btn--primary {
-    background-color: color-mix(
-      in srgb,
-      var(--color-noor-rose-bright) 48%,
-      transparent
-    );
-    box-shadow:
-      inset 0 1.5px 0 rgba(255, 255, 255, 0.95),
-      inset 0 0 5px 1.5px rgba(104, 32, 70, 0.9),
-      inset 0 -18px 26px -20px rgba(140, 52, 92, 0.35),
-      0 1.5px 2px rgba(44, 74, 78, 0.32),
-      0 12px 26px -12px rgba(44, 74, 78, 0.22);
+    background: rgba(233, 163, 196, 0.28);
+    border-color: rgba(141, 81, 103, 1);
   }
   .btn--primary:hover {
-    background-color: color-mix(
-      in srgb,
-      var(--color-noor-rose-bright) 62%,
-      transparent
-    );
-    transform: translateY(-1px);
-    box-shadow:
-      inset 0 1.5px 0 rgba(255, 255, 255, 1),
-      inset 0 0 5px 1.5px rgba(104, 32, 70, 0.95),
-      inset 0 -18px 26px -20px rgba(140, 52, 92, 0.4),
-      0 2px 3px rgba(44, 74, 78, 0.34),
-      0 16px 32px -12px rgba(44, 74, 78, 0.26);
+    background: rgba(233, 163, 196, 0.42);
+    border-color: rgba(116, 66, 84, 1);
   }
 
   .btn--secondary {
-    background-color: color-mix(
-      in srgb,
-      var(--color-noor-aqua) 46%,
-      transparent
-    );
-    box-shadow:
-      inset 0 1.5px 0 rgba(255, 255, 255, 0.95),
-      inset 0 0 5px 1.5px rgba(10, 62, 66, 0.85),
-      inset 0 -18px 26px -20px rgba(20, 80, 84, 0.32),
-      0 1.5px 2px rgba(44, 74, 78, 0.32),
-      0 12px 26px -12px rgba(44, 74, 78, 0.22);
+    background: rgba(127, 210, 212, 0.18);
+    border-color: rgba(43, 108, 112, 1);
   }
   .btn--secondary:hover {
-    background-color: color-mix(
-      in srgb,
-      var(--color-noor-aqua) 60%,
-      transparent
-    );
-    transform: translateY(-1px);
-    box-shadow:
-      inset 0 1.5px 0 rgba(255, 255, 255, 1),
-      inset 0 0 5px 1.5px rgba(10, 62, 66, 0.9),
-      inset 0 -18px 26px -20px rgba(20, 80, 84, 0.38),
-      0 2px 3px rgba(44, 74, 78, 0.34),
-      0 16px 32px -12px rgba(44, 74, 78, 0.26);
-  }
-
-  .btn:active {
-    transform: translateY(0);
+    background: rgba(127, 210, 212, 0.32);
+    border-color: rgba(35, 89, 92, 1);
   }
 
   @media (prefers-reduced-motion: reduce) {
     .btn {
       transition: none;
-    }
-    .btn:hover {
-      transform: none;
     }
   }
 </style>

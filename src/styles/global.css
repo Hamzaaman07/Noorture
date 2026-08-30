@@ -65,9 +65,6 @@
   --color-noor-bg-alt: #eff6f6;
 
   /* --- AA-safe text/label siblings (derived, see note above) --- */
-  /* Brighter, more saturated than --noor-rose. The buttons are translucent
-     glass, so this is a tint the page shows through rather than a fill. */
-  --color-noor-rose-bright: #ee80b4;
   --color-noor-rose-ink: #8d5167;
   --color-noor-rose-ink-hover: #744254;
   --color-noor-aqua-ink: #2b6c70;
@@ -205,52 +202,30 @@
 
   /* Same glass as the primary Button — see Button.astro for why the edge is a
      blurred rim rather than a stroke. */
+  /* Matches Button.astro — the primary variant, as a real <button>. */
   .form-submit {
     margin-top: 0.35rem;
-    min-height: 3.25rem;
-    padding: 0.9rem 1.9rem;
-    border: 0;
-    border-radius: 999px;
-    background-image: linear-gradient(
-      152deg,
-      rgba(255, 255, 255, 0.55) 0%,
-      rgba(255, 255, 255, 0.04) 52%,
-      rgba(255, 255, 255, 0.16) 100%
-    );
-    background-color: color-mix(
-      in srgb,
-      var(--color-noor-rose-bright) 48%,
-      transparent
-    );
+    min-height: 2.75rem;
+    padding: 14px 28px;
+    border: 1px solid rgba(141, 81, 103, 1);
+    border-radius: 4px;
+    background: rgba(233, 163, 196, 0.28);
     color: var(--color-noor-ink);
     font: inherit;
     font-size: var(--text-base);
-    font-weight: 600;
+    font-weight: 500;
+    letter-spacing: 0.01em;
     cursor: pointer;
-    backdrop-filter: blur(20px) saturate(1.85);
-    -webkit-backdrop-filter: blur(20px) saturate(1.85);
-    box-shadow:
-      inset 0 1.5px 0 rgba(255, 255, 255, 0.95),
-      inset 0 0 5px 1.5px rgba(104, 32, 70, 0.9),
-      inset 0 -18px 26px -20px rgba(140, 52, 92, 0.35),
-      0 1.5px 2px rgba(44, 74, 78, 0.32),
-      0 12px 26px -12px rgba(44, 74, 78, 0.22);
+    backdrop-filter: blur(12px) saturate(1.4);
+    -webkit-backdrop-filter: blur(12px) saturate(1.4);
+    box-shadow: none;
     transition:
-      background-color 200ms var(--ease-noor),
-      box-shadow 200ms var(--ease-noor);
+      background 180ms ease,
+      border-color 180ms ease;
   }
   .form-submit:hover {
-    background-color: color-mix(
-      in srgb,
-      var(--color-noor-rose-bright) 62%,
-      transparent
-    );
-    box-shadow:
-      inset 0 1.5px 0 rgba(255, 255, 255, 1),
-      inset 0 0 5px 1.5px rgba(104, 32, 70, 0.95),
-      inset 0 -18px 26px -20px rgba(140, 52, 92, 0.4),
-      0 2px 3px rgba(44, 74, 78, 0.34),
-      0 16px 32px -12px rgba(44, 74, 78, 0.26);
+    background: rgba(233, 163, 196, 0.42);
+    border-color: rgba(116, 66, 84, 1);
   }
   @media (prefers-reduced-motion: reduce) {
     .form-submit {
