@@ -109,8 +109,12 @@ const { intensity = 'quiet' } = Astro.props;
     x: number;
     y: number;
     r: number;
-    vx: number;
-    vy: number;
+    /** px per second along `heading`. */
+    speed: number;
+    /** radians. Steered slowly by `turn`, so the path is an arc, not a line. */
+    heading: number;
+    /** radians per second, signed. Small — this is a wide, lazy curve. */
+    turn: number;
     hue: 'rose' | 'aqua';
     alpha: number;
   };
@@ -136,6 +140,23 @@ const { intensity = 'quiet' } = Astro.props;
      */
     const FADE_FLOOR = 0.34;
     const SPEED_FLOOR = 0.3;
+
+    /**
+     * Drift, as a fraction of the viewport's long edge per second.
+     *
+     * These were roughly a third of their current value, which measured 0.8px
+     * per second at the alpha centroid — a viewport crossing took four and a
+     * half minutes. That is animated in the sense that the numbers change, and
+     * a still image to anyone actually looking at it. A light now crosses a
+     * 1280px window in about 75 seconds in the hero, and about two minutes on
+     * the quieter pages, where the ambience sits behind body copy.
+     */
+    const SPEED_MIN = isHero ? 0.008 : 0.005;
+    const SPEED_MAX = isHero ? 0.019 : 0.012;
+
+    /** Seconds for a full turn of the arc each orb travels. */
+    const TURN_PERIOD_MIN = 70;
+    const TURN_PERIOD_SPAN = 90;
 
     // Rose and aqua at low opacity. Read as atmosphere, never as activity.
     const TINT = { rose: '233, 163, 196', aqua: '127, 210, 212' } as const;
@@ -166,15 +187,19 @@ const { intensity = 'quiet' } = Astro.props;
     function seed() {
       const base = Math.max(width, height);
       orbs = Array.from({ length: COUNT }, (_, i) => {
-        // Slow. A full crossing of the viewport takes several minutes.
-        const speed = 0.0016 + Math.random() * 0.0042;
-        const angle = Math.random() * Math.PI * 2;
+        const speed = base * (SPEED_MIN + Math.random() * (SPEED_MAX - SPEED_MIN));
+        // A wide arc rather than a straight line, so the lights wander instead
+        // of marching. Signed, so they do not all curve the same way.
+        const turn =
+          ((Math.PI * 2) / (TURN_PERIOD_MIN + Math.random() * TURN_PERIOD_SPAN)) *
+          (Math.random() < 0.5 ? -1 : 1);
         return {
           x: Math.random() * width,
           y: Math.random() * height,
           r: base * (0.05 + Math.random() * 0.16),
-          vx: Math.cos(angle) * speed * base,
-          vy: Math.sin(angle) * speed * base,
+          speed,
+          heading: Math.random() * Math.PI * 2,
+          turn,
           hue: i % 2 === 0 ? 'rose' : 'aqua',
           alpha: PEAK_ALPHA * (0.45 + Math.random() * 0.55),
         };
@@ -210,10 +235,13 @@ const { intensity = 'quiet' } = Astro.props;
 
       // Slow with the fade: past the hero the drift is a third of its speed,
       // so the ambience reads as settling rather than simply dimming.
-      const speed = isHero ? SPEED_FLOOR + (1 - SPEED_FLOOR) * fade : 1;
+      const pace = isHero ? SPEED_FLOOR + (1 - SPEED_FLOOR) * fade : 1;
       for (const o of orbs) {
-        o.x += o.vx * dt * speed;
-        o.y += o.vy * dt * speed;
+        // Steer first, then move. The turn eases off with the fade too, or the
+        // lights would keep curving briskly while barely travelling.
+        o.heading += o.turn * dt * pace;
+        o.x += Math.cos(o.heading) * o.speed * dt * pace;
+        o.y += Math.sin(o.heading) * o.speed * dt * pace;
         // Wrap with a full-radius margin so nothing pops at the edge.
         if (o.x - o.r > width) o.x = -o.r;
         if (o.x + o.r < 0) o.x = width + o.r;
