@@ -132,7 +132,26 @@ const { intensity = 'quiet' } = Astro.props;
     // The hero is deliberately more present than the rest of the site. What
     // keeps that from fighting the copy is that it only stays bold while the
     // reader is looking at a wordmark — see FADE_FLOOR below.
-    const PEAK_ALPHA = isHero ? 0.3 : 0.1;
+    const PEAK_ALPHA = isHero ? 0.38 : 0.12;
+
+    /**
+     * Radial falloff, sampled from a Gaussian at sigma 0.32.
+     *
+     * The orbs used to be three stops — full, 0.42 at the halfway mark, then
+     * nothing. Three stops is a cone, and a cone has a visible slope: turn the
+     * opacity up on one and you start to see where it ends. A Gaussian has no
+     * edge to find, so the light can be brighter and still read as out of
+     * focus rather than as a shape. The tail is forced to zero well before the
+     * rim, or the circle's own boundary becomes the edge instead.
+     */
+    const FALLOFF: ReadonlyArray<readonly [number, number]> = [
+      [0, 1],
+      [0.2, 0.82],
+      [0.4, 0.46],
+      [0.6, 0.17],
+      [0.8, 0.04],
+      [1, 0],
+    ];
     /**
      * Where the hero's ambience settles once scrolled past, as a fraction of
      * its full strength. Both the opacity and the drift speed ease to this,
@@ -215,10 +234,9 @@ const { intensity = 'quiet' } = Astro.props;
         const g = ctx!.createRadialGradient(o.x, o.y, 0, o.x, o.y, o.r);
         const tint = TINT[o.hue];
         const a = o.alpha * scale;
-        // Soft-edged: opaque centre falling to nothing well before the rim.
-        g.addColorStop(0, `rgba(${tint}, ${a})`);
-        g.addColorStop(0.45, `rgba(${tint}, ${a * 0.42})`);
-        g.addColorStop(1, `rgba(${tint}, 0)`);
+        for (const [stop, mul] of FALLOFF) {
+          g.addColorStop(stop, `rgba(${tint}, ${a * mul})`);
+        }
         ctx!.fillStyle = g;
         ctx!.beginPath();
         ctx!.arc(o.x, o.y, o.r, 0, Math.PI * 2);
