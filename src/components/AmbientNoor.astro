@@ -2,29 +2,46 @@
 /**
  * Ambient noor — the site's signature (spec §6).
  *
- * Soft, out-of-focus lights drifting slowly behind everything, like light
- * through a window at an hour when someone is awake with a baby.
+ * Soft, out-of-focus lights drifting behind everything, like light through a
+ * window at an hour when someone is awake with a baby.
  *
- * Deliberately a 2D canvas and nothing else. The original brief asked for
- * immersive WebGL; §6 records why that was dropped — battery and data cost on
- * older Android, and vestibular sensitivity overlaps meaningfully with
- * pregnancy and postpartum. Same feeling, a fraction of the cost.
+ * Two layers, and which of them a visitor gets depends on their device:
+ *   1. a static CSS gradient wash — always present, the whole ambience below
+ *      768px and under any WebGL failure
+ *   2. a fullscreen GLSL shader drawing 28 soft discs — 768px and up only,
+ *      lazy-loaded so three.js never blocks first paint
  *
- * Layers, back to front:
- *   1. a static CSS gradient wash  — survives reduced motion
- *   2. this canvas of drifting orbs — frozen under reduced motion
- *   3. page content
+ * §6 originally ruled WebGL out (battery and data on older Android, and
+ * vestibular sensitivity overlapping pregnancy and postpartum) and the client
+ * has since asked for it directly. The constraints that reasoning produced are
+ * kept rather than discarded: nothing runs on a phone, nothing runs for a
+ * reduced-motion reader beyond a single held frame, nothing runs behind a
+ * hidden tab, and the device pixel ratio is capped at 1.5.
  */
+import BokehMount from './bokeh/BokehMount';
+
 interface Props {
   /** 'hero' is the loud one — homepage only. Every other page uses 'quiet'. */
   intensity?: 'hero' | 'quiet';
 }
 const { intensity = 'quiet' } = Astro.props;
+
+/**
+ * Peak alpha per disc. The hero is deliberately more present; every other page
+ * carries body copy, and the contrast gate has very little headroom left there.
+ */
+const peak = intensity === 'hero' ? 0.38 : 0.12;
 ---
 
 <div class="noor-ambience" data-intensity={intensity} aria-hidden="true">
   <div class="noor-wash"></div>
-  <canvas class="noor-canvas" data-noor-canvas data-intensity={intensity}></canvas>
+  {/*
+    client:media, not client:idle: Astro then never even fetches the island's
+    JS below the breakpoint. With client:idle a phone downloaded 182KB of React
+    to mount a component whose first act is to return null. This drops that to
+    zero — the sub-768px ambience is the CSS wash above and nothing else.
+  */}
+  <BokehMount peak={peak} client:media="(min-width: 768px)" />
 </div>
 
 <style>
@@ -65,11 +82,12 @@ const { intensity = 'quiet' } = Astro.props;
       var(--color-noor-bg);
   }
 
-  .noor-canvas {
+  /* The island's own <canvas> — it mounts inside .noor-ambience. */
+  .noor-ambience :global(canvas) {
     position: absolute;
     inset: 0;
-    width: 100%;
-    height: 100%;
+    width: 100% !important;
+    height: 100% !important;
     display: block;
   }
 
@@ -104,289 +122,58 @@ const { intensity = 'quiet' } = Astro.props;
   }
 </style>
 
+
 <script>
-  type Orb = {
-    x: number;
-    y: number;
-    r: number;
-    /** px per second along `heading`. */
-    speed: number;
-    /** radians. Steered slowly by `turn`, so the path is an arc, not a line. */
-    heading: number;
-    /** radians per second, signed. Small — this is a wide, lazy curve. */
-    turn: number;
-    hue: 'rose' | 'aqua';
-    alpha: number;
-  };
+  /*
+    The hero wash boost eases off over the first viewport. This is all that
+    survives of the old canvas script, and it stays because the boost darkens
+    the backdrop under every line of copy below the fold — the contrast gate
+    has under half a stop of headroom there.
 
-  const MOTION_QUERY = '(prefers-reduced-motion: reduce)';
+    The shader's own scroll coupling is separate and lives in BokehField.
 
-  function start(canvas: HTMLCanvasElement) {
-    const ctx = canvas.getContext('2d', { alpha: true });
-    if (!ctx) return;
+    Under reduced motion this does not merely freeze: it never runs. A
+    scroll-linked effect is itself one of the patterns that provokes
+    vestibular symptoms, so the wash is pinned at its settled level and the
+    listener is never attached.
+  */
+  const ambience = document.querySelector<HTMLElement>(
+    '.noor-ambience[data-intensity="hero"]',
+  );
 
-    const isHero = canvas.dataset.intensity === 'hero';
-    // 15–25 soft circles (spec §6). The hero gets the top of that range; every
-    // other page keeps the same ambience, quieter.
-    const COUNT = isHero ? 24 : 15;
-    // The hero is deliberately more present than the rest of the site. What
-    // keeps that from fighting the copy is that it only stays bold while the
-    // reader is looking at a wordmark — see FADE_FLOOR below.
-    const PEAK_ALPHA = isHero ? 0.38 : 0.12;
-
-    /**
-     * Radial falloff, sampled from a Gaussian at sigma 0.32.
-     *
-     * The orbs used to be three stops — full, 0.42 at the halfway mark, then
-     * nothing. Three stops is a cone, and a cone has a visible slope: turn the
-     * opacity up on one and you start to see where it ends. A Gaussian has no
-     * edge to find, so the light can be brighter and still read as out of
-     * focus rather than as a shape. The tail is forced to zero well before the
-     * rim, or the circle's own boundary becomes the edge instead.
-     */
-    const FALLOFF: ReadonlyArray<readonly [number, number]> = [
-      [0, 1],
-      [0.2, 0.82],
-      [0.4, 0.46],
-      [0.6, 0.17],
-      [0.8, 0.04],
-      [1, 0],
-    ];
-    /**
-     * Where the hero's ambience settles once scrolled past, as a fraction of
-     * its full strength. Both the opacity and the drift speed ease to this,
-     * so the background quietens AND slows as content arrives.
-     */
-    const FADE_FLOOR = 0.34;
-    const SPEED_FLOOR = 0.3;
-
-    /**
-     * Drift, as a fraction of the viewport's long edge per second.
-     *
-     * This has been raised twice. It started at roughly a sixth of the current
-     * value, which measured 0.8px per second at the alpha centroid — a
-     * viewport crossing took four and a half minutes, which is animated in the
-     * sense that the numbers change and a still image to anyone looking at it.
-     * A light now crosses a 1280px window in about 37 seconds in the hero, and
-     * a little over a minute on the quieter pages, where the ambience sits
-     * behind body copy rather than a wordmark.
-     */
-    const SPEED_MIN = isHero ? 0.016 : 0.009;
-    const SPEED_MAX = isHero ? 0.038 : 0.021;
-
-    /**
-     * Seconds for a full turn of the arc each orb travels. Halved alongside
-     * the speed above: the radius of the arc is speed/turn, so leaving the
-     * period alone would have doubled every curve into something close to a
-     * straight line — the lights would travel faster and stop wandering.
-     */
-    const TURN_PERIOD_MIN = 35;
-    const TURN_PERIOD_SPAN = 45;
-
-    // Rose and aqua at low opacity. Read as atmosphere, never as activity.
-    const TINT = { rose: '233, 163, 196', aqua: '127, 210, 212' } as const;
-
-    let orbs: Orb[] = [];
-    let width = 0;
-    let height = 0;
-    let dpr = 1;
-    let frame = 0;
-    let running = false;
-    let last = 0;
-    /** 1 at the top of the page, easing to 0 one viewport down. */
+  if (ambience) {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
     let fade = 1;
+    let ticking = false;
 
-    const reduced = window.matchMedia(MOTION_QUERY);
-
-    function measure() {
-      // Cap the backing store. These are blurred gradients — nobody can see
-      // the difference at 2x, and the fill rate on a mid-range Android can.
-      dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-      width = canvas.clientWidth;
-      height = canvas.clientHeight;
-      canvas.width = Math.max(1, Math.round(width * dpr));
-      canvas.height = Math.max(1, Math.round(height * dpr));
-      ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
-    }
-
-    function seed() {
-      const base = Math.max(width, height);
-      orbs = Array.from({ length: COUNT }, (_, i) => {
-        const speed = base * (SPEED_MIN + Math.random() * (SPEED_MAX - SPEED_MIN));
-        // A wide arc rather than a straight line, so the lights wander instead
-        // of marching. Signed, so they do not all curve the same way.
-        const turn =
-          ((Math.PI * 2) / (TURN_PERIOD_MIN + Math.random() * TURN_PERIOD_SPAN)) *
-          (Math.random() < 0.5 ? -1 : 1);
-        return {
-          x: Math.random() * width,
-          y: Math.random() * height,
-          r: base * (0.05 + Math.random() * 0.16),
-          speed,
-          heading: Math.random() * Math.PI * 2,
-          turn,
-          hue: i % 2 === 0 ? 'rose' : 'aqua',
-          alpha: PEAK_ALPHA * (0.45 + Math.random() * 0.55),
-        };
-      });
-    }
-
-    function paint() {
-      ctx!.clearRect(0, 0, width, height);
-      // Scale every orb by the scroll fade, so the whole layer recedes
-      // together rather than individual lights blinking out.
-      const scale = isHero ? FADE_FLOOR + (1 - FADE_FLOOR) * fade : 1;
-      for (const o of orbs) {
-        const g = ctx!.createRadialGradient(o.x, o.y, 0, o.x, o.y, o.r);
-        const tint = TINT[o.hue];
-        const a = o.alpha * scale;
-        for (const [stop, mul] of FALLOFF) {
-          g.addColorStop(stop, `rgba(${tint}, ${a * mul})`);
-        }
-        ctx!.fillStyle = g;
-        ctx!.beginPath();
-        ctx!.arc(o.x, o.y, o.r, 0, Math.PI * 2);
-        ctx!.fill();
-      }
-    }
-
-    function step(now: number) {
-      if (!running) return;
-      // Delta-timed so the drift is the same speed at 60Hz and 120Hz, and a
-      // backgrounded tab does not lurch forward on return.
-      const dt = Math.min((now - last) / 1000, 0.05);
-      last = now;
-
-      // Slow with the fade: past the hero the drift is a third of its speed,
-      // so the ambience reads as settling rather than simply dimming.
-      const pace = isHero ? SPEED_FLOOR + (1 - SPEED_FLOOR) * fade : 1;
-      for (const o of orbs) {
-        // Steer first, then move. The turn eases off with the fade too, or the
-        // lights would keep curving briskly while barely travelling.
-        o.heading += o.turn * dt * pace;
-        o.x += Math.cos(o.heading) * o.speed * dt * pace;
-        o.y += Math.sin(o.heading) * o.speed * dt * pace;
-        // Wrap with a full-radius margin so nothing pops at the edge.
-        if (o.x - o.r > width) o.x = -o.r;
-        if (o.x + o.r < 0) o.x = width + o.r;
-        if (o.y - o.r > height) o.y = -o.r;
-        if (o.y + o.r < 0) o.y = height + o.r;
-      }
-      paint();
-      frame = requestAnimationFrame(step);
-    }
-
-    function play() {
-      if (running || reduced.matches || document.hidden) return;
-      running = true;
-      last = performance.now();
-      frame = requestAnimationFrame(step);
-    }
-
-    function pause() {
-      running = false;
-      cancelAnimationFrame(frame);
-    }
-
-    function apply() {
-      if (reduced.matches) {
-        // Drift stops. The gradient and the static bokeh remain (spec §6).
-        pause();
-        paint();
-      } else {
-        play();
-      }
-    }
-
-    function rebuild() {
-      measure();
-      seed();
-      paint();
-      apply();
-    }
-
-    rebuild();
-
-    /*
-      Scroll fade. rAF-throttled and passive, and it writes one custom property
-      plus one number — no layout is read beyond scrollY, so it cannot become a
-      scroll jank source on the phones this site is built for.
-    */
-    const ambience = canvas.parentElement as HTMLElement | null;
-    let fadeTicking = false;
-
-    function readFade() {
+    const read = () => {
       const span = Math.max(1, window.innerHeight * 0.85);
       const next = Math.max(0, Math.min(1, 1 - window.scrollY / span));
       if (Math.abs(next - fade) < 0.005) return;
       fade = next;
-      ambience?.style.setProperty('--noor-fade', fade.toFixed(3));
-      // Repaint immediately when the drift is frozen, or the fade would only
-      // apply on the next resize.
-      if (!running) paint();
-    }
+      ambience.style.setProperty('--noor-fade', fade.toFixed(3));
+    };
 
-    const onFadeScroll = () => {
-      if (fadeTicking) return;
-      fadeTicking = true;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
       requestAnimationFrame(() => {
-        fadeTicking = false;
-        readFade();
+        ticking = false;
+        read();
       });
     };
 
-    /**
-     * The scroll fade is itself motion — it is scroll-linked, which is one of
-     * the patterns that actually provokes vestibular symptoms. So under
-     * reduced motion it is not merely frozen, it never runs: the ambience is
-     * painted once at its settled level and stays there, whatever the reader
-     * scrolls past. The hero gives up its extra boldness for those readers,
-     * which is the correct trade — they asked for less.
-     */
-    function applyFadeMode() {
-      if (!isHero) return;
+    const apply = () => {
       if (reduced.matches) {
-        window.removeEventListener('scroll', onFadeScroll);
-        fade = 0;
-        ambience?.style.setProperty('--noor-fade', '0');
-        paint();
+        window.removeEventListener('scroll', onScroll);
+        ambience.style.setProperty('--noor-fade', '0');
       } else {
-        window.addEventListener('scroll', onFadeScroll, { passive: true });
-        readFade();
+        window.addEventListener('scroll', onScroll, { passive: true });
+        read();
       }
-    }
+    };
 
-    applyFadeMode();
-
-    // Only react to a real width change: mobile browsers fire resize on every
-    // address-bar collapse, and reseeding on scroll would be visible.
-    let lastWidth = window.innerWidth;
-    let resizeTimer = 0;
-    window.addEventListener(
-      'resize',
-      () => {
-        if (window.innerWidth === lastWidth) return;
-        lastWidth = window.innerWidth;
-        window.clearTimeout(resizeTimer);
-        resizeTimer = window.setTimeout(rebuild, 180);
-      },
-      { passive: true },
-    );
-
-    // Never burn a battery behind a hidden tab.
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) pause();
-      else apply();
-    });
-
-    // Honour the setting being changed live, without a reload.
-    reduced.addEventListener('change', () => {
-      apply();
-      applyFadeMode();
-    });
+    apply();
+    reduced.addEventListener('change', apply);
   }
-
-  document
-    .querySelectorAll<HTMLCanvasElement>('[data-noor-canvas]')
-    .forEach(start);
 </script>

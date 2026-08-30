@@ -169,9 +169,19 @@ const stopPreview = () => {
 };
 process.on('exit', stopPreview);
 
-const browser = await chromium.launch(
-  process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {},
-);
+/*
+  The ambience is a WebGL shader above 768px. Headless Chromium falls back to
+  a software rasteriser only when told to, and without these flags the canvas
+  never draws — the gate would then measure a page whose backdrop is the CSS
+  wash alone and pass text that a real reader sees over a darker orb. Slow, and
+  correct, which is the right trade for a gate.
+*/
+const LAUNCH = {
+  args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'],
+  ...(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {}),
+};
+
+const browser = await chromium.launch(LAUNCH);
 
 /*
   Pass 2, measured per element.
@@ -208,6 +218,23 @@ for (const [path, width, height] of SAMPLES) {
   await page.evaluate(() => {
     document.documentElement.style.scrollBehavior = 'auto';
   });
+
+  /*
+    Above the breakpoint the ambience is a lazily hydrated island, so it is not
+    on the page at networkidle. Wait for its canvas and then for the blur to
+    finish easing, or the gate measures a backdrop lighter than the one the
+    reader ends up with — and passes text that should have failed.
+  */
+  if (width >= 768) {
+    await page
+      .waitForSelector('.noor-ambience canvas', { timeout: 8000 })
+      .catch(() => {
+        console.log('  WARNING: no WebGL canvas at ' + width + 'px on ' + path);
+        console.log('  The ambience was not measured. Treat this run as unproven.');
+        failures++;
+      });
+    await page.waitForTimeout(2200);
+  }
 
   // Walk the page a screen at a time: the ambience is fixed, so what sits
   // behind a paragraph changes as it scrolls through the viewport.
@@ -284,15 +311,21 @@ for (const [path, width, height] of SAMPLES) {
 
     if (items.length === 0) continue;
 
-    // Hide the content: what is left is the backdrop each element sits on.
-    await page.addStyleTag({
+    /*
+      Hide the content: what is left is the backdrop each element sits on.
+
+      Remove the tag by its own handle, not by index. This used to delete "the
+      last <style> in the document" on the assumption that it was this one —
+      and once anything else appended a style after it, the wrong tag was
+      removed, the content stayed hidden for the rest of the page, and every
+      screen after the first silently measured zero elements. The gate went on
+      reporting PASS the whole time, on a fraction of the page.
+    */
+    const hider = await page.addStyleTag({
       content: 'header,main,footer{visibility:hidden!important}',
     });
     const shot = await page.screenshot();
-    await page.evaluate(() => {
-      const tags = document.querySelectorAll('style');
-      tags[tags.length - 1]?.remove();
-    });
+    await hider.evaluate((el) => el.remove());
 
     const { data, info } = await sharp(shot)
       .raw()
@@ -386,9 +419,7 @@ const CONTROLS = [
   ['/consultations/', '.form-submit', 'form submit'],
 ];
 
-const browser3 = await chromium.launch(
-  process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {},
-);
+const browser3 = await chromium.launch(LAUNCH);
 for (const [path, selector, name] of CONTROLS) {
   const ctx = await browser3.newContext({ viewport: { width: 1280, height: 900 } });
   const page = await ctx.newPage();
