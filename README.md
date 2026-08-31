@@ -217,7 +217,7 @@ them, because this is the cheapest point to change direction.
 | Astro + Tailwind project, deployed to a preview URL | Built; deploy config for Vercel and Netlify committed. **Connecting the repo to a hosting account is the one step that needs the owner's credentials** |
 | Design tokens from §6, verified for AA contrast at final values | Done — `npm run check:contrast`, table below |
 | Type scale, display and body faces loaded and set | Cormorant Garamond + Figtree, self-hosted |
-| Ambient bokeh canvas, with `prefers-reduced-motion` handling | Done — `src/components/AmbientNoor.astro` |
+| Ambient bokeh canvas, with `prefers-reduced-motion` handling | Done. Later replaced by a WebGL shader at the client's direction — see *The ambient noor layer* |
 | Site shell: header, nav, footer, mobile nav | Done |
 | Home page hero — headline, subhead, both CTAs, ambience behind it | Done |
 
@@ -426,7 +426,9 @@ src/
   styles/global.css           design tokens (§6), type scale, base + focus styles
   layouts/BaseLayout.astro     head, skip link, ambience, header, footer
   components/
-    AmbientNoor.astro         the bokeh layer — canvas + static wash
+    AmbientNoor.astro         static wash, hero fade, and the WebGL mount
+    bokeh/BokehMount.tsx      decides whether WebGL runs at all
+    bokeh/BokehField.tsx      R3F canvas + the GLSL bokeh shader
     Header.astro              nav, persistent CTA, mobile menu
     Footer.astro              social, legal, Circle member login → Podia
     Hero.astro                the homepage hero
@@ -442,14 +444,52 @@ scripts/check-contrast.mjs    the palette gate
 *Noor* means light, and the site's signature is literal: soft, out-of-focus
 lights drifting slowly behind everything.
 
-§6 records why this is a 2D canvas and not WebGL, and that decision should not
-be relitigated: heavy WebGL costs battery and data, stutters on older Android,
-and can trigger nausea in people with vestibular sensitivity — which overlaps
-meaningfully with pregnancy and postpartum. No Three.js, no WebGL, no 3D
-library. `AmbientNoor.astro` is roughly 200 lines with no dependencies.
+**This is now WebGL, at the client's direction.** §6 originally ruled it out —
+battery and data on older Android, and vestibular sensitivity overlapping
+pregnancy and postpartum — and the client asked for it anyway, which is their
+call. The reasoning was not discarded, it was turned into constraints:
 
-The `intensity` prop is the only knob: `hero` on the homepage, `quiet`
-everywhere else. §6 — spend the boldness in one place.
+| §6's worry | What holds it |
+|---|---|
+| Cost on a mid-range phone | Below 768px the island is never fetched. Measured **0KB** of JS at 390px and 767px; the CSS wash is the whole ambience there |
+| Vestibular sensitivity | `prefers-reduced-motion` holds `uBlur` at rest and freezes `uTime`/`uScroll`. Measured **0.00** mean channel change over 2.5s, against 4.75 with motion allowed |
+| Battery | DPR capped at 1.5, render loop parked on a hidden tab |
+| Blocking first paint | three.js sits behind `React.lazy`, in its own chunk |
+
+**The cost is real and worth restating before anyone adds to it:** desktop JS
+went from about 2KB to **1046KB raw / ~287KB gzipped**. React exists in this
+project for this one component. Nothing else is an island, and nothing else
+should become one without a better reason than convenience.
+
+- `AmbientNoor.astro` — the static CSS wash, the hero fade, and the mount
+- `bokeh/BokehMount.tsx` — the light half: decides whether WebGL runs at all
+- `bokeh/BokehField.tsx` — R3F canvas and the GLSL, the only heavy import
+
+The `intensity` prop is still the only look knob: `hero` on the homepage,
+`quiet` everywhere else. §6 — spend the boldness in one place.
+
+#### Two things this cost, both worth knowing
+
+**The shader rendered one flat colour and every JS-side check said it was
+fine.** `ScreenQuad` does not supply a `uv` attribute, so every fragment read
+the same `vUv`. The canvas came back at alpha 1/255: uniform, advancing
+correctly with time, answering scroll exactly as designed, and invisible.
+Patching `uniform1f` at the GPU confirmed all five uniforms were correct the
+whole time. What caught it was the pixel histogram —
+`maxAlpha: 1, meanAlpha: 1, fractionNonzeroAlpha: 1`. *Perfectly uniform* is a
+distinct failure shape, and the eye reads it as merely "faint". The fragment
+stage now derives coordinates from `gl_FragCoord` and a `uResolution` uniform,
+depending on no attribute at all.
+
+**The contrast gate had been scoring a fraction of every page.** It hid content
+with an injected `<style>` and removed *the last style tag in the document*,
+assuming that was the one. Once anything else appended a style after it, the
+wrong tag went, the content stayed hidden, and every screen after the first
+measured zero elements — still reporting PASS. It now removes the tag by its
+own handle. The element count went 55 → 408, and the restored gate immediately
+failed the hero credential line at 4.50 against 4.5. If a gate gets quieter
+after a change, that is the thing to investigate, not the reassurance it looks
+like.
 
 ### Adding a Circle cohort
 
