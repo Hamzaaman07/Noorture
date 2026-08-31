@@ -56,6 +56,15 @@ export const TIER_FOLLOW_UP = get('tierFollowUp').paragraphs[0];
 export const CONSULT_LEDE = get('consultLede').paragraphs[0];
 /** §4.3 — the private class lede, which is now the page's opening line. */
 export const PRIVATE_CLASS_LEDE = get('privateClassLede').paragraphs[0];
+/**
+ * §4.4 — the circles lede.
+ *
+ * The client's text has a double space between "of" and "Light". It is stored
+ * that way because this file records what was approved, not a tidied version
+ * of it; HTML collapses the pair to a single space on the page, and the
+ * preflight normalises whitespace before comparing, so both stay honest.
+ */
+export const CIRCLES_LEDE = get('circlesLede').paragraphs[0];
 
 /** Every passage, for the preflight gate to verify against the build. */
 export const APPROVED_PASSAGES: Passage[] = Object.entries(passages)

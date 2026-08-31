@@ -6,6 +6,7 @@ import Testimonial from '../../components/Testimonial.astro';
 import { getCohorts, STATUS_META } from '../../lib/cohorts';
 import { CIRCLE_TESTIMONIALS } from '../../data/testimonials';
 import { PRICING } from '../../consts';
+import { CIRCLES_LEDE } from '../../data/approved-copy';
 
 // Already sorted: joinable first, completed last (§4.4).
 const cohorts = await getCohorts();
@@ -15,18 +16,20 @@ const completed = cohorts.filter((c) => c.data.status === 'completed');
 const current = [...joinable, ...waitlist];
 
 const title = 'Circles';
-const description = `Twelve weeks with a small group of caregivers, meeting on Zoom. ${PRICING.circle.label} for ${PRICING.circle.weeks} weeks.`;
+// The client's own lede, as on /consultations and /private-class, so search
+// results say what the page says.
+const description = CIRCLES_LEDE;
 ---
 
 <BaseLayout title={title} description={description}>
   <Section narrow>
-    <p class="eyebrow">Circles</p>
-    <h1>Twelve weeks, the same small group, every week.</h1>
-    <p class="lede__sub">
-      Connect, reflect, recharge, and draw on the wisdom of the Quran and each
-      other. Circles meet on Zoom, and the group stays the same for the whole
-      season — which is the part that makes it work.
-    </p>
+    {/*
+      Same treatment as /consultations and /private-class: the page label is
+      the header, as the h1, and the headline above the lede is gone.
+    */}
+    <h1 class="eyebrow">Noorture Circles</h1>
+    {/* CLIENT-APPROVED, VERBATIM (§4.4). See approved-copy.json. */}
+    <p class="lede__sub">{CIRCLES_LEDE}</p>
   </Section>
 
   {/*
@@ -113,24 +116,24 @@ const description = `Twelve weeks with a small group of caregivers, meeting on Z
 </BaseLayout>
 
 <style>
+  /* The page header — see /consultations for why these values. */
   .eyebrow {
-    margin: 0 0 0.85rem;
-    font-size: var(--text-xs);
+    margin: 0 0 0.9rem;
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
     font-weight: 700;
-    letter-spacing: 0.12em;
+    line-height: 1.25;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--color-noor-rose-ink);
   }
 
-  h1 {
-    margin: 0;
-    font-size: var(--text-4xl);
-  }
-
+  /* Full ink: with no headline above it, this paragraph opens the page. */
   .lede__sub {
     margin: 1.25rem 0 0;
     font-size: var(--text-lg);
-    color: var(--color-noor-ink-soft);
+    color: var(--color-noor-ink);
+    text-wrap: pretty;
   }
 
   .section-heading {

@@ -106,5 +106,13 @@
       "Noorture Education sessions can help you and your partner prepare for birth, lactation, and/or parenting. Most topics need 2-4 sessions to be fully covered, depending on your goals and your needs."
     ],
     "sha256": "698b7f8d6414ab1a20d32387072ef2d8676056a160dc77f36ea60beca6b5daa0"
+  },
+  "circlesLede": {
+    "name": "circles lede (§4.4)",
+    "page": "/circles",
+    "paragraphs": [
+      "Noorture Circles are all about opening a community where caregivers can connect, share, reflect, recharge, and be inspired by the wisdom of the Quran and also each other, so that we can be carriers of  Light to ourselves and our children. Join a circle today!"
+    ],
+    "sha256": "bf972cc064e1d4112284eed53ef435943be0ad750de4c78373de76b4cd79927d"
   }
 }
