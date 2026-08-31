@@ -10,6 +10,8 @@ import {
   TIER_INTRO,
   TIER_INITIAL,
   TIER_FOLLOW_UP,
+  CONSULT_HEADING,
+  CONSULT_LEDE,
 } from '../data/approved-copy';
 
 const title = 'Consultations';
@@ -20,12 +22,9 @@ const description =
 <BaseLayout title={title} description={description}>
   <Section narrow>
     <p class="eyebrow">Consultations</p>
-    <h1>Bring your situation, and we'll work through it together.</h1>
-    <p class="lede__sub">
-      A private space to talk through what you're actually facing — the
-      emotional and psychological side of caring for a young child, held with
-      both clinical experience and faith.
-    </p>
+    {/* CLIENT-APPROVED, VERBATIM (§4.2). See approved-copy.json. */}
+    <h1>{CONSULT_HEADING}</h1>
+    <p class="lede__sub">{CONSULT_LEDE}</p>
     <p class="lede__cta">
       {/* §4.2: the $250 initial is a significant ask cold. The free call is
           the real conversion event, so it is the primary CTA on this page. */}

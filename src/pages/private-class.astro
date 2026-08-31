@@ -4,6 +4,7 @@ import Section from '../components/Section.astro';
 import BookingBlock from '../components/BookingBlock.astro';
 import Button from '../components/Button.astro';
 import { PRICING, CLASS_TOPICS, SOCIAL } from '../consts';
+import { PRIVATE_CLASS_LEDE } from '../data/approved-copy';
 
 const title = 'Private Class';
 const description =
@@ -13,13 +14,16 @@ const description =
 <BaseLayout title={title} description={description}>
   <Section narrow>
     <p class="eyebrow">Private Class</p>
-    {/* §4.3: lead with what makes it different from a Consultation. */}
-    <h1>You pick the topic, and Hoda teaches it.</h1>
-    <p class="lede__sub">
-      A private session on one topic, taught with slides, with time for your
-      questions. Practical knowledge, taught the Noorture way — for your
-      family only, on your calendar.
-    </p>
+    {/*
+      The client asked for the headline to go and the paragraph to carry the
+      page on its own. The h1 stays in the accessibility tree rather than being
+      deleted: a page with no top-level heading breaks the document outline for
+      a screen-reader user navigating by heading, and it is what search results
+      title the page by. It is the visible headline that is gone.
+    */}
+    <h1 class="visually-hidden">Private Class</h1>
+    {/* CLIENT-APPROVED, VERBATIM (§4.3). See approved-copy.json. */}
+    <p class="lede__sub lede__sub--lead">{PRIVATE_CLASS_LEDE}</p>
     <p class="lede__cta">
       <Button href="#book">Book a class</Button>
       <span class="lede__price">
@@ -146,6 +150,22 @@ const description =
     margin: 1.25rem 0 0;
     font-size: var(--text-lg);
     color: var(--color-noor-ink-soft);
+  }
+
+  /*
+    With the headline gone this paragraph opens the page, so it is sized and
+    coloured to carry that weight — full ink rather than the softer secondary
+    tone, and a measure that keeps it to three or four lines. It stays in the
+    body face: setting it in the display serif would just rebuild the headline
+    that was asked for removal.
+  */
+  .lede__sub--lead {
+    margin-top: 0.85rem;
+    max-width: 40ch;
+    font-size: var(--text-2xl);
+    line-height: 1.45;
+    color: var(--color-noor-ink);
+    text-wrap: pretty;
   }
 
   .lede__cta {

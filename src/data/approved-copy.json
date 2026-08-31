@@ -90,5 +90,29 @@
       "This 60 minute session is a time to check in on progress since the initial meeting, ask additional questions, or just provide a space for you to share and process what is on your mind or in your heart."
     ],
     "sha256": "b7c5acc5d722b3e448eb3b6b70e0e62652446c9d4ed89bf871de1a5a55254341"
+  },
+  "consultHeading": {
+    "name": "consultations heading (§4.2)",
+    "page": "/consultations",
+    "paragraphs": [
+      "Schedule a Noorture Consultation"
+    ],
+    "sha256": "eaf6ffe0b0e975fed9a7676767b27e33395180a29470a07393d42a8d109038b2"
+  },
+  "consultLede": {
+    "name": "consultations lede (§4.2)",
+    "page": "/consultations",
+    "paragraphs": [
+      "Salam & welcome to Noorture, a professional, non-judgmental space to support you as you \"noorture\" your baby (and yourself!) guided by Divine Love and Light. Please use a link to schedule a time to meet."
+    ],
+    "sha256": "b1315025c56e286a7f4bca9800cba0abfd1339fad46a6f63a86e5f209a4396e6"
+  },
+  "privateClassLede": {
+    "name": "private class lede (§4.3)",
+    "page": "/private-class",
+    "paragraphs": [
+      "Noorture Education sessions can help you and your partner prepare for birth, lactation, and/or parenting. Most topics need 2-4 sessions to be fully covered, depending on your goals and your needs."
+    ],
+    "sha256": "698b7f8d6414ab1a20d32387072ef2d8676056a160dc77f36ea60beca6b5daa0"
   }
 }

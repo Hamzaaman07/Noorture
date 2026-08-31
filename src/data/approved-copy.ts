@@ -44,6 +44,11 @@ export const ABOUT_HODA = get('aboutHoda').paragraphs;
 export const TIER_INTRO = get('tierIntro').paragraphs[0];
 export const TIER_INITIAL = get('tierInitial').paragraphs[0];
 export const TIER_FOLLOW_UP = get('tierFollowUp').paragraphs[0];
+/** §4.2 — the consultations page heading and lede. */
+export const CONSULT_HEADING = get('consultHeading').paragraphs[0];
+export const CONSULT_LEDE = get('consultLede').paragraphs[0];
+/** §4.3 — the private class lede, which is now the page's opening line. */
+export const PRIVATE_CLASS_LEDE = get('privateClassLede').paragraphs[0];
 
 /** Every passage, for the preflight gate to verify against the build. */
 export const APPROVED_PASSAGES: Passage[] = Object.entries(passages)
