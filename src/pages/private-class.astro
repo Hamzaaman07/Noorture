@@ -56,15 +56,15 @@ const description = PRIVATE_CLASS_LEDE;
     --text-lg — so it reads as the page's header while keeping the eyebrow's
     uppercase treatment and its left edge exactly where it was.
 
-    Two resets, because this is an h1 now: the display serif and tight leading
-    that global.css gives every heading are both wrong for wide-tracked
-    uppercase, which needs the body face and room to breathe. Tracking eases
-    from 0.12em to 0.08em as well — the same letter-spacing that reads as
-    deliberate at 13px sprawls at 26px.
+    It is set in the display serif, matching the consultations headline. The
+    leading is still relaxed from the 1.12 global.css gives headings, because
+    that is tuned for two stacked lines of large serif and not for a single
+    uppercase line. Tracking eases from 0.12em to 0.08em as well — the same
+    letter-spacing that reads as deliberate at 13px sprawls at 26px.
   */
   .eyebrow {
     margin: 0 0 0.9rem;
-    font-family: var(--font-body);
+    font-family: var(--font-display);
     font-size: var(--text-xl);
     font-weight: 700;
     line-height: 1.25;
