@@ -44,8 +44,15 @@ export const ABOUT_HODA = get('aboutHoda').paragraphs;
 export const TIER_INTRO = get('tierIntro').paragraphs[0];
 export const TIER_INITIAL = get('tierInitial').paragraphs[0];
 export const TIER_FOLLOW_UP = get('tierFollowUp').paragraphs[0];
-/** §4.2 — the consultations page heading and lede. */
-export const CONSULT_HEADING = get('consultHeading').paragraphs[0];
+/**
+ * §4.2 — the consultations lede.
+ *
+ * There was a CONSULT_HEADING here too ("Schedule a Noorture Consultation").
+ * The client replaced that headline with the page label, so the passage was
+ * removed rather than left registered and unrendered — the gate requires every
+ * registered passage to appear on its page, and a passage that exists but is
+ * never shown is exactly the kind of quiet drift the registry exists to stop.
+ */
 export const CONSULT_LEDE = get('consultLede').paragraphs[0];
 /** §4.3 — the private class lede, which is now the page's opening line. */
 export const PRIVATE_CLASS_LEDE = get('privateClassLede').paragraphs[0];

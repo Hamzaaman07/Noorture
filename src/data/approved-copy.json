@@ -91,14 +91,6 @@
     ],
     "sha256": "b7c5acc5d722b3e448eb3b6b70e0e62652446c9d4ed89bf871de1a5a55254341"
   },
-  "consultHeading": {
-    "name": "consultations heading (§4.2)",
-    "page": "/consultations",
-    "paragraphs": [
-      "Schedule a Noorture Consultation"
-    ],
-    "sha256": "eaf6ffe0b0e975fed9a7676767b27e33395180a29470a07393d42a8d109038b2"
-  },
   "consultLede": {
     "name": "consultations lede (§4.2)",
     "page": "/consultations",

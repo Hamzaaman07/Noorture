@@ -10,7 +10,6 @@ import {
   TIER_INTRO,
   TIER_INITIAL,
   TIER_FOLLOW_UP,
-  CONSULT_HEADING,
   CONSULT_LEDE,
 } from '../data/approved-copy';
 
@@ -21,9 +20,12 @@ const description = CONSULT_LEDE;
 
 <BaseLayout title={title} description={description}>
   <Section narrow>
-    <p class="eyebrow">Consultations</p>
+    {/*
+      Same treatment as /private-class: this label is the page's header, so it
+      is the h1 rather than a decorative <p> sitting above a separate headline.
+    */}
+    <h1 class="eyebrow">Consultations</h1>
     {/* CLIENT-APPROVED, VERBATIM (§4.2). See approved-copy.json. */}
-    <h1>{CONSULT_HEADING}</h1>
     <p class="lede__sub">{CONSULT_LEDE}</p>
     <p class="lede__cta">
       {/* §4.2: the $250 initial is a significant ask cold. The free call is
@@ -137,24 +139,35 @@ const description = CONSULT_LEDE;
 </BaseLayout>
 
 <style>
+  /*
+    The page header, matching /private-class: display serif, one step above the
+    lede below it, uppercase, left edge unmoved. Leading is relaxed from the
+    1.12 global.css gives headings, which suits two stacked lines of large
+    serif rather than a single uppercase line, and tracking eases 0.12em ->
+    0.08em because spacing that reads as deliberate at 13px sprawls at 26px.
+  */
   .eyebrow {
-    margin: 0 0 0.85rem;
-    font-size: var(--text-xs);
+    margin: 0 0 0.9rem;
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
     font-weight: 700;
-    letter-spacing: 0.12em;
+    line-height: 1.25;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--color-noor-rose-ink);
   }
 
-  h1 {
-    margin: 0;
-    font-size: var(--text-4xl);
-  }
-
+  /*
+    Full ink rather than the softer secondary tone. With no headline above it
+    this paragraph opens the page, exactly as on /private-class — leaving one
+    of the two soft and the other ink would make two now-identical layouts
+    look subtly out of step.
+  */
   .lede__sub {
     margin: 1.25rem 0 0;
     font-size: var(--text-lg);
-    color: var(--color-noor-ink-soft);
+    color: var(--color-noor-ink);
+    text-wrap: pretty;
   }
 
   .lede__cta {
