@@ -85,7 +85,9 @@ const href = `/circles/${cohort.id}`;
 
     <p class="cohort__cta">
       <a href={href} class="tap">
-        {meta.joinable ? 'See this Circle' : meta.cta}
+        {/* The {' '} is load-bearing: Astro drops the newline before an inline
+            tag, and without it this renders "See this Circle→" glued. */}
+        {meta.joinable ? 'See this Circle' : meta.cta}{' '}
         <span aria-hidden="true">&rarr;</span>
       </a>
     </p>

@@ -2,6 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Section from '../../components/Section.astro';
 import CohortCard from '../../components/CohortCard.astro';
+import GiftCircleCard from '../../components/GiftCircleCard.astro';
 import Testimonial from '../../components/Testimonial.astro';
 import { getCohorts, STATUS_META } from '../../lib/cohorts';
 import { CIRCLE_TESTIMONIALS } from '../../data/testimonials';
@@ -44,6 +45,8 @@ const description = CIRCLES_LEDE;
       current.length > 0 ? (
         <div class="cohorts">
           {current.map((cohort) => <CohortCard cohort={cohort} />)}
+          {/* Last, so it never pushes a joinable Circle out of first position. */}
+          <GiftCircleCard />
         </div>
       ) : (
         <p class="empty">
