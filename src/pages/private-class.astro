@@ -14,15 +14,14 @@ const description = PRIVATE_CLASS_LEDE;
 
 <BaseLayout title={title} description={description}>
   <Section narrow>
-    <p class="eyebrow">Private Class</p>
     {/*
-      The client asked for the headline to go and the paragraph to carry the
-      page on its own. The h1 stays in the accessibility tree rather than being
-      deleted: a page with no top-level heading breaks the document outline for
-      a screen-reader user navigating by heading, and it is what search results
-      title the page by. It is the visible headline that is gone.
+      This label is the page's visible header now, so it is the h1 rather than
+      a decorative <p> with a hidden h1 beside it. That earlier arrangement had
+      a screen reader announce "Private Class" twice in a row — once as the
+      heading, once as the label sitting right under it. One element, doing
+      both jobs, is the honest version.
     */}
-    <h1 class="visually-hidden">Private Class</h1>
+    <h1 class="eyebrow">Private Class</h1>
     {/* CLIENT-APPROVED, VERBATIM (§4.3). See approved-copy.json. */}
     <p class="lede__sub lede__sub--lead">{PRIVATE_CLASS_LEDE}</p>
     <p class="lede__cta">
@@ -52,11 +51,24 @@ const description = PRIVATE_CLASS_LEDE;
 </BaseLayout>
 
 <style>
+  /*
+    Sized one step above the paragraph below it — --text-xl against the lede's
+    --text-lg — so it reads as the page's header while keeping the eyebrow's
+    uppercase treatment and its left edge exactly where it was.
+
+    Two resets, because this is an h1 now: the display serif and tight leading
+    that global.css gives every heading are both wrong for wide-tracked
+    uppercase, which needs the body face and room to breathe. Tracking eases
+    from 0.12em to 0.08em as well — the same letter-spacing that reads as
+    deliberate at 13px sprawls at 26px.
+  */
   .eyebrow {
-    margin: 0 0 0.85rem;
-    font-size: var(--text-xs);
+    margin: 0 0 0.9rem;
+    font-family: var(--font-body);
+    font-size: var(--text-xl);
     font-weight: 700;
-    letter-spacing: 0.12em;
+    line-height: 1.25;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--color-noor-rose-ink);
   }
