@@ -66,5 +66,29 @@
       "Hoda Shawky is a maternal child health consultant with 20 years of experience working as a pediatric nurse practitioner with expertise in lactation, healthy nutrition, and maternal and pediatric mental health. She received both her undergraduate degree and Masters’ of Science in Nursing from UCLA and completed fellowships in Early Relational Health and Early Childhood advocacy at the UMass Chan School of Medicine Early and the Pritzker Foundation, respectively. She studies Quran under Dr. Zainab Alwani through Glass Lamp Institute and Ustadha Samia Mubarak through Quranic Ocean. She is a student in the Al Madina Institute Suhba Seminary. Hoda is the founder of Noorture, where she provides evidence based, spiritually-centered support to new parents and their young children which integrate Quranic and Prophetic wisdom into the foundation of care for babies and young children in order to noorture future generations through Divine Noor (God's Love and Light)."
     ],
     "sha256": "a08e511fb41370b7522b4fdc2dd45c60eb107176f8c13134ef63ecc688874b99"
+  },
+  "tierIntro": {
+    "name": "introductory call tier (§4.2)",
+    "page": "/consultations",
+    "paragraphs": [
+      "Before setting up a full session, please use this link to set up a free 15 minute consultation first. I am also happy to answer any burning questions you may have. I strongly believe that everyone deserves access to quality care and information. Please inform me during this intro consultation so that we can work out something affordable for your family."
+    ],
+    "sha256": "f219d484da305f246f6545a1344b5d1548ffb67f8a96ed1bbfe2754c10fc2529"
+  },
+  "tierInitial": {
+    "name": "initial consultation tier (§4.2)",
+    "page": "/consultations",
+    "paragraphs": [
+      "This 90 minute session consists of a thorough intake, assessments, and an action plan that we will develop together. More importantly, it is a time for us to check in on how YOU are doing. It is a space for you to ask questions, share what is on your mind, and to process what you are experiencing in your heart. Please only schedule this time after we have had the free 15 minute consultation together."
+    ],
+    "sha256": "a0bcfb50329a838811e4d3526c853964f5188a53a12d2be8475102913bdd43fb"
+  },
+  "tierFollowUp": {
+    "name": "follow-up tier (§4.2)",
+    "page": "/consultations",
+    "paragraphs": [
+      "This 60 minute session is a time to check in on progress since the initial meeting, ask additional questions, or just provide a space for you to share and process what is on your mind or in your heart."
+    ],
+    "sha256": "b7c5acc5d722b3e448eb3b6b70e0e62652446c9d4ed89bf871de1a5a55254341"
   }
 }

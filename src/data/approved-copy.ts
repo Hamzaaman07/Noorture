@@ -40,6 +40,10 @@ export const GIFT_CARD_LINE = get('giftCardLine').paragraphs[0];
 export const ABOUT_WHAT_IS_NOORTURE = get('aboutWhatIsNoorture').paragraphs;
 /** §4.6 — Hoda's bio. */
 export const ABOUT_HODA = get('aboutHoda').paragraphs;
+/** §4.2 — the three consultation tiers, in Hoda's own words. */
+export const TIER_INTRO = get('tierIntro').paragraphs[0];
+export const TIER_INITIAL = get('tierInitial').paragraphs[0];
+export const TIER_FOLLOW_UP = get('tierFollowUp').paragraphs[0];
 
 /** Every passage, for the preflight gate to verify against the build. */
 export const APPROVED_PASSAGES: Passage[] = Object.entries(passages)

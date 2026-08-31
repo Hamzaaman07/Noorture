@@ -6,6 +6,11 @@ import BookingBlock from '../components/BookingBlock.astro';
 import ProvisionalNote from '../components/ProvisionalNote.astro';
 import Button from '../components/Button.astro';
 import { PRICING } from '../consts';
+import {
+  TIER_INTRO,
+  TIER_INITIAL,
+  TIER_FOLLOW_UP,
+} from '../data/approved-copy';
 
 const title = 'Consultations';
 const description =
@@ -83,11 +88,8 @@ const description =
         ctaLabel="Book the free call"
         featured
       >
-        <p>
-          A short call to work out whether this is the right fit, and what
-          you'd want out of a full session. No charge, and no obligation to
-          book anything afterwards.
-        </p>
+        {/* CLIENT-APPROVED, VERBATIM (§4.2). See approved-copy.json. */}
+        <p>{TIER_INTRO}</p>
       </PriceTier>
 
       <PriceTier
@@ -97,11 +99,8 @@ const description =
         href="#book"
         ctaLabel="Request a time"
       >
-        <p>
-          The first full session. Long enough to get the whole picture — the
-          history, what you've already tried, and what is actually going on
-          underneath — and to leave with a plan.
-        </p>
+        {/* CLIENT-APPROVED, VERBATIM (§4.2). See approved-copy.json. */}
+        <p>{TIER_INITIAL}</p>
       </PriceTier>
 
       <PriceTier
@@ -111,11 +110,8 @@ const description =
         href="#book"
         ctaLabel="Request a time"
       >
-        <p>
-          For after the first session, when things have moved and you want to
-          think it through again. Book them as you need them; there is no
-          package to commit to.
-        </p>
+        {/* CLIENT-APPROVED, VERBATIM (§4.2). See approved-copy.json. */}
+        <p>{TIER_FOLLOW_UP}</p>
       </PriceTier>
     </div>
 
