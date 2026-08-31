@@ -3,7 +3,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Section from '../components/Section.astro';
 import PriceTier from '../components/PriceTier.astro';
 import BookingBlock from '../components/BookingBlock.astro';
-import ProvisionalNote from '../components/ProvisionalNote.astro';
 import Button from '../components/Button.astro';
 import { PRICING } from '../consts';
 import {
@@ -32,49 +31,6 @@ const description = CONSULT_LEDE;
           the real conversion event, so it is the primary CTA on this page. */}
       <Button href="#book">Book a free 15-minute call</Button>
     </p>
-  </Section>
-
-  <Section tint narrow labelledby="what-heading">
-    <h2 id="what-heading">What a session is like</h2>
-    <p>
-      We meet on Zoom or FaceTime, wherever you are, with your baby on you if
-      that's how the hour has to go. You talk, and I listen properly — not to
-      the first minute of it while I decide what to tell you.
-    </p>
-    <p>
-      Then we work through it. Sometimes that's untangling what's actually
-      happening from what you've been told is happening. Sometimes it's
-      permission to stop doing something that isn't working. Often it's both,
-      and often the thing underneath is not the thing you booked about.
-    </p>
-    <p>
-      You'll leave with something you can do this week, not a reading list.
-    </p>
-
-    <h2>Who it's for</h2>
-    <p>
-      Parents and parents-to-be, and anyone else doing the caring — aunts and
-      uncles, grandparents, teachers, students, and care providers. Families
-      and new parents are welcome to book together; that's the same
-      consultation, not a different product.
-    </p>
-    <p>
-      You do not need to arrive with a crisis, and you do not need to have
-      tried everything first.
-    </p>
-
-    <ProvisionalNote pending="the client's licensing board or attorney review">
-      <p>
-        Noorture consultations are consultation and education. They are not
-        medical care, do not create a provider–patient relationship, and are
-        not a substitute for care from your own clinician. If something is
-        urgent, contact your doctor or your local emergency service.
-      </p>
-      <p>
-        Hoda is a licensed nurse practitioner. Whether a given consultation can
-        be offered depends on where you are located.
-      </p>
-    </ProvisionalNote>
   </Section>
 
   <Section labelledby="pricing-heading">
@@ -172,14 +128,6 @@ const description = CONSULT_LEDE;
 
   .lede__cta {
     margin: 2rem 0 0;
-  }
-
-  h2 {
-    margin: 2.5rem 0 0.85rem;
-    font-size: var(--text-2xl);
-  }
-  h2:first-child {
-    margin-top: 0;
   }
 
   p {
