@@ -6,7 +6,7 @@ import ProductCard from '../components/ProductCard.astro';
 import ProofStrip from '../components/ProofStrip.astro';
 import GiftBand from '../components/GiftBand.astro';
 import Testimonial from '../components/Testimonial.astro';
-import { CIRCLE_TESTIMONIALS } from '../data/testimonials';
+import { GENERAL_TESTIMONIALS } from '../data/testimonials';
 import { PRICING } from '../consts';
 import {
   POSITIONING,
@@ -17,8 +17,13 @@ import {
   TILE_ORGANIZATIONAL,
 } from '../data/approved-copy';
 
-// Two short pulls on the home page; the full set lives on /reviews (§4.1).
-const pulls = [CIRCLE_TESTIMONIALS[1], CIRCLE_TESTIMONIALS[2]];
+/*
+  One pull on the home page, at the client's direction; the full set lives on
+  /reviews (§4.1). The two Circle quotes that used to sit here were not moved
+  anywhere — /reviews already renders every entry of CIRCLE_TESTIMONIALS, so
+  they have been on that page the whole time and still are.
+*/
+const pulls = [GENERAL_TESTIMONIALS[0]];
 ---
 
 <BaseLayout ambience="hero">
@@ -162,8 +167,12 @@ const pulls = [CIRCLE_TESTIMONIALS[1], CIRCLE_TESTIMONIALS[2]];
       grid-template-columns: repeat(2, 1fr);
       gap: 1.5rem;
     }
+    /*
+      One column now that there is a single quote. The two-column rule is gone
+      rather than left in place: with one child it did nothing visible, but it
+      would silently halve the measure the moment a second quote was added.
+    */
     .pulls {
-      grid-template-columns: repeat(2, 1fr);
       gap: 2rem;
     }
   }

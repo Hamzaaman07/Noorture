@@ -27,7 +27,15 @@ export interface Testimonial {
  * until the real wording is supplied. Paste them in here and the page picks
  * them up with no other edit.
  */
-export const GENERAL_TESTIMONIALS: Testimonial[] = [];
+export const GENERAL_TESTIMONIALS: Testimonial[] = [
+  {
+    // CLIENT-APPROVED, VERBATIM. The first testimonial with an attribution —
+    // §9.4 notes that even "Mother of two" beats nothing for credibility.
+    quote:
+      "Hoda has been a guiding light in my parenting journey ever since I met her. Her Noorture sessions help me feel seen in the isolation of motherhood, and most importantly, she helps me connect my parenting to Allah and reminds me that when I feel like my light is not enough for my children, to seek His everlasting light and connect them to it. I wish every mom could be in these Noorture circles because it's so needed!",
+    name: 'Mother of two',
+  },
+];
 
 export const CIRCLE_TESTIMONIALS: Testimonial[] = [
   {
