@@ -1,0 +1,74 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/Section.astro';
+import ProvisionalNote from '../components/ProvisionalNote.astro';
+import Button from '../components/Button.astro';
+import { SOCIAL } from '../consts';
+
+/**
+ * Organizational trainings and technical assistance.
+ *
+ * The client added this to the nav before supplying copy for it, so the page
+ * exists and is honest about being unfinished rather than carrying invented
+ * descriptions of a service nobody has agreed the shape of (§8.5: deferred
+ * items are marked placeholders, never fabricated). The nav cannot point at a
+ * 404, and the links gate would fail if it did.
+ */
+const title = 'Organizational Trainings and Technical Assistance';
+const description =
+  'Trainings and technical assistance for organizations, from a pediatric nurse practitioner and lactation consultant. Details coming soon.';
+---
+
+<BaseLayout title={title} description={description}>
+  <Section narrow>
+    <h1 class="eyebrow">Organizational Trainings</h1>
+    <p class="lede__sub">
+      Trainings and technical assistance for organizations, clinics, and
+      community groups.
+    </p>
+    <p class="lede__cta">
+      <Button href="/contact">Get in touch</Button>
+    </p>
+  </Section>
+
+  <Section tint narrow>
+    <ProvisionalNote pending="the client's copy for this page">
+      <p>
+        This page is in the nav but its content has not been written yet. What
+        is offered, who it is for, how it is delivered and what it costs are
+        all still to come from Hoda.
+      </p>
+      <p>
+        In the meantime, anyone who wants this can{' '}
+        <a href="/contact">use the contact form</a> or email{' '}
+        <a href={`mailto:${SOCIAL.email}`}>{SOCIAL.email}</a>, and she will
+        reply directly.
+      </p>
+    </ProvisionalNote>
+  </Section>
+</BaseLayout>
+
+<style>
+  /* The page header, matching every other top-level page. */
+  .eyebrow {
+    margin: 0 0 0.9rem;
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-noor-rose-ink);
+  }
+
+  .lede__sub {
+    margin: 1.25rem 0 0;
+    font-size: var(--text-lg);
+    color: var(--color-noor-ink);
+    text-wrap: pretty;
+  }
+
+  .lede__cta {
+    margin: 2rem 0 0;
+  }
+</style>

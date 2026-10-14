@@ -34,12 +34,9 @@ import { CTA, CREDENTIALS } from '../consts';
 
     <p class="hero__credentials">
       {
-        CREDENTIALS.map((item, i) => (
-          <>
-            {i > 0 && <span class="dot" aria-hidden="true">·</span>}
-            <span>{item}</span>
-          </>
-        ))
+        /* No separator glyph any more — each credential ends in its own full
+           stop, so a middot between them would be punctuation twice. */
+        CREDENTIALS.map((item) => <span>{item}</span>)
       }
     </p>
   </div>
@@ -94,16 +91,14 @@ import { CTA, CREDENTIALS } from '../consts';
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
-    gap: 0.3rem 0.65rem;
+    /* Wider than the old 0.65rem: the middots used to do the separating and
+       now the gap has to, or the items read as one run-on line. */
+    gap: 0.4rem 1.6rem;
     font-size: var(--text-xs);
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--color-noor-ink);
-  }
-
-  .dot {
-    color: var(--color-noor-rose-ink);
   }
 
   @media (min-width: 34rem) {

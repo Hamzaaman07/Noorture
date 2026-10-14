@@ -13,23 +13,6 @@ const isCurrent = (href: string) => path === href || path.startsWith(href + '/')
       <NoortureMark />
     </a>
 
-    <nav class="desktop-nav" aria-label="Primary">
-      <ul>
-        {
-          NAV.map((item) => (
-            <li>
-              <a
-                href={item.href}
-                aria-current={isCurrent(item.href) ? 'page' : undefined}
-              >
-                {item.label}
-              </a>
-            </li>
-          ))
-        }
-      </ul>
-    </nav>
-
     <div class="desktop-cta">
       <Button href={CTA.primaryHref} class="btn--compact">
         {CTA.primaryLabel}
@@ -48,6 +31,32 @@ const isCurrent = (href: string) => path === href || path.startsWith(href + '/')
       </span>
       <span class="menu-toggle__label" data-menu-label>Menu</span>
     </button>
+  </div>
+
+  {/*
+    The nav sits on its own row rather than beside the logo. Measured rather
+    than guessed: on one line these six labels need 1109px, and the 76rem shell
+    is 1216px with the logo and CTA already taking about 300px of it. There is
+    no width at which they fit alongside each other, so the choice was a second
+    row or a hamburger on desktop — and a row keeps every label visible.
+  */}
+  <div class="nav-row">
+    <nav class="desktop-nav shell shell--nav" aria-label="Primary">
+      <ul>
+        {
+          NAV.map((item) => (
+            <li>
+              <a
+                href={item.href}
+                aria-current={isCurrent(item.href) ? 'page' : undefined}
+              >
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
   </div>
 
   <div class="mobile-nav" id="mobile-nav" data-mobile-nav hidden>
@@ -104,7 +113,6 @@ const isCurrent = (href: string) => path === href || path.startsWith(href + '/')
     display: inline-flex;
   }
 
-  .desktop-nav,
   .desktop-cta {
     display: none;
   }
@@ -116,10 +124,25 @@ const isCurrent = (href: string) => path === href || path.startsWith(href + '/')
     padding: 0;
   }
 
+  .nav-row {
+    display: none;
+    border-top: 1px solid var(--color-noor-line);
+  }
+
+  .shell--nav {
+    padding-block: 0.15rem 0.5rem;
+  }
+
   .desktop-nav ul {
     display: flex;
     align-items: center;
-    gap: clamp(1rem, 2.4vw, 2rem);
+    justify-content: space-between;
+    gap: clamp(0.75rem, 1.8vw, 1.75rem);
+  }
+
+  /* Each label stays on one line; the row exists precisely so they can. */
+  .desktop-nav a {
+    white-space: nowrap;
   }
 
   .desktop-nav a {
@@ -213,8 +236,13 @@ const isCurrent = (href: string) => path === href || path.startsWith(href + '/')
     font-size: var(--text-sm);
   }
 
-  @media (min-width: 62rem) {
-    .desktop-nav,
+  /*
+    78rem, not 62rem. Below this the nav row itself would wrap, which is the
+    thing the row exists to prevent — so narrower viewports keep the menu
+    button, which handles long labels better than a cramped row ever could.
+  */
+  @media (min-width: 78rem) {
+    .nav-row,
     .desktop-cta {
       display: block;
     }
@@ -223,9 +251,6 @@ const isCurrent = (href: string) => path === href || path.startsWith(href + '/')
       display: none;
     }
     .brand {
-      margin-right: clamp(1rem, 3vw, 2.5rem);
-    }
-    .desktop-nav {
       margin-right: auto;
     }
   }

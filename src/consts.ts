@@ -20,10 +20,22 @@ export const CTA = {
   secondaryHref: '/circles',
 } as const;
 
+/**
+ * The nav. Labels are the client's, in their order.
+ *
+ * These are long — four of the six are three words or more — so the header
+ * switches to the menu button at a wider breakpoint than it used to. See
+ * Header.astro; the alternative was shrinking the type until the nav stopped
+ * being readable, which is not a trade worth making for a tired reader.
+ */
 export const NAV = [
-  { label: 'Consultations', href: '/consultations' },
-  { label: 'Private Class', href: '/private-class' },
-  { label: 'Circles', href: '/circles' },
+  { label: 'One-on-One Consultations', href: '/consultations' },
+  { label: 'Noorture Circles', href: '/circles' },
+  { label: 'Private & Group Classes', href: '/private-class' },
+  {
+    label: 'Organizational Trainings and Technical Assistance',
+    href: '/organizational-trainings',
+  },
   { label: 'About', href: '/about' },
   { label: 'Reviews', href: '/reviews' },
 ] as const;
@@ -118,9 +130,15 @@ export const ANALYTICS = {
   cloudflareToken: null as string | null,
 } as const;
 
+/**
+ * The hero credential line, in the client's wording. The trailing full stops
+ * are theirs and are part of the strings: the line used to be separated by
+ * middots, and those are gone now that each item punctuates itself. The last
+ * item deliberately carries no stop.
+ */
 export const CREDENTIALS = [
-  '20 years',
-  'Pediatric Nurse Practitioner',
-  'IBCLC Lactation Consultant',
-  'UCLA MSN',
+  '20 Years Experience.',
+  'Pediatric Nurse Practitioner.',
+  'IBCLC Lactation Consultant.',
+  'Maternal and Pediatric Mental Health Specialist',
 ] as const;
