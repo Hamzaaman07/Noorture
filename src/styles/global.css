@@ -61,8 +61,22 @@
   --color-noor-aqua: #7fd2d4;
   --color-noor-aqua-deep: #3f9ca3;
   --color-noor-ink: #2c4a4e;
-  --color-noor-bg: #faf6f5;
-  --color-noor-bg-alt: #eff6f6;
+  /*
+    Cream, at the client's request — warmer and softer than the near-white
+    #faf6f5 this replaces. The alternating section tint moves with it: it was
+    a mint #eff6f6, which read as a second hue next to cream rather than as the
+    same paper in shadow. Both now sit on one warm axis, so sections still
+    alternate without the page looking like two palettes.
+
+    The step between them is matched to the old pair rather than picked by eye.
+    In relative luminance the mint sat 0.0191 below the old background; the
+    first cream tint tried here sat 0.0739 below, four times the separation,
+    and the alternating bands stopped reading as soft. 0.0176 is the closest
+    match available, so the rhythm of the page is unchanged and only the hue
+    has moved.
+  */
+  --color-noor-bg: #fbf7ef;
+  --color-noor-bg-alt: #f9f5ec;
 
   /* --- AA-safe text/label siblings (derived, see note above) --- */
   --color-noor-rose-ink: #8d5167;
