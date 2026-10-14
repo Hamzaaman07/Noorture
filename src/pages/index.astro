@@ -8,7 +8,14 @@ import GiftBand from '../components/GiftBand.astro';
 import Testimonial from '../components/Testimonial.astro';
 import { CIRCLE_TESTIMONIALS } from '../data/testimonials';
 import { PRICING } from '../consts';
-import { POSITIONING, FOR_WHOM } from '../data/approved-copy';
+import {
+  POSITIONING,
+  FOR_WHOM,
+  TILE_CONSULTATION,
+  TILE_CLASSES,
+  TILE_CIRCLE,
+  TILE_ORGANIZATIONAL,
+} from '../data/approved-copy';
 
 // Two short pulls on the home page; the full set lives on /reviews (§4.1).
 const pulls = [CIRCLE_TESTIMONIALS[1], CIRCLE_TESTIMONIALS[2]];
@@ -29,47 +36,48 @@ const pulls = [CIRCLE_TESTIMONIALS[1], CIRCLE_TESTIMONIALS[2]];
 
   </Section>
 
-  {/* The heart of the page: three cards, equal weight (§4.1). */}
+  {/*
+    The heart of the page: four cards, equal weight (§4.1). Was three until
+    the client added Organizational Trainings — see the grid below for why
+    that became a 2x2 rather than a row of four.
+  */}
   <Section labelledby="products-heading">
-    <h2 id="products-heading" class="section-heading">Three ways to work together</h2>
+    <h2 id="products-heading" class="section-heading">Ways to work together</h2>
 
+    {/* CLIENT-APPROVED, VERBATIM (§4.1). See approved-copy.json. */}
     <div class="products">
       <ProductCard
-        title="Consultations"
+        title="One-on-One Consultation"
         href="/consultations"
         cta="Start with a free 15-minute call"
         accent="rose"
       >
-        <p>
-          A private space to talk through what you're actually facing. Bring
-          your situation, and we'll work through it together — the emotional
-          and psychological side of caring for a young child, held with both
-          clinical experience and faith.
-        </p>
+        <p>{TILE_CONSULTATION}</p>
       </ProductCard>
 
       <ProductCard
-        title="Private Class"
+        title="Private & Group Classes"
         href="/private-class"
         cta={`${PRICING.privateClass.label} per family`}
       >
-        <p>
-          A private session on one topic, taught with slides, with time for
-          your questions. Birth, breastfeeding, bonding with your baby —
-          practical knowledge, taught the Noorture way.
-        </p>
+        <p>{TILE_CLASSES}</p>
       </ProductCard>
 
       <ProductCard
-        title="Circles"
+        title="Noorture Circle"
         href="/circles"
         cta={`${PRICING.circle.label} for ${PRICING.circle.weeks} weeks`}
+        accent="rose"
       >
-        <p>
-          Twelve weeks with a small group of caregivers, meeting on Zoom.
-          Connect, reflect, recharge, and draw on the wisdom of the Quran and
-          each other.
-        </p>
+        <p>{TILE_CIRCLE}</p>
+      </ProductCard>
+
+      <ProductCard
+        title="Organizational Trainings and Technical Assistance"
+        href="/organizational-trainings"
+        cta="Book a 15-minute consultation"
+      >
+        <p>{TILE_ORGANIZATIONAL}</p>
       </ProductCard>
     </div>
   </Section>
@@ -144,8 +152,14 @@ const pulls = [CIRCLE_TESTIMONIALS[1], CIRCLE_TESTIMONIALS[2]];
   }
 
   @media (min-width: 48rem) {
+    /*
+      2x2, not a row of four. These descriptions run to 60-130 words; four
+      columns would give each about 280px and produce a card tall enough to
+      need its own scroll. Two columns keep a readable measure and let the
+      pairs line up.
+    */
     .products {
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 1.5rem;
     }
     .pulls {

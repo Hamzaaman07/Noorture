@@ -65,6 +65,19 @@ export const PRIVATE_CLASS_LEDE = get('privateClassLede').paragraphs[0];
  * preflight normalises whitespace before comparing, so both stay honest.
  */
 export const CIRCLES_LEDE = get('circlesLede').paragraphs[0];
+/** §4.1 — the hero subhead. */
+export const HERO_SUBHEAD = get('heroSubhead').paragraphs[0];
+/**
+ * §4.1 — the four home-page tiles.
+ *
+ * Two of these carry the salawat (ﷺ, U+FDFA). global.css serves a subsetted
+ * Amiri for exactly that codepoint, so it renders in its own face rather than
+ * as a tofu box or at the wrong size — do not "simplify" it to (pbuh).
+ */
+export const TILE_CONSULTATION = get('tileConsultation').paragraphs[0];
+export const TILE_CLASSES = get('tileClasses').paragraphs[0];
+export const TILE_CIRCLE = get('tileCircle').paragraphs[0];
+export const TILE_ORGANIZATIONAL = get('tileOrganizational').paragraphs[0];
 
 /** Every passage, for the preflight gate to verify against the build. */
 export const APPROVED_PASSAGES: Passage[] = Object.entries(passages)

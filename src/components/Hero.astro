@@ -2,6 +2,7 @@
 import NoortureMark from './NoortureMark.astro';
 import Button from './Button.astro';
 import { CTA, CREDENTIALS } from '../consts';
+import { HERO_SUBHEAD } from '../data/approved-copy';
 ---
 
 <section class="hero">
@@ -18,10 +19,8 @@ import { CTA, CREDENTIALS } from '../consts';
       <NoortureMark variant="wordmark" alt="Noorture" />
     </h1>
 
-    <p class="hero__subhead">
-      Consultations, private classes, and support circles from a pediatric
-      nurse practitioner and lactation consultant.
-    </p>
+    {/* CLIENT-APPROVED, VERBATIM (§4.1). See approved-copy.json. */}
+    <p class="hero__subhead">{HERO_SUBHEAD}</p>
 
     <div class="hero__actions">
       {/* The free 15-minute call is the lowest-friction entry point in the

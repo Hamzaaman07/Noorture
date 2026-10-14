@@ -22,9 +22,9 @@
     "name": "positioning block (§4.1)",
     "page": "/",
     "paragraphs": [
-      "Noorture provides consultations, education, and support that fuses the evidence-based sciences of maternal and child health and well-being with the richness of our Islamic tradition to help parents not raise healthy children, but to noorture the relationships in their lives through Divine, Loving Light & Guidance (noor)."
+      "Noorture provides consultations, education, and support that fuses the evidence-based sciences of maternal and child health and well-being with the richness of our Islamic tradition to help parents not only raise healthy children, but to noorture the relationships in their lives through Divine, Loving Light & Guidance (noor)."
     ],
-    "sha256": "c30f8c1c56892f71e7f4b6dfdd5bef257d052229be3076926ee004aa4d9667e9"
+    "sha256": "06d4eb5bf1b91eb62a436a1cc8f2df02c87848f660f9f6b402ba9337c7d65a4a"
   },
   "forWhom": {
     "name": "who it is for (§4.1)",
@@ -114,5 +114,45 @@
       "Noorture Circles are all about opening a community where caregivers can connect, share, reflect, recharge, and be inspired by the wisdom of the Quran and also each other, so that we can be carriers of  Light to ourselves and our children. Join a circle today!"
     ],
     "sha256": "bf972cc064e1d4112284eed53ef435943be0ad750de4c78373de76b4cd79927d"
+  },
+  "heroSubhead": {
+    "name": "hero subhead (§4.1)",
+    "page": "/",
+    "paragraphs": [
+      "Spiritually-centered support to parents and caregivers of young children to Noorture their relationships guided by Divine Love and Light."
+    ],
+    "sha256": "d2ad045ca2b7f7efd33b066e7cc804d208180f9c1c541e9494691487dacfe92d"
+  },
+  "tileConsultation": {
+    "name": "home tile — consultation (§4.1)",
+    "page": "/",
+    "paragraphs": [
+      "A private, non-judgmental virtual space to receive professional, spiritually- backed support from a pediatric expert as you “noorture” your child and yourself. Whether your need for support is related to lactation or feeding issues, bonding with baby, your own emotional/spiritual state, learning to find your new normal, or a combination of all of it, this space is for you to feel seen, heard, and supported in your journey."
+    ],
+    "sha256": "caadaddb2de19c8f0db2b9db0f8ddc1099882222f7c2972aafd6513cf1c23c32"
+  },
+  "tileClasses": {
+    "name": "home tile — classes (§4.1)",
+    "page": "/",
+    "paragraphs": [
+      "Noorture Education sessions can help you and your partner prepare for the arrival of your child, for breastfeeding your baby, preserving your child’s fitra, or building a healthy relationship with your child(ren) in a spiritually- centered, peaceful home. Topics may vary from one to four sessions depending on your needs. Book a private class for you or a group of friends."
+    ],
+    "sha256": "2559485526d1dd384670803b9a87f7f13f9a068f4c4533db92387b445d1259bd"
+  },
+  "tileCircle": {
+    "name": "home tile — circle (§4.1)",
+    "page": "/",
+    "paragraphs": [
+      "In this 12- week support circle, you’ll join a community of sisters in a space in which to “noorture” your own mind and spirit while you care for the children in your life. Guided by wisdom from the Quran and sunnah of the Prophet Muhammed ﷺ, this space will allow you to listen, share, connect, reflect, and recharge alongside other women."
+    ],
+    "sha256": "f28524fb8dc050766c3d9d3762137ab063efd791ad1e18faf23a894befb33785"
+  },
+  "tileOrganizational": {
+    "name": "home tile — organizational (§4.1)",
+    "page": "/",
+    "paragraphs": [
+      "The most powerful impact that our Beloved Prophet ﷺ left on the people around him, especially children, came from his ability to truly see, hear, and understand them. These are prophetic traits necessary for all of us to be able to “noorture” children in environments where they feel respected, loved, and can grow to become people who are connected to their own fitra, their community, and their Creator. Noorture is happy to offer professional expertise in pediatric health, maternal- child health from an equity and spiritually- based lens for organizations wishing to support their staff in developing the skills to effectively work with babies and young children and their parents in a way that supports their overall development and wellness. Book a 15- minute consultation to discuss further."
+    ],
+    "sha256": "852414c10a7c33d390e27222ebef15dea118d8cd026981496cacbc3eea491ddd"
   }
 }
