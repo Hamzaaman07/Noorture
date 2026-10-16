@@ -1,0 +1,117 @@
+---
+import FormField from './FormField.astro';
+import { FORMS } from '../consts';
+
+/**
+ * THE SCHEDULER SWAP POINT.
+ *
+ * §5.2: the scheduler is not chosen yet. Both booking pages get a slot that
+ * currently renders a request form, delivered to email. When a scheduler is
+ * picked — Cal.com, Acuity and SavvyCal are the candidates — this block is
+ * swapped for an embed and nothing else on either page changes.
+ *
+ * So this component is the only thing that knows a form exists. The pages
+ * render <BookingBlock product="..." /> and nothing more. §8.5 asks that
+ * swapping the scheduler touch one component and no page templates: replace
+ * the <form> below with the embed, keep the props, done.
+ *
+ * HIPAA compliance is explicitly NOT required for these forms, per client
+ * direction (§5.2).
+ */
+interface Props {
+  product: 'consultation' | 'private-class';
+  id?: string;
+  options: { value: string; label: string }[];
+  heading?: string;
+  intro?: string;
+}
+const {
+  product, id = 'book', options, heading = 'Request a time', intro,
+} = Astro.props;
+---
+
+<div class="booking" id={id}>
+  <div class="booking__head">
+    <h2>{heading}</h2>
+    {intro && <p class="booking__intro">{intro}</p>}
+  </div>
+
+  <form
+    class="booking__form"
+    method="post"
+    action={FORMS.endpoint ?? undefined}
+    data-noor-form
+    novalidate
+  >
+    <input type="hidden" name="source" value={product} />
+    <p class="form-trap" aria-hidden="true">
+      <label>Leave this field empty
+        <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" />
+      </label>
+    </p>
+
+    <FormField id={`${id}-name`} name="name" label="Your name" required autocomplete="name" />
+    <FormField id={`${id}-email`} name="email" label="Email" type="email" required
+      autocomplete="email" inputmode="email" />
+    <FormField id={`${id}-phone`} name="phone" label="Phone" type="tel" optional
+      autocomplete="tel" inputmode="tel" />
+    <FormField id={`${id}-product`} name="product" label="What would you like to book?"
+      type="select" required options={options} />
+    <FormField id={`${id}-times`} name="times" label="Times that usually work for you"
+      required placeholder="Weekday mornings, or after 8pm PT" />
+    <FormField id={`${id}-notes`} name="notes" type="textarea"
+      label="Anything you want me to know beforehand"
+      hint="As much or as little as you like. A sentence is plenty." />
+
+    <button type="submit" class="form-submit">Send request</button>
+
+    <p class="booking__reply">
+      You'll hear back within two business days. Nothing is charged when you
+      send this.
+    </p>
+
+    <div class="form-status" data-form-status role="status" hidden></div>
+  </form>
+</div>
+
+<style>
+  .booking {
+    max-width: 34rem;
+    margin-inline: auto;
+    padding: clamp(1.5rem, 5vw, 2.5rem);
+    background: color-mix(in srgb, #fff 72%, transparent);
+    border: 1px solid var(--color-noor-line);
+    border-radius: 1.25rem;
+    box-shadow: 0 1px 3px rgba(44, 74, 78, 0.06);
+  }
+
+  .booking__head h2 {
+    margin: 0;
+    font-size: var(--text-2xl);
+  }
+
+  .booking__intro {
+    margin: 0.6rem 0 0;
+    color: var(--color-noor-ink-soft);
+    font-size: var(--text-sm);
+  }
+
+  .booking__form {
+    margin-top: 1.75rem;
+    display: grid;
+    gap: 1.1rem;
+  }
+
+  .booking__reply {
+    margin: 0;
+    font-size: var(--text-xs);
+    color: var(--color-noor-ink-soft);
+    text-align: center;
+  }
+</style>
+
+<script>
+  import { enhanceForms } from '../scripts/forms';
+  import { FORMS, SOCIAL } from '../consts';
+  enhanceForms({ endpoint: FORMS.endpoint, fallbackEmail: SOCIAL.email });
+</script>

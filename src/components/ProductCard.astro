@@ -1,0 +1,118 @@
+---
+/**
+ * One of the three products (§4.1). Equal weight, each linking to its own page.
+ */
+interface Props {
+  title: string;
+  href: string;
+  cta: string;
+  accent?: 'rose' | 'aqua';
+}
+const { title, href, cta, accent = 'aqua' } = Astro.props;
+---
+
+<article class:list={['card', `card--${accent}`]}>
+  <h3 class="card__title">
+    <!-- The whole card is the target; the link inside keeps it one tab stop
+         and one accessible name. -->
+    <a href={href} class="card__link">{title}</a>
+  </h3>
+  <div class="card__body"><slot /></div>
+  <p class="card__cta" aria-hidden="true">{cta} <span>&rarr;</span></p>
+</article>
+
+<style>
+  .card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: clamp(1.5rem, 4vw, 2rem);
+    background: color-mix(in srgb, #fff 66%, transparent);
+    border: 1px solid var(--color-noor-line);
+    border-radius: 1.25rem;
+    transition:
+      transform 220ms var(--ease-noor),
+      border-color 220ms var(--ease-noor),
+      box-shadow 220ms var(--ease-noor);
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    inset-inline: clamp(1.5rem, 4vw, 2rem);
+    top: 0;
+    height: 3px;
+    border-radius: 0 0 3px 3px;
+  }
+  .card--aqua::before {
+    background: var(--color-noor-aqua);
+  }
+  .card--rose::before {
+    background: var(--color-noor-rose);
+  }
+
+  .card:hover {
+    transform: translateY(-3px);
+    border-color: var(--color-noor-aqua-deep);
+    box-shadow: 0 10px 24px -14px rgba(44, 74, 78, 0.4);
+  }
+
+  /* The card lifts on hover but the ring belongs to the real focus target. */
+  .card:focus-within {
+    border-color: var(--color-noor-aqua-deep);
+  }
+
+  .card__title {
+    margin: 0;
+    font-size: var(--text-xl);
+  }
+
+  .card__link {
+    color: var(--color-noor-ink);
+    text-decoration: none;
+  }
+  .card__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+
+  .card__body {
+    margin-top: 0.75rem;
+    flex: 1;
+  }
+  .card__body :global(p) {
+    margin: 0;
+    color: var(--color-noor-ink-soft);
+    font-size: var(--text-sm);
+    line-height: 1.6;
+  }
+
+  .card__cta {
+    margin: 1.5rem 0 0;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--color-noor-aqua-ink);
+  }
+  .card__cta span {
+    display: inline-block;
+    transition: transform 220ms var(--ease-noor);
+  }
+  .card:hover .card__cta span {
+    transform: translateX(4px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card,
+    .card__cta span {
+      transition: none;
+    }
+    .card:hover {
+      transform: none;
+    }
+    .card:hover .card__cta span {
+      transform: none;
+    }
+  }
+</style>

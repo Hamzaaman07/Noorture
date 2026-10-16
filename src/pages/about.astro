@@ -1,0 +1,243 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/Section.astro';
+import NoortureMark from '../components/NoortureMark.astro';
+import Button from '../components/Button.astro';
+import { Image } from 'astro:assets';
+import portrait from '../assets/hoda.png';
+import { ABOUT_WHAT_IS_NOORTURE, ABOUT_HODA } from '../data/approved-copy';
+import { SOCIAL, CREDENTIALS, CTA } from '../consts';
+
+const title = 'About';
+const description =
+  'What Noorture means, and about Hoda Shawky — pediatric nurse practitioner, IBCLC lactation consultant, and founder of Noorture.';
+---
+
+<BaseLayout title={title} description={description}>
+  {/*
+    §4.6: this is the one page where a visitor has already decided to spend
+    time. It can be slow and beautiful — hence the full lockup, the wide
+    measure, and the unhurried rhythm.
+  */}
+  <Section narrow>
+    <div class="lede">
+      <NoortureMark variant="stacked" alt="Noorture" class="lede__mark" />
+      <p class="lede__sub">
+        <em>Noor</em> means light. The name is the whole idea: not only to
+        nurture a child, but to noorture — to raise them, and yourself, in it.
+      </p>
+    </div>
+  </Section>
+
+  <Section tint narrow labelledby="what-is">
+    <div class="prose">
+      <h1 id="what-is">What is Noorture</h1>
+      {/*
+        CLIENT-APPROVED, VERBATIM (§4.6). The words live in
+        src/data/approved-copy.json and the preflight asserts every paragraph
+        reached the page unaltered. Do not edit the wording here.
+      */}
+      {ABOUT_WHAT_IS_NOORTURE.map((paragraph) => <p class="approved">{paragraph}</p>)}
+    </div>
+  </Section>
+
+  <Section narrow labelledby="about-hoda">
+    <div class="prose">
+      <h2 id="about-hoda">About Hoda</h2>
+
+      <div class="bio">
+        <div class="bio__portrait">
+          {/*
+            The supplied headshot sits on a warm near-white that measures
+            [250, 246, 247] — within a point or two of --noor-bg — so it blends
+            into the page without any background knockout.
+          */}
+          <Image
+            src={portrait}
+            alt="Hoda Shawky"
+            widths={[243, 486]}
+            sizes="(min-width: 40rem) 15rem, 12rem"
+            class="bio__photo"
+          />
+        </div>
+
+        <div class="bio__body">
+          <p class="bio__name">Hoda Shawky</p>
+          <p class="bio__creds">RN, MSN, CPNP, IBCLC, PMHS</p>
+          <ul class="bio__list">
+            {CREDENTIALS.map((c) => <li>{c}</li>)}
+          </ul>
+          <p class="bio__links">
+            <a href={SOCIAL.instagram} rel="me noopener" target="_blank">Instagram</a>
+            <a href={SOCIAL.linkedin} rel="me noopener" target="_blank">LinkedIn</a>
+          </p>
+        </div>
+      </div>
+
+      {/* CLIENT-APPROVED, VERBATIM (§4.6). See approved-copy.json. */}
+      {ABOUT_HODA.map((paragraph) => <p class="approved">{paragraph}</p>)}
+    </div>
+  </Section>
+
+  <Section tint narrow>
+    <div class="tail">
+      <h2>Start with a conversation</h2>
+      <p>
+        Fifteen minutes, free, and no obligation to book anything afterwards.
+      </p>
+      <p class="tail__cta"><Button href={CTA.primaryHref}>{CTA.primaryLabel}</Button></p>
+    </div>
+  </Section>
+</BaseLayout>
+
+<style>
+  .lede {
+    text-align: center;
+  }
+
+  .lede :global(.lede__mark) {
+    margin-inline: auto;
+    width: 15rem;
+  }
+
+  .lede__sub {
+    margin: 2rem auto 0;
+    max-width: 32rem;
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    line-height: 1.45;
+    color: var(--color-noor-ink);
+  }
+
+  .prose h1,
+  .prose h2 {
+    margin: 0 0 1.25rem;
+    font-size: var(--text-3xl);
+  }
+
+  /* Long-form, and the one page a visitor has already decided to spend time
+     on (§4.6) — so it is set larger and looser than body copy elsewhere. */
+  .approved {
+    margin: 0 0 1.25rem;
+    font-size: var(--text-lg);
+    line-height: 1.72;
+    text-wrap: pretty;
+  }
+  .approved:last-child {
+    margin-bottom: 0;
+  }
+
+  .bio {
+    display: grid;
+    gap: 1.75rem;
+    margin-bottom: 2.25rem;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .bio__portrait :global(.bio__photo) {
+    display: block;
+    width: 12rem;
+    height: auto;
+    border-radius: 999px;
+    /* A hairline ring so the portrait reads as placed rather than floating,
+       given its background is nearly the page colour. */
+    box-shadow: 0 0 0 1px var(--color-noor-line);
+  }
+
+  .bio__name {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+  }
+
+  .bio__creds {
+    margin: 0.3rem 0 1.1rem;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--color-noor-ink-soft);
+  }
+
+  .bio__list {
+    margin: 0 0 1.25rem;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.5rem;
+  }
+  .bio__list li {
+    position: relative;
+    padding-left: 1.5rem;
+    font-size: var(--text-sm);
+  }
+  .bio__list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.55em;
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 999px;
+    background: var(--color-noor-rose-deep);
+  }
+
+  .bio__links {
+    margin: 0;
+    display: flex;
+    gap: 1.25rem;
+    justify-content: center;
+  }
+  @media (min-width: 40rem) {
+    .bio__links {
+      justify-content: flex-start;
+    }
+  }
+  .bio__links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    color: var(--color-noor-aqua-ink);
+    font-weight: 600;
+    font-size: var(--text-sm);
+    text-decoration: none;
+    border-bottom: 1px solid var(--color-noor-aqua);
+  }
+
+  .prose :global(code) {
+    font-size: 0.9em;
+    padding: 0.1em 0.35em;
+    border-radius: 0.3rem;
+    background: color-mix(in srgb, var(--color-noor-aqua) 18%, transparent);
+  }
+
+  .tail {
+    text-align: center;
+  }
+  .tail h2 {
+    margin: 0;
+    font-size: var(--text-2xl);
+  }
+  .tail p {
+    margin: 0.9rem auto 0;
+    max-width: 30rem;
+    font-size: var(--text-sm);
+    color: var(--color-noor-ink-soft);
+  }
+  .tail__cta {
+    margin-top: 1.75rem;
+  }
+
+  @media (min-width: 40rem) {
+    .bio {
+      grid-template-columns: 15rem 1fr;
+      align-items: center;
+      gap: 2.5rem;
+      justify-items: start;
+      text-align: left;
+    }
+    .bio__portrait :global(.bio__photo) {
+      width: 15rem;
+    }
+  }
+</style>

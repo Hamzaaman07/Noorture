@@ -1,0 +1,25 @@
+{
+  "_README": [
+    "THE LAUNCH REDIRECT MAP (spec \u00a75.4, Stage 4).",
+    "",
+    "Exit criterion: no URL that worked before launch may break after it.",
+    "The case that must not break is a past Circle member reaching her",
+    "archive \u2014 she paid for it, and her bookmark is the only way back.",
+    "",
+    "Fill `rules` from a real inventory of every Podia URL in circulation:",
+    "Instagram bio, past emails, gift cards already issued, member bookmarks,",
+    "and anything Podia itself links. docs/launch.md has a paste-ready prompt",
+    "for collecting that inventory.",
+    "",
+    "Then: node scripts/build-redirects.mjs   (writes public/_redirects)",
+    "",
+    "  from   path on the apex, as it exists TODAY",
+    "  to     where it should land AFTER the cutover",
+    "  status 301 permanent, 302 temporary, 200 proxy-rewrite",
+    "  note   why this rule exists \u2014 future-you will want it",
+    "",
+    "`npm run preflight` checks every rule parses, and that internal targets",
+    "actually exist in the build. An empty map blocks --launch on purpose."
+  ],
+  "rules": []
+}

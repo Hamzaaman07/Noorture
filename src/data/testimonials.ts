@@ -1,0 +1,61 @@
+/**
+ * Approved testimonials.
+ *
+ * §9.4 — every quote is currently unattributed. `name` and `location` exist so
+ * that adding "Amina, Fremont CA" later is a data edit and nothing else; §9
+ * notes it roughly doubles credibility for no work beyond getting permission.
+ * Even "Circle participant, Spring 2026" would beat nothing.
+ *
+ * A sixth quote comparing the Circle to a weekly therapy session was
+ * DELIBERATELY REMOVED at the client's approval (§4.4). Do not reinstate it:
+ * publishing a testimonial that frames a peer support group as therapy creates
+ * a scope-of-practice exposure for a licensed NP, and sets the wrong
+ * expectation for someone who needs clinical care.
+ */
+export interface Testimonial {
+  quote: string;
+  name?: string;
+  location?: string;
+}
+
+/**
+ * The three general (non-Circle) testimonials referenced in §4.7.
+ *
+ * Their text is not in the build spec — only the fact that they exist on the
+ * current Podia site. Client-approved copy must not be paraphrased or invented,
+ * so this is deliberately empty and /reviews renders the Circle quotes alone
+ * until the real wording is supplied. Paste them in here and the page picks
+ * them up with no other edit.
+ */
+export const GENERAL_TESTIMONIALS: Testimonial[] = [
+  {
+    // CLIENT-APPROVED, VERBATIM. The first testimonial with an attribution —
+    // §9.4 notes that even "Mother of two" beats nothing for credibility.
+    quote:
+      "Hoda has been a guiding light in my parenting journey ever since I met her. Her Noorture sessions help me feel seen in the isolation of motherhood, and most importantly, she helps me connect my parenting to Allah and reminds me that when I feel like my light is not enough for my children, to seek His everlasting light and connect them to it. I wish every mom could be in these Noorture circles because it's so needed!",
+    name: 'Mother of two',
+  },
+];
+
+export const CIRCLE_TESTIMONIALS: Testimonial[] = [
+  {
+    quote:
+      'The Quran is supposed to be lived. This is a space like where it is being applied in our lives at home and with our families.',
+  },
+  {
+    quote:
+      "Coming to the circle helps bring clarity to the issue I'm having in my life.",
+  },
+  {
+    quote:
+      'It feels like a true support group with my sisters because even though we did not know each other from before, the space feels safe enough to open up and share honestly.',
+  },
+  {
+    quote:
+      "You're actively engaging with the suras of the Quran to access the meanings by approaching them in this way. It has helped my own Quran journey to find meaning in it. It's not the same as when you are hearing an audio or video recording. It's nicer to be on live all together.",
+  },
+  {
+    quote:
+      'The come as you are environment helped people to participate and show up naturally.',
+  },
+];

@@ -1,0 +1,87 @@
+---
+/**
+ * Buttons, per the client's spec.
+ *
+ * Light glass rather than the heavier treatment this replaced: a low-alpha
+ * tint over `backdrop-filter`, a real 1px border, no drop shadow, no inner
+ * rim, and a 4px radius instead of a pill.
+ *
+ * The border is doing a job the old inner rim used to. Translucent tint on a
+ * near-white page has almost no luminance difference from the page, so
+ * something has to make the control's boundary perceivable — WCAG 1.4.11 asks
+ * 3:1 for the visual information that identifies a control. Pass 3 of
+ * scripts/check-contrast.mjs measures that on the rendered button rather than
+ * from the tokens, because it is a translucent stroke over a translucent fill
+ * over a drifting ambience.
+ *
+ * That is why the border uses the AA-safe siblings rather than --noor-rose-deep
+ * and --noor-aqua-deep. Those two sit at roughly 3.0:1 flat, and once they are
+ * composited over the button's own tint and the ambience behind it they top out
+ * at 2.91 and 2.94 — at full opacity. Turning the alpha up does not rescue
+ * them; the hue itself cannot carry a boundary on this page. Measured, not
+ * assumed: the sweep is in the commit that introduced these values.
+ */
+interface Props {
+  href: string;
+  variant?: 'primary' | 'secondary';
+  class?: string;
+}
+const { href, variant = 'primary', class: className = '' } = Astro.props;
+---
+
+<a href={href} class:list={['btn', `btn--${variant}`, className]}>
+  <span><slot /></span>
+</a>
+
+<style>
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    /* Floor only — the padding below already clears it. She is holding a
+       baby, so the target must not fall under 44px if the type scale moves. */
+    min-height: 2.75rem;
+    padding: 14px 28px;
+    border: 1px solid;
+    border-radius: 4px;
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    line-height: 1.25;
+    text-align: center;
+    text-decoration: none;
+    color: var(--color-noor-ink);
+    backdrop-filter: blur(12px) saturate(1.4);
+    -webkit-backdrop-filter: blur(12px) saturate(1.4);
+    box-shadow: none;
+    transition:
+      background 180ms ease,
+      border-color 180ms ease;
+  }
+
+  .btn--primary {
+    background: rgba(233, 163, 196, 0.28);
+    border-color: rgba(141, 81, 103, 1);
+  }
+  .btn--primary:hover {
+    background: rgba(233, 163, 196, 0.42);
+    border-color: rgba(116, 66, 84, 1);
+  }
+
+  .btn--secondary {
+    background: rgba(127, 210, 212, 0.18);
+    border-color: rgba(43, 108, 112, 1);
+  }
+  .btn--secondary:hover {
+    background: rgba(127, 210, 212, 0.32);
+    border-color: rgba(35, 89, 92, 1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn {
+      transition: none;
+    }
+  }
+</style>

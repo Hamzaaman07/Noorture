@@ -1,0 +1,129 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/Section.astro';
+import BookingBlock from '../components/BookingBlock.astro';
+import Button from '../components/Button.astro';
+import { PRICING, CLASS_TOPICS, SOCIAL } from '../consts';
+import { PRIVATE_CLASS_LEDE } from '../data/approved-copy';
+
+const title = 'Private Class';
+// Search results should say what the page says, so this is the client's lede
+// rather than a separate summary that can drift away from it.
+const description = PRIVATE_CLASS_LEDE;
+---
+
+<BaseLayout title={title} description={description}>
+  <Section narrow>
+    {/*
+      This label is the page's visible header now, so it is the h1 rather than
+      a decorative <p> with a hidden h1 beside it. That earlier arrangement had
+      a screen reader announce "Private Class" twice in a row — once as the
+      heading, once as the label sitting right under it. One element, doing
+      both jobs, is the honest version.
+    */}
+    <h1 class="eyebrow">Private Class</h1>
+    {/* CLIENT-APPROVED, VERBATIM (§4.3). See approved-copy.json. */}
+    <p class="lede__sub lede__sub--lead">{PRIVATE_CLASS_LEDE}</p>
+    <p class="lede__cta">
+      <Button href="#book">Book a class</Button>
+      <span class="lede__price">
+        {PRICING.privateClass.label} {PRICING.privateClass.suffix}
+      </span>
+    </p>
+  </Section>
+
+  <Section tint>
+    <BookingBlock
+      product="private-class"
+      heading="Book a private class"
+      intro={`${PRICING.privateClass.label} ${PRICING.privateClass.suffix}. Tell me the topic you want taught — including one that isn't listed — and when you're usually free.`}
+      options={[
+        ...CLASS_TOPICS.map((t) => ({ value: t.title.toLowerCase(), label: t.title })),
+        { value: 'other', label: 'Another topic — described below' },
+      ]}
+    />
+    <p class="book__aside">
+      Not sure whether you want a class or a consultation?{' '}
+      <a href="/consultations#book">Book the free 15-minute call</a> and we'll
+      work it out, or email <a href={`mailto:${SOCIAL.email}`}>{SOCIAL.email}</a>.
+    </p>
+  </Section>
+</BaseLayout>
+
+<style>
+  /*
+    Sized one step above the paragraph below it — --text-xl against the lede's
+    --text-lg — so it reads as the page's header while keeping the eyebrow's
+    uppercase treatment and its left edge exactly where it was.
+
+    It is set in the display serif, matching the consultations headline. The
+    leading is still relaxed from the 1.12 global.css gives headings, because
+    that is tuned for two stacked lines of large serif and not for a single
+    uppercase line. Tracking eases from 0.12em to 0.08em as well — the same
+    letter-spacing that reads as deliberate at 13px sprawls at 26px.
+  */
+  .eyebrow {
+    margin: 0 0 0.9rem;
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-noor-rose-ink);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: var(--text-4xl);
+  }
+
+  .lede__sub {
+    margin: 1.25rem 0 0;
+    font-size: var(--text-lg);
+    color: var(--color-noor-ink-soft);
+  }
+
+  /*
+    With the headline gone this paragraph opens the page. It matches the
+    consultations subhead exactly in size, measure and leading — the client
+    asked for the two to read the same — so all this modifier does now is take
+    the full ink tone instead of the softer secondary one, because here there
+    is no headline above it to carry the page.
+  */
+  .lede__sub--lead {
+    margin-top: 0.85rem;
+    color: var(--color-noor-ink);
+    text-wrap: pretty;
+  }
+
+  .lede__cta {
+    margin: 2rem 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.25rem;
+  }
+
+  .lede__price {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--color-noor-ink-soft);
+  }
+
+  p {
+    margin: 0 0 1.1rem;
+  }
+
+  .book__aside {
+    margin: 1.75rem auto 0;
+    max-width: 34rem;
+    text-align: center;
+    font-size: var(--text-sm);
+    color: var(--color-noor-ink-soft);
+  }
+  .book__aside a {
+    color: var(--color-noor-aqua-ink);
+    font-weight: 600;
+  }
+</style>

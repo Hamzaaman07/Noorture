@@ -1,0 +1,59 @@
+---
+import Button from './Button.astro';
+
+/**
+ * §4.5: "A friend just had a baby, what do I send" is high-intent, and the
+ * buyer isn't the recipient — one of the few genuinely viral mechanics
+ * available to a practice like this. On Podia it was a buried paragraph.
+ */
+---
+
+<div class="gift">
+  <div class="gift__text">
+    <h2>Know someone who just had a baby?</h2>
+    <p>
+      Give her twelve weeks in a Circle of her choosing, with a card written
+      for her by hand.
+    </p>
+  </div>
+  <Button href="/gift" variant="secondary">Gift a Circle</Button>
+</div>
+
+<style>
+  .gift {
+    display: grid;
+    gap: 1.5rem;
+    align-items: center;
+    justify-items: start;
+    padding: clamp(1.75rem, 5vw, 2.75rem);
+    border-radius: 1.5rem;
+    border: 1px solid var(--color-noor-line);
+    background:
+      radial-gradient(
+        120% 140% at 100% 0%,
+        color-mix(in srgb, var(--color-noor-rose) 20%, transparent) 0%,
+        transparent 60%
+      ),
+      color-mix(in srgb, #fff 60%, transparent);
+  }
+
+  .gift h2 {
+    margin: 0;
+    font-size: var(--text-2xl);
+  }
+
+  .gift p {
+    margin: 0.6rem 0 0;
+    max-width: 30rem;
+    color: var(--color-noor-ink-soft);
+    font-size: var(--text-sm);
+  }
+
+  @media (min-width: 48rem) {
+    .gift {
+      grid-template-columns: 1fr auto;
+      gap: 2.5rem;
+      justify-items: stretch;
+    }
+  }
+</style>

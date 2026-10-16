@@ -1,0 +1,179 @@
+---
+/**
+ * Ambient noor — the site's signature (spec §6).
+ *
+ * Soft, out-of-focus lights drifting behind everything, like light through a
+ * window at an hour when someone is awake with a baby.
+ *
+ * Two layers, and which of them a visitor gets depends on their device:
+ *   1. a static CSS gradient wash — always present, the whole ambience below
+ *      768px and under any WebGL failure
+ *   2. a fullscreen GLSL shader drawing 28 soft discs — 768px and up only,
+ *      lazy-loaded so three.js never blocks first paint
+ *
+ * §6 originally ruled WebGL out (battery and data on older Android, and
+ * vestibular sensitivity overlapping pregnancy and postpartum) and the client
+ * has since asked for it directly. The constraints that reasoning produced are
+ * kept rather than discarded: nothing runs on a phone, nothing runs for a
+ * reduced-motion reader beyond a single held frame, nothing runs behind a
+ * hidden tab, and the device pixel ratio is capped at 1.5.
+ */
+import BokehMount from './bokeh/BokehMount';
+
+interface Props {
+  /** 'hero' is the loud one — homepage only. Every other page uses 'quiet'. */
+  intensity?: 'hero' | 'quiet';
+}
+const { intensity = 'quiet' } = Astro.props;
+
+/**
+ * Peak alpha per disc. The hero is deliberately more present; every other page
+ * carries body copy, and the contrast gate has very little headroom left there.
+ */
+const peak = intensity === 'hero' ? 0.38 : 0.12;
+---
+
+<div class="noor-ambience" data-intensity={intensity} aria-hidden="true">
+  <div class="noor-wash"></div>
+  {/*
+    client:media, not client:idle: Astro then never even fetches the island's
+    JS below the breakpoint. With client:idle a phone downloaded 182KB of React
+    to mount a component whose first act is to return null. This drops that to
+    zero — the sub-768px ambience is the CSS wash above and nothing else.
+  */}
+  <BokehMount peak={peak} client:media="(min-width: 768px)" />
+</div>
+
+<style>
+  .noor-ambience {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  /* Static wash. Present at all times, including reduced motion — the page
+     stays beautiful when the drift stops. */
+  /*
+    The static wash. The hero page turns it up via [data-intensity=hero] on the
+    canvas beside it; every other page keeps the quieter baseline.
+  */
+  .noor-wash {
+    position: absolute;
+    inset: 0;
+    transition: opacity 400ms var(--ease-noor);
+    background:
+      radial-gradient(
+        68% 52% at 78% 6%,
+        color-mix(in srgb, var(--color-noor-aqua) 15%, transparent) 0%,
+        transparent 62%
+      ),
+      radial-gradient(
+        62% 48% at 12% 24%,
+        color-mix(in srgb, var(--color-noor-rose) 14%, transparent) 0%,
+        transparent 64%
+      ),
+      radial-gradient(
+        86% 60% at 50% 108%,
+        color-mix(in srgb, var(--color-noor-aqua) 9%, transparent) 0%,
+        transparent 70%
+      ),
+      var(--color-noor-bg);
+  }
+
+  /* The island's own <canvas> — it mounts inside .noor-ambience. */
+  .noor-ambience :global(canvas) {
+    position: absolute;
+    inset: 0;
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+  }
+
+  /*
+    Hero pages get a bolder wash behind the fold, which then eases back as the
+    reader scrolls into the content — the boldness is spent where there is
+    almost no text (a wordmark and two buttons) and withdrawn where there is.
+    --noor-fade runs 1 -> 0 across the first viewport; the script sets it.
+  */
+  .noor-ambience[data-intensity='hero'] .noor-wash::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: var(--noor-fade, 1);
+    background:
+      radial-gradient(
+        62% 48% at 76% 4%,
+        color-mix(in srgb, var(--color-noor-aqua) 26%, transparent) 0%,
+        transparent 60%
+      ),
+      radial-gradient(
+        58% 44% at 10% 20%,
+        color-mix(in srgb, var(--color-noor-rose) 24%, transparent) 0%,
+        transparent 62%
+      );
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .noor-wash {
+      transition: none;
+    }
+  }
+</style>
+
+
+<script>
+  /*
+    The hero wash boost eases off over the first viewport. This is all that
+    survives of the old canvas script, and it stays because the boost darkens
+    the backdrop under every line of copy below the fold — the contrast gate
+    has under half a stop of headroom there.
+
+    The shader's own scroll coupling is separate and lives in BokehField.
+
+    Under reduced motion this does not merely freeze: it never runs. A
+    scroll-linked effect is itself one of the patterns that provokes
+    vestibular symptoms, so the wash is pinned at its settled level and the
+    listener is never attached.
+  */
+  const ambience = document.querySelector<HTMLElement>(
+    '.noor-ambience[data-intensity="hero"]',
+  );
+
+  if (ambience) {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let fade = 1;
+    let ticking = false;
+
+    const read = () => {
+      const span = Math.max(1, window.innerHeight * 0.85);
+      const next = Math.max(0, Math.min(1, 1 - window.scrollY / span));
+      if (Math.abs(next - fade) < 0.005) return;
+      fade = next;
+      ambience.style.setProperty('--noor-fade', fade.toFixed(3));
+    };
+
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        ticking = false;
+        read();
+      });
+    };
+
+    const apply = () => {
+      if (reduced.matches) {
+        window.removeEventListener('scroll', onScroll);
+        ambience.style.setProperty('--noor-fade', '0');
+      } else {
+        window.addEventListener('scroll', onScroll, { passive: true });
+        read();
+      }
+    };
+
+    apply();
+    reduced.addEventListener('change', apply);
+  }
+</script>

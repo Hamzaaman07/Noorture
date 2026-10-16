@@ -1,0 +1,166 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/Section.astro';
+import PriceTier from '../components/PriceTier.astro';
+import BookingBlock from '../components/BookingBlock.astro';
+import Button from '../components/Button.astro';
+import { PRICING } from '../consts';
+import {
+  TIER_INTRO,
+  TIER_INITIAL,
+  TIER_FOLLOW_UP,
+  CONSULT_LEDE,
+} from '../data/approved-copy';
+
+const title = 'Consultations';
+// Same reasoning as /private-class: the client's own lede, not a summary of it.
+const description = CONSULT_LEDE;
+---
+
+<BaseLayout title={title} description={description}>
+  <Section narrow>
+    {/*
+      Same treatment as /private-class: this label is the page's header, so it
+      is the h1 rather than a decorative <p> sitting above a separate headline.
+    */}
+    <h1 class="eyebrow">Consultations</h1>
+    {/* CLIENT-APPROVED, VERBATIM (§4.2). See approved-copy.json. */}
+    <p class="lede__sub">{CONSULT_LEDE}</p>
+    <p class="lede__cta">
+      {/* §4.2: the $250 initial is a significant ask cold. The free call is
+          the real conversion event, so it is the primary CTA on this page. */}
+      <Button href="#book">Book a free 15-minute call</Button>
+    </p>
+  </Section>
+
+  <Section labelledby="pricing-heading">
+    <h2 id="pricing-heading" class="section-heading">The three tiers</h2>
+
+    <div class="tiers">
+      <PriceTier
+        name="Introductory call"
+        price={PRICING.consultIntro.label}
+        meta={`${PRICING.consultIntro.minutes} minutes · Zoom or FaceTime`}
+        href="#book"
+        ctaLabel="Book the free call"
+        featured
+      >
+        {/* CLIENT-APPROVED, VERBATIM (§4.2). See approved-copy.json. */}
+        <p>{TIER_INTRO}</p>
+      </PriceTier>
+
+      <PriceTier
+        name="Initial consultation"
+        price={PRICING.consultInitial.label}
+        meta={`${PRICING.consultInitial.minutes} minutes · Zoom or FaceTime`}
+        href="#book"
+        ctaLabel="Request a time"
+      >
+        {/* CLIENT-APPROVED, VERBATIM (§4.2). See approved-copy.json. */}
+        <p>{TIER_INITIAL}</p>
+      </PriceTier>
+
+      <PriceTier
+        name="Follow-up"
+        price={PRICING.consultFollowUp.label}
+        meta={`${PRICING.consultFollowUp.minutes} minutes · Zoom or FaceTime`}
+        href="#book"
+        ctaLabel="Request a time"
+      >
+        {/* CLIENT-APPROVED, VERBATIM (§4.2). See approved-copy.json. */}
+        <p>{TIER_FOLLOW_UP}</p>
+      </PriceTier>
+    </div>
+
+    <p class="tiers__note">
+      Looking for a taught session on one topic instead — birth, breastfeeding,
+      bonding? That's a <a href="/private-class">Private Class</a>. In a
+      consultation you bring the situation; in a class, Hoda brings the
+      curriculum.
+    </p>
+  </Section>
+
+  <Section tint>
+    <BookingBlock
+      product="consultation"
+      intro="Tell me a little about what's going on and when you're usually free. I'll come back with times."
+      options={[
+        { value: 'intro', label: `Free ${PRICING.consultIntro.minutes}-minute introductory call` },
+        { value: 'initial', label: `Initial consultation — ${PRICING.consultInitial.minutes} minutes, ${PRICING.consultInitial.label}` },
+        { value: 'follow-up', label: `Follow-up — ${PRICING.consultFollowUp.minutes} minutes, ${PRICING.consultFollowUp.label}` },
+        { value: 'unsure', label: "Not sure yet — let's talk" },
+      ]}
+    />
+  </Section>
+</BaseLayout>
+
+<style>
+  /*
+    The page header, matching /private-class: display serif, one step above the
+    lede below it, uppercase, left edge unmoved. Leading is relaxed from the
+    1.12 global.css gives headings, which suits two stacked lines of large
+    serif rather than a single uppercase line, and tracking eases 0.12em ->
+    0.08em because spacing that reads as deliberate at 13px sprawls at 26px.
+  */
+  .eyebrow {
+    margin: 0 0 0.9rem;
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-noor-rose-ink);
+  }
+
+  /*
+    Full ink rather than the softer secondary tone. With no headline above it
+    this paragraph opens the page, exactly as on /private-class — leaving one
+    of the two soft and the other ink would make two now-identical layouts
+    look subtly out of step.
+  */
+  .lede__sub {
+    margin: 1.25rem 0 0;
+    font-size: var(--text-lg);
+    color: var(--color-noor-ink);
+    text-wrap: pretty;
+  }
+
+  .lede__cta {
+    margin: 2rem 0 0;
+  }
+
+  p {
+    margin: 0 0 1.1rem;
+  }
+
+  .section-heading {
+    margin: 0 0 clamp(1.75rem, 4vw, 2.5rem);
+    font-size: var(--text-3xl);
+    text-align: center;
+  }
+
+  .tiers {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .tiers__note {
+    margin: 2rem auto 0;
+    max-width: 38rem;
+    text-align: center;
+    font-size: var(--text-sm);
+    color: var(--color-noor-ink-soft);
+  }
+  .tiers__note a {
+    color: var(--color-noor-aqua-ink);
+    font-weight: 600;
+  }
+
+  @media (min-width: 48rem) {
+    .tiers {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+  }
+</style>

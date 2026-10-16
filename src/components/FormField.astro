@@ -1,0 +1,109 @@
+---
+/**
+ * One labelled control. Exists so every form on the site gets the same label
+ * association, hint wiring, and 16px minimum font — below which iOS zooms the
+ * whole page on focus, which on a one-handed phone is genuinely disorienting.
+ */
+interface Props {
+  id: string;
+  name: string;
+  label: string;
+  type?: 'text' | 'email' | 'tel' | 'textarea' | 'select';
+  required?: boolean;
+  optional?: boolean;
+  placeholder?: string;
+  autocomplete?: string;
+  inputmode?: 'text' | 'email' | 'tel';
+  rows?: number;
+  hint?: string;
+  options?: { value: string; label: string }[];
+  value?: string;
+}
+const {
+  id, name, label, type = 'text', required = false, optional = false,
+  placeholder, autocomplete, inputmode, rows = 4, hint, options = [], value,
+} = Astro.props;
+const hintId = hint ? `${id}-hint` : undefined;
+---
+
+<div class="field">
+  <label for={id}>
+    {label}{optional && <span class="field__optional"> (optional)</span>}
+  </label>
+
+  {
+    type === 'textarea' ? (
+      <textarea id={id} name={name} rows={rows} required={required}
+        placeholder={placeholder} aria-describedby={hintId}>{value}</textarea>
+    ) : type === 'select' ? (
+      <select id={id} name={name} required={required} aria-describedby={hintId}>
+        {options.map((o) => (
+          <option value={o.value} selected={o.value === value}>{o.label}</option>
+        ))}
+      </select>
+    ) : (
+      <input id={id} name={name} type={type} required={required}
+        placeholder={placeholder} autocomplete={autocomplete}
+        inputmode={inputmode} value={value} aria-describedby={hintId} />
+    )
+  }
+
+  {hint && <p class="field__hint" id={hintId}>{hint}</p>}
+</div>
+
+<style>
+  .field {
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  label {
+    font-size: var(--text-sm);
+    font-weight: 600;
+  }
+
+  .field__optional {
+    font-weight: 400;
+    color: var(--color-noor-ink-soft);
+  }
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    font: inherit;
+    /* 16px floor: below it, iOS zooms the page on focus. */
+    font-size: max(1rem, var(--text-sm));
+    color: var(--color-noor-ink);
+    background: #fff;
+    border: 1px solid var(--color-noor-line);
+    border-radius: 0.65rem;
+    padding: 0.8rem 0.9rem;
+    min-height: 3rem;
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 6.5rem;
+  }
+
+  input:hover,
+  select:hover,
+  textarea:hover {
+    border-color: var(--color-noor-aqua-deep);
+  }
+
+  .field__hint {
+    margin: 0;
+    font-size: var(--text-xs);
+    color: var(--color-noor-ink-soft);
+  }
+
+  /* Never colour alone — the message below the field carries the meaning. */
+  input[aria-invalid='true'],
+  textarea[aria-invalid='true'],
+  select[aria-invalid='true'] {
+    border-color: var(--color-noor-rose-ink);
+    border-width: 2px;
+  }
+</style>

@@ -1,0 +1,59 @@
+---
+/**
+ * Placeholder copy that is waiting on the client, marked as such on the page.
+ *
+ * §8.5 says to build the deferred items as clearly-marked placeholders and
+ * flag them, and not to invent final language for any of them. The marker is
+ * visible deliberately: an unmarked placeholder is indistinguishable from
+ * finished copy, and this particular placeholder is about a licensed
+ * clinician's scope of practice.
+ *
+ * Remove the component — not the marker — once the real language arrives.
+ */
+interface Props {
+  /** Who unblocks this. */
+  pending: string;
+}
+const { pending } = Astro.props;
+---
+
+<aside class="provisional">
+  <p class="provisional__flag">
+    <span aria-hidden="true">✱</span>
+    Provisional wording — pending {pending}
+  </p>
+  <div class="provisional__body">
+    <slot />
+  </div>
+</aside>
+
+<style>
+  .provisional {
+    margin-block: 2rem;
+    padding: clamp(1.1rem, 3vw, 1.6rem);
+    border: 1px dashed var(--color-noor-rose-deep);
+    border-radius: 1rem;
+    background: color-mix(in srgb, var(--color-noor-rose) 7%, transparent);
+  }
+
+  .provisional__flag {
+    margin: 0 0 0.75rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-noor-rose-ink);
+  }
+
+  .provisional__body :global(p) {
+    margin: 0 0 0.9rem;
+    font-size: var(--text-sm);
+    color: var(--color-noor-ink);
+  }
+  .provisional__body :global(p:last-child) {
+    margin-bottom: 0;
+  }
+</style>

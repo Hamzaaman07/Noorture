@@ -1,0 +1,135 @@
+---
+import { Image } from 'astro:assets';
+import mark from '../assets/noorture-mark.png';
+import lockup from '../assets/noorture-lockup.png';
+import wordmarkSvg from '../assets/noorture-wordmark.svg?raw';
+
+/**
+ * The Noorture logo.
+ *
+ * The wordmark is inline SVG, traced from the high-resolution artwork by
+ * `npm run build:wordmark`. Inline rather than <img> for two reasons: it is
+ * resolution-independent at any size the hero wants, and its fills read CSS
+ * custom properties, so one asset serves both the light brand colours and the
+ * deeper pair the header needs — no second file to keep in step.
+ *
+ * The owl-and-crescent mark and the full lockup are still raster (200px and
+ * 392px from the print file), so they are only used small.
+ */
+interface Props {
+  /**
+   * 'horizontal' — mark beside wordmark. Header and footer.
+   * 'wordmark'   — the wordmark alone, at any size. The hero.
+   * 'stacked'    — the full vertical lockup as supplied.
+   * 'glyph'      — the mark alone.
+   */
+  variant?: 'horizontal' | 'wordmark' | 'stacked' | 'glyph';
+  /** Empty string renders it decorative, for when a parent names the link. */
+  alt?: string;
+  class?: string;
+}
+const {
+  variant = 'horizontal',
+  alt = '',
+  class: className = '',
+} = Astro.props;
+
+// Decorative use must not announce a second name over the parent's.
+const svg = alt
+  ? wordmarkSvg.replace('<svg ', `<svg aria-label="${alt}" `)
+  : wordmarkSvg
+      .replace(' role="img"', '')
+      .replace(' aria-label="Noorture"', '')
+      .replace(/<title>.*?<\/title>/, '')
+      .replace('<svg ', '<svg aria-hidden="true" focusable="false" ');
+---
+
+{
+  variant === 'stacked' ? (
+    <Image
+      src={lockup}
+      alt={alt}
+      widths={[196, 392]}
+      sizes="(min-width: 48rem) 260px, 200px"
+      class:list={['logo logo--stacked', className]}
+      loading="eager"
+    />
+  ) : variant === 'wordmark' ? (
+    <span class:list={['logo logo--wordmark', className]} set:html={svg} />
+  ) : (
+    <span class:list={['logo', `logo--${variant}`, className]}>
+      <Image
+        src={mark}
+        alt={variant === 'glyph' ? alt : ''}
+        widths={[100, 200]}
+        sizes="48px"
+        class="logo__mark"
+        loading="eager"
+      />
+      {variant === 'horizontal' && (
+        <span class="logo__word" set:html={svg} />
+      )}
+    </span>
+  )
+}
+
+<style>
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+  }
+
+  .logo__mark {
+    width: 2.6rem;
+    height: auto;
+    flex: none;
+  }
+
+  /*
+    The header and footer use the deeper pair of brand tokens: the supplied
+    light aqua is lovely large and nearly invisible at a header's cap height,
+    where it stops reading as the brand name and starts reading as decoration.
+    Same asset, different fills.
+  */
+  .logo__word {
+    --noor-wordmark-aqua: var(--color-noor-aqua-deep);
+    --noor-wordmark-rose: var(--color-noor-rose-deep);
+    display: block;
+    flex: none;
+  }
+  .logo__word :global(svg) {
+    display: block;
+    height: 1.15rem;
+    width: auto;
+  }
+
+  /* The hero: full brand colours, sized by the page. */
+  .logo--wordmark {
+    display: block;
+    width: 100%;
+  }
+  .logo--wordmark :global(svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .logo--stacked {
+    display: block;
+    width: 12.5rem;
+    height: auto;
+  }
+
+  @media (min-width: 48rem) {
+    .logo__mark {
+      width: 2.9rem;
+    }
+    .logo__word :global(svg) {
+      height: 1.3rem;
+    }
+    .logo--stacked {
+      width: 16rem;
+    }
+  }
+</style>

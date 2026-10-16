@@ -1,0 +1,306 @@
+@import "tailwindcss";
+
+/* Self-hosted so there is no third-party round trip on a bad connection. */
+@import "@fontsource-variable/cormorant-garamond";
+@import "@fontsource-variable/figtree";
+
+/*
+  The salawat, ﷺ (U+FDFA), appears in the approved "What is Noorture" passage.
+
+  Neither body nor display face carries it, and the system fallbacks squeeze
+  the ligature into a single em where it renders as an illegible smudge — which
+  is not an acceptable way to set a religious honorific, least of all on the
+  page where this audience is deciding whether they are understood here.
+
+  So one glyph of Amiri is self-hosted. `unicode-range` means the browser only
+  fetches it on a page that actually contains the character — in practice just
+  /about — and subsetting takes it from 108 KB to 1.6 KB.
+
+  Regenerate with:
+    python3 -m fontTools.subset       node_modules/@fontsource/amiri/files/amiri-arabic-400-normal.woff2       --unicodes=U+FDFA --layout-features='*' --flavor=woff2       --output-file=src/assets/fonts/amiri-salawat.woff2
+*/
+@font-face {
+  font-family: "Amiri Salawat";
+  src: url("../assets/fonts/amiri-salawat.woff2") format("woff2");
+  unicode-range: U+FDFA;
+  font-display: swap;
+  font-weight: 400;
+  /* Amiri sets this ligature small against Latin text at the same size;
+     150% brings it to a comparable weight without crowding the full stop
+     that follows it. */
+  size-adjust: 150%;
+}
+
+/*
+  Noorture design tokens — §6 of the build spec.
+
+  The seven brand values below are taken from the spec verbatim and are the
+  source of truth for anything decorative: fills, borders, the bokeh layer.
+
+  Two of them do not pass WCAG AA as *text*:
+    --noor-aqua-deep  #3F9CA3  →  3.01:1 on --noor-bg   (AA large only)
+    --noor-rose-deep  #C4708F  →  3.23:1 on --noor-bg   (AA large only)
+
+  So each has an AA-safe sibling, darkened along the same hue, used wherever
+  the colour carries a label or small text.
+
+  Those siblings are set against the *ambience*, not against --noor-bg. The
+  bokeh layer sits behind every page, so the real backdrop under a line of
+  text is bg + wash + drifting orbs — measurably darker than bg alone. Every
+  value here clears 4.5:1 against the darkest pixel the ambience produces
+  anywhere on the site.
+
+  `npm run check:contrast` re-measures both: the flat-token table, and the
+  live composited ambience. Re-run it after touching a token or the opacity
+  of the bokeh layer — those two are coupled.
+*/
+@theme {
+  /* --- brand, from the logo (spec §6) --- */
+  --color-noor-rose: #e9a3c4;
+  --color-noor-rose-deep: #c4708f;
+  --color-noor-aqua: #7fd2d4;
+  --color-noor-aqua-deep: #3f9ca3;
+  --color-noor-ink: #2c4a4e;
+  /*
+    Cream, at the client's request — warmer and softer than the near-white
+    #faf6f5 this replaces. The alternating section tint moves with it: it was
+    a mint #eff6f6, which read as a second hue next to cream rather than as the
+    same paper in shadow. Both now sit on one warm axis, so sections still
+    alternate without the page looking like two palettes.
+
+    The step between them is matched to the old pair rather than picked by eye.
+    In relative luminance the mint sat 0.0191 below the old background; the
+    first cream tint tried here sat 0.0739 below, four times the separation,
+    and the alternating bands stopped reading as soft. 0.0176 is the closest
+    match available, so the rhythm of the page is unchanged and only the hue
+    has moved.
+  */
+  --color-noor-bg: #fbf7ef;
+  --color-noor-bg-alt: #f9f5ec;
+
+  /* --- AA-safe text/label siblings (derived, see note above) --- */
+  --color-noor-rose-ink: #8d5167;
+  --color-noor-rose-ink-hover: #744254;
+  --color-noor-aqua-ink: #2b6c70;
+  --color-noor-aqua-ink-hover: #23595c;
+
+  /* --- supporting neutrals --- */
+  /* Secondary copy. Darkened from #496567 when the WebGL ambience went in:
+     the hero credential line sits on the boldest backdrop on the site and
+     measured exactly 4.50 against the 4.5 required. Buying the headroom here
+     rather than dimming the orbs keeps the ambience the client asked for. */
+  --color-noor-ink-soft: #3f585a;
+  --color-noor-line: #e2d9d8; /* hairlines on bg */
+  --color-noor-line-alt: #d5e4e4; /* hairlines on bg-alt */
+
+  /* --- type --- */
+  --font-display: "Amiri Salawat", "Cormorant Garamond Variable",
+    "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --font-body: "Amiri Salawat", "Figtree Variable", Figtree, ui-sans-serif,
+    system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  /*
+    Fluid scale, 360px → 1280px. Body is set deliberately large: the reader
+    is tired, one-handed, and probably in the dark.
+  */
+  --text-xs: clamp(0.8125rem, 0.79rem + 0.1vw, 0.875rem);
+  --text-sm: clamp(0.9375rem, 0.91rem + 0.15vw, 1rem);
+  --text-base: clamp(1.0625rem, 1.02rem + 0.22vw, 1.1875rem);
+  --text-lg: clamp(1.1875rem, 1.12rem + 0.32vw, 1.375rem);
+  --text-xl: clamp(1.375rem, 1.27rem + 0.5vw, 1.625rem);
+  --text-2xl: clamp(1.625rem, 1.45rem + 0.8vw, 2.125rem);
+  --text-3xl: clamp(2rem, 1.6rem + 1.8vw, 3rem);
+  --text-4xl: clamp(2.375rem, 1.75rem + 2.9vw, 4.25rem);
+
+  /* --- motion --- */
+  --ease-noor: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+@layer base {
+  html {
+    background-color: var(--color-noor-bg);
+    color: var(--color-noor-ink);
+    font-family: var(--font-body);
+    font-size: 100%;
+    line-height: 1.65;
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  body {
+    margin: 0;
+    min-height: 100svh;
+    font-size: var(--text-base);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  blockquote {
+    font-family: var(--font-display);
+    font-weight: 500;
+    line-height: 1.12;
+    letter-spacing: -0.005em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /*
+    Focus is visible everywhere and never removed. This is the single
+    accessibility affordance most often lost in a custom theme.
+  */
+  :focus-visible {
+    outline: 3px solid var(--color-noor-aqua-ink);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--color-noor-rose) 55%, transparent);
+    color: var(--color-noor-ink);
+  }
+}
+
+@layer components {
+  /* Available to any page: a heading that exists for screen readers only. */
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /*
+    Standalone link CTAs — "See this Circle", "Back to home", a footer link.
+
+    They are set at body size with a hairline underline, which looks right but
+    leaves a hit area around 20px tall. This audience is one-handed on a phone,
+    often at night, so the target is expanded to a comfortable 44px with a
+    pseudo-element instead of padding: padding would push the underline away
+    from the text, and layout stays exactly as designed.
+  */
+  .tap {
+    position: relative;
+  }
+  .tap::after {
+    content: '';
+    position: absolute;
+    inset: -0.7rem -0.5rem;
+  }
+
+  /*
+    Form chrome shared by the booking, contact and waitlist forms. These live
+    here rather than in a component because the error message and the status
+    notice are injected at runtime, and Astro's scoped selectors do not match
+    elements that were not in the template.
+  */
+  .field__error {
+    margin: 0;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--color-noor-rose-ink);
+  }
+
+  /* Same glass as the primary Button — see Button.astro for why the edge is a
+     blurred rim rather than a stroke. */
+  /* Matches Button.astro — the primary variant, as a real <button>. */
+  .form-submit {
+    margin-top: 0.35rem;
+    min-height: 2.75rem;
+    padding: 14px 28px;
+    border: 1px solid rgba(141, 81, 103, 1);
+    border-radius: 4px;
+    background: rgba(233, 163, 196, 0.28);
+    color: var(--color-noor-ink);
+    font: inherit;
+    font-size: var(--text-base);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    backdrop-filter: blur(12px) saturate(1.4);
+    -webkit-backdrop-filter: blur(12px) saturate(1.4);
+    box-shadow: none;
+    transition:
+      background 180ms ease,
+      border-color 180ms ease;
+  }
+  .form-submit:hover {
+    background: rgba(233, 163, 196, 0.42);
+    border-color: rgba(116, 66, 84, 1);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .form-submit {
+      transition: none;
+    }
+  }
+
+  .form-status {
+    margin: 0;
+    padding: 0.9rem 1rem;
+    border-radius: 0.75rem;
+    background: color-mix(in srgb, var(--color-noor-bg-alt) 90%, transparent);
+    border: 1px solid var(--color-noor-line-alt);
+    font-size: var(--text-sm);
+  }
+  .form-status[hidden] {
+    display: none;
+  }
+  .form-status a {
+    color: var(--color-noor-aqua-ink);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  /* Bots fill this; people never see it. Cheaper than a captcha, and it costs
+     the reader nothing. */
+  .form-trap {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* Skip link — visible only once focused. */
+  .skip-link {
+    position: absolute;
+    left: 0.75rem;
+    top: 0.75rem;
+    z-index: 100;
+    transform: translateY(-150%);
+    background: var(--color-noor-ink);
+    color: var(--color-noor-bg);
+    padding: 0.7rem 1.1rem;
+    border-radius: 999px;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    transition: transform 180ms var(--ease-noor);
+  }
+  .skip-link:focus {
+    transform: translateY(0);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .skip-link {
+      transition: none;
+    }
+  }
+}

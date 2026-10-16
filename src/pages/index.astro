@@ -1,0 +1,179 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import Section from '../components/Section.astro';
+import ProductCard from '../components/ProductCard.astro';
+import ProofStrip from '../components/ProofStrip.astro';
+import GiftBand from '../components/GiftBand.astro';
+import Testimonial from '../components/Testimonial.astro';
+import { GENERAL_TESTIMONIALS } from '../data/testimonials';
+import { PRICING } from '../consts';
+import {
+  POSITIONING,
+  FOR_WHOM,
+  TILE_CONSULTATION,
+  TILE_CLASSES,
+  TILE_CIRCLE,
+  TILE_ORGANIZATIONAL,
+} from '../data/approved-copy';
+
+/*
+  One pull on the home page, at the client's direction; the full set lives on
+  /reviews (§4.1). The two Circle quotes that used to sit here were not moved
+  anywhere — /reviews already renders every entry of CIRCLE_TESTIMONIALS, so
+  they have been on that page the whole time and still are.
+*/
+const pulls = [GENERAL_TESTIMONIALS[0]];
+---
+
+<BaseLayout ambience="hero">
+  <Hero />
+
+  <Section tint narrow>
+    {/*
+      CLIENT-APPROVED, VERBATIM (§4.1). The text lives in
+      src/data/approved-copy.ts so it exists exactly once and the preflight can
+      assert it reached the page unaltered. Do not inline it here.
+    */}
+    <p class="positioning">{POSITIONING}</p>
+
+    <p class="for-whom">{FOR_WHOM}</p>
+
+  </Section>
+
+  {/*
+    The heart of the page: four cards, equal weight (§4.1). Was three until
+    the client added Organizational Trainings — see the grid below for why
+    that became a 2x2 rather than a row of four.
+  */}
+  <Section labelledby="products-heading">
+    <h2 id="products-heading" class="section-heading">Ways to work together</h2>
+
+    {/* CLIENT-APPROVED, VERBATIM (§4.1). See approved-copy.json. */}
+    <div class="products">
+      <ProductCard
+        title="One-on-One Consultation"
+        href="/consultations"
+        cta="Start with a free 15-minute call"
+        accent="rose"
+      >
+        <p>{TILE_CONSULTATION}</p>
+      </ProductCard>
+
+      <ProductCard
+        title="Private & Group Classes"
+        href="/private-class"
+        cta={`${PRICING.privateClass.label} per family`}
+      >
+        <p>{TILE_CLASSES}</p>
+      </ProductCard>
+
+      <ProductCard
+        title="Noorture Circle"
+        href="/circles"
+        cta={`${PRICING.circle.label} for ${PRICING.circle.weeks} weeks`}
+        accent="rose"
+      >
+        <p>{TILE_CIRCLE}</p>
+      </ProductCard>
+
+      <ProductCard
+        title="Organizational Trainings and Technical Assistance"
+        href="/organizational-trainings"
+        cta="Book a 15-minute consultation"
+      >
+        <p>{TILE_ORGANIZATIONAL}</p>
+      </ProductCard>
+    </div>
+  </Section>
+
+  <Section tint labelledby="proof-heading">
+    <h2 id="proof-heading" class="visually-hidden">
+      Credentials and what caregivers say
+    </h2>
+    <ProofStrip />
+
+    <div class="pulls">
+      {pulls.map((t) => <Testimonial {...t} />)}
+    </div>
+
+    <p class="pulls__more">
+      <a href="/reviews" class="tap">Read what caregivers say <span aria-hidden="true">&rarr;</span></a>
+    </p>
+  </Section>
+
+  <Section>
+    <GiftBand />
+  </Section>
+</BaseLayout>
+
+<style>
+  .positioning {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    line-height: 1.42;
+    text-wrap: pretty;
+  }
+
+  .for-whom {
+    margin: 1.75rem 0 0;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-noor-line-alt);
+    font-size: var(--text-sm);
+    color: var(--color-noor-ink-soft);
+  }
+
+  .section-heading {
+    margin: 0 0 clamp(1.75rem, 4vw, 2.5rem);
+    font-size: var(--text-3xl);
+    text-align: center;
+  }
+
+  .products {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .pulls {
+    display: grid;
+    gap: 0;
+  }
+
+  .pulls__more {
+    margin: 0;
+    text-align: center;
+  }
+  .pulls__more a {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--color-noor-aqua-ink);
+    text-decoration: none;
+    border-bottom: 1px solid var(--color-noor-aqua);
+    padding-bottom: 3px;
+  }
+  .pulls__more a:hover {
+    color: var(--color-noor-aqua-ink-hover);
+  }
+
+  @media (min-width: 48rem) {
+    /*
+      2x2, not a row of four. These descriptions run to 60-130 words; four
+      columns would give each about 280px and produce a card tall enough to
+      need its own scroll. Two columns keep a readable measure and let the
+      pairs line up.
+    */
+    .products {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+    /*
+      One column now that there is a single quote. The two-column rule is gone
+      rather than left in place: with one child it did nothing visible, but it
+      would silently halve the measure the moment a second quote was added.
+    */
+    .pulls {
+      gap: 2rem;
+    }
+  }
+</style>

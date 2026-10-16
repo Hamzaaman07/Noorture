@@ -1,0 +1,5 @@
+# Noorture — everything here is public marketing.
+User-agent: *
+Allow: /
+
+Sitemap: https://noorture.com/sitemap-index.xml

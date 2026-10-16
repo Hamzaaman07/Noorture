@@ -1,0 +1,220 @@
+---
+import type { Testimonial } from '../data/testimonials';
+
+/**
+ * One approved quote, revealed gently on scroll.
+ *
+ * §4.4 is specific about the presentation and about what it rules out: not a
+ * carousel and not auto-fading, because rotating quotes mean nobody finishes
+ * reading one — a bad trade on a page where someone is deciding whether to
+ * commit twelve weeks. So each quote sits still, in its own whitespace, and
+ * simply arrives.
+ *
+ * Under prefers-reduced-motion the quotes are just present, with no animation
+ * and no dependence on the observer ever firing.
+ */
+interface Props extends Testimonial {
+  /** Nudges the quote off-centre so a column of them does not look like a list. */
+  align?: 'left' | 'center' | 'right';
+  class?: string;
+}
+const { quote, name, location, align = 'center', class: className = '' } = Astro.props;
+
+const attribution = [name, location].filter(Boolean).join(', ');
+---
+
+<!-- The wrapper carries the page gutter so a quote is safe to drop straight
+     between sections, not only inside one. -->
+<div class:list={['quote-wrap', className]}>
+  <figure class:list={['quote', `quote--${align}`]} data-reveal>
+    <blockquote>
+      <p>{quote}</p>
+    </blockquote>
+    {attribution && <figcaption>{attribution}</figcaption>}
+  </figure>
+</div>
+
+<style>
+  .quote-wrap {
+    max-width: 72rem;
+    margin-inline: auto;
+    margin-block: clamp(2.5rem, 7vw, 4.5rem);
+    padding-inline: clamp(1rem, 4vw, 2.5rem);
+  }
+
+  .quote {
+    margin: 0 auto;
+    max-width: 34rem;
+  }
+
+  /* Off-centre so a column of quotes does not read as a list. */
+  .quote--left {
+    margin-inline: 0 auto;
+  }
+  .quote--right {
+    margin-inline: auto 0;
+  }
+
+  blockquote {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    font-weight: 400;
+    font-style: italic;
+    line-height: 1.35;
+    color: var(--color-noor-ink);
+  }
+
+  blockquote p {
+    margin: 0;
+    text-wrap: pretty;
+  }
+
+  /* The opening mark hangs into the margin so the text edge stays straight. */
+  blockquote p::before {
+    content: '\201C';
+    margin-left: -0.42em;
+    color: var(--color-noor-rose-deep);
+  }
+  blockquote p::after {
+    content: '\201D';
+    color: var(--color-noor-rose-deep);
+  }
+
+  figcaption {
+    margin-top: 1rem;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--color-noor-ink-soft);
+  }
+
+  .quote--center {
+    text-align: center;
+  }
+
+  /*
+    The reveal. Note the direction of the logic: the quote is visible by
+    default, and only hidden once JS has confirmed it will be able to reveal it
+    again. No script, no observer, no support — the quote is simply there.
+  */
+  :global(html.can-reveal) [data-reveal] {
+    opacity: 0;
+    transform: translateY(1.25rem);
+    transition:
+      opacity 900ms var(--ease-noor),
+      transform 900ms var(--ease-noor);
+  }
+
+  :global(html.can-reveal) [data-reveal].is-revealed {
+    opacity: 1;
+    transform: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(html.can-reveal) [data-reveal],
+    :global(html.can-reveal) [data-reveal].is-revealed {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+
+  /* A quote that never got scrolled past must still exist on paper. */
+  @media print {
+    :global(html.can-reveal) [data-reveal] {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  /*
+    Reveal-on-scroll, done as a scroll-position predicate rather than an
+    IntersectionObserver.
+
+    The obvious implementation — observe each quote, reveal on isIntersecting —
+    has a failure mode that showed up immediately in testing: an observer only
+    fires when the intersection state changes at a rendering opportunity, so a
+    quote that is jumped clean past between two frames is never reported as
+    intersecting and stays at opacity 0 forever. A hard flick on a phone, an
+    in-page anchor, or a restored scroll position all do exactly that. The
+    result is a quote the reader can never read, which is worse than having no
+    animation at all.
+
+    So the rule is stated as "reveal anything whose top has passed the trigger
+    line", evaluated on load and on every (rAF-throttled) scroll. That is true
+    no matter how the page arrived at its scroll position. The list drains as
+    quotes reveal, and the listeners detach once it is empty — so the steady
+    state costs nothing.
+  */
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  if (!reduced.matches) {
+    // Only start hiding things once we know we can reveal them again.
+    document.documentElement.classList.add('can-reveal');
+
+    let pending = [...document.querySelectorAll('[data-reveal]')];
+    let ticking = false;
+
+    const revealAll = () => {
+      for (const el of pending) el.classList.add('is-revealed');
+      pending = [];
+      stop();
+    };
+
+    const check = () => {
+      // Trigger a little above the fold, so a quote is already settled by the
+      // time it reaches comfortable reading height.
+      const line = window.innerHeight * 0.88;
+      const remaining = [];
+      let revealed = false;
+      for (const el of pending) {
+        if (el.getBoundingClientRect().top < line) {
+          el.classList.add('is-revealed');
+          revealed = true;
+        } else {
+          remaining.push(el);
+        }
+      }
+      pending = remaining;
+
+      if (pending.length === 0) {
+        stop();
+        return;
+      }
+      // Revealing a quote drops its transform, which moves everything below
+      // it. That can bring the next quote past the line with no further scroll
+      // event to notice it, so re-check once more. Converges: pending only
+      // ever shrinks.
+      if (revealed) requestAnimationFrame(check);
+    };
+
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        ticking = false;
+        check();
+      });
+    };
+
+    function stop() {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+
+    // Covers a deep link or a restored scroll position landing mid-page.
+    check();
+
+    // If the setting changes mid-visit, stop hiding anything.
+    reduced.addEventListener('change', (event) => {
+      if (event.matches) revealAll();
+    });
+  }
+</script>

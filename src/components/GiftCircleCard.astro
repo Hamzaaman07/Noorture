@@ -1,0 +1,163 @@
+---
+import { Image } from 'astro:assets';
+import mark from '../assets/noorture-mark.png';
+
+/**
+ * The gift offer, as a tile that sits in the same grid as the cohorts.
+ *
+ * It deliberately mirrors CohortCard's anatomy — media band with a badge,
+ * title, body, one link at the foot — because it shares a row with real
+ * cohorts and anything structurally different would read as a stray advert.
+ * It is NOT a CohortCard variant: a cohort is a content-collection entry with
+ * dates, a price and a status, and a gift has none of those. Bending one
+ * component around both would put a fake status on a thing that has no state.
+ *
+ * Copy is the client's, transcribed from the existing Podia page.
+ */
+---
+
+<article class="gift">
+  <div class="gift__media">
+    <div class="gift__fallback">
+      <Image src={mark} alt="" widths={[100, 200]} sizes="72px" />
+    </div>
+    <p class="gift__badge">Gift a Circle</p>
+  </div>
+
+  <div class="gift__body">
+    <h3 class="gift__title">
+      <a href="/gift">Gift A Noorture Circle to a Friend!</a>
+    </h3>
+
+    <p class="gift__desc">
+      Do you have a friend that just had a baby or could use a supportive
+      community? Gift her a gift that Noortures her in these spaces today!
+    </p>
+    <p class="gift__desc">
+      This gift includes a 12 week subscription to the Noorture Circle of her
+      choice.
+    </p>
+
+    <p class="gift__cta">
+      <a href="/gift" class="tap">
+        Learn more{' '}
+        <span aria-hidden="true">&rarr;</span>
+      </a>
+    </p>
+  </div>
+</article>
+
+<style>
+  /* Matches .cohort, so the tiles sit in one row without looking bolted on. */
+  .gift {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: color-mix(in srgb, #fff 66%, transparent);
+    border: 1px solid var(--color-noor-line);
+    border-radius: 1.25rem;
+  }
+
+  .gift__media {
+    position: relative;
+    aspect-ratio: 5 / 2;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--color-noor-bg-alt) 70%, transparent);
+    border-bottom: 1px solid var(--color-noor-line);
+  }
+
+  /* The rose and aqua of the cohort fallback, mirrored left-to-right so the
+     two tiles are siblings rather than duplicates. */
+  .gift__fallback {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    background:
+      radial-gradient(
+        90% 120% at 80% 0%,
+        color-mix(in srgb, var(--color-noor-aqua) 24%, transparent),
+        transparent 62%
+      ),
+      radial-gradient(
+        90% 120% at 10% 100%,
+        color-mix(in srgb, var(--color-noor-rose) 26%, transparent),
+        transparent 62%
+      );
+  }
+  .gift__fallback :global(img) {
+    width: 4.5rem;
+    height: auto;
+    opacity: 0.9;
+  }
+
+  /*
+    Rose, where a joinable cohort's badge is aqua. This is not a fifth cohort
+    state dressed up as one — it says plainly that the tile is a different kind
+    of thing from the Circles beside it.
+  */
+  .gift__badge {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    margin: 0;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    background: var(--color-noor-rose-ink);
+    border: 1px solid var(--color-noor-rose-ink);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #fff;
+  }
+
+  .gift__body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: clamp(1.25rem, 3.5vw, 1.6rem);
+  }
+
+  .gift__title {
+    margin: 0;
+    font-size: var(--text-xl);
+  }
+  .gift__title a {
+    color: var(--color-noor-ink);
+    text-decoration: none;
+  }
+  .gift__title a:hover {
+    color: var(--color-noor-aqua-ink);
+  }
+
+  .gift__desc {
+    margin: 1rem 0 0;
+    color: var(--color-noor-ink-soft);
+  }
+
+  /*
+    margin-top: auto, where the cohort card uses a fixed margin. The cohort's
+    link lands at the foot because its content fills the card; this one's body
+    is shorter, so without this the two links sit at different heights in the
+    same row — which was exactly what the first version did.
+  */
+  .gift__cta {
+    margin: 1.35rem 0 0;
+    margin-top: auto;
+    padding-top: 1.35rem;
+  }
+  .gift__cta a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: var(--text-sm);
+    color: var(--color-noor-aqua-ink);
+    font-weight: 600;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.25em;
+  }
+  .gift__cta a:hover {
+    color: var(--color-noor-aqua-ink-hover);
+  }
+</style>
